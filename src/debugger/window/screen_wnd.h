@@ -1,5 +1,5 @@
 #pragma once
-#include "debugger/ui/ui_view.h"
+#include "src/ui/ui_view.h"
 
 namespace qd::window {
 
@@ -9,7 +9,10 @@ class ScreenWnd : public UiWindow {
     ImTextureID mTextureId = 0;
 
 public:
-    ScreenWnd(UiViewCreate* cp);
+    virtual void onCreate(UiViewCreate* cp) override {
+        UiWindow::onCreate(cp);
+        mTitle = "Screen";
+    }
 
     virtual void drawContent() override;
 

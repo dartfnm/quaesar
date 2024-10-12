@@ -102,7 +102,7 @@ static void rdbdump(FILE* h, uae_u64 offset, uae_u8* buf, int blocksize) {
     for (i = 0; i <= blocks; i++) {
         if (fseeko64(h, offset, SEEK_SET) != 0)
             break;
-        int outlen = fread(buf, 1, blocksize, h);
+        size_t outlen = fread(buf, 1, blocksize, h);
         if (outlen != blocksize) {
             write_log("rdbdump: warning: read %d bytes (not blocksize %d)\n", outlen, blocksize);
         }
@@ -126,7 +126,7 @@ static int ismounted(FILE* f) {
 #define CA "Commodore\0Amiga\0"
 static int safetycheck(FILE* h, const char* name, uae_u64 offset, uae_u8* buf, int blocksize) {
     int i, j, blocks = 63, empty = 1;
-    long outlen;
+    size_t outlen;
 
     for (j = 0; j < blocks; j++) {
         if (fseeko64(h, offset, SEEK_SET) != 0) {
@@ -291,7 +291,7 @@ int hdf_open_target(struct hardfiledata* hfd, const char* pname) {
         if (h == INVALID_HANDLE_VALUE)
             goto end;
         hfd->handle->h = h;
-        i = _tcslen(name) - 1;
+        i = (int)_tcslen(name) - 1;
         while (i >= 0) {
             if ((i > 0 && (name[i - 1] == '/' || name[i - 1] == '\\')) || i == 0) {
                 _tcscpy(hfd->vendor_id, "UAE");
@@ -356,7 +356,7 @@ int hdf_open_target(struct hardfiledata* hfd, const char* pname) {
                 ret = fseeko64(h, 0, SEEK_END);
                 if (ret)
                     goto end;
-                low = ftello64(h);
+                low = (off_t)ftello64(h);
                 if (low == -1)
                     goto end;
             }
@@ -532,7 +532,7 @@ void hfd_flush_cache (struct hardfiledata *hfd, int now)
 #endif
 
 static int hdf_read_2(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int len) {
-    long outlen = 0;
+    size_t outlen = 0;
     int coffset;
 
     if (offset == 0)
@@ -567,14 +567,14 @@ static int hdf_read_2(struct hardfiledata* hfd, void* buffer, uae_u64 offset, in
 
 // TODO: Implement error handling
 int hdf_read_target(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int len, uae_u32* error) {
-    int got = 0;
+    size_t got = 0;
     uae_u8* p = (uae_u8*)buffer;
 
     if (hfd->drive_empty)
         return 0;
     while (len > 0) {
         int maxlen;
-        int ret = 0;
+        size_t ret = 0;
         if (hfd->physsize < CACHE_SIZE) {
             hfd->cache_valid = 0;
             hdf_seek(hfd, offset);
@@ -592,16 +592,16 @@ int hdf_read_target(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int 
         }
         got += ret;
         if (ret != maxlen)
-            return got;
+            return (int)got;
         offset += maxlen;
         p += maxlen;
         len -= maxlen;
     }
-    return got;
+    return (int)got;
 }
 
 static int hdf_write_2(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int len) {
-    int outlen = 0;
+    size_t outlen = 0;
 
     if (hfd->ci.readonly) {
         if (g_debug) {
@@ -627,14 +627,13 @@ static int hdf_write_2(struct hardfiledata* hfd, void* buffer, uae_u64 offset, i
         }
         const TCHAR* name = hfd->emptyname == NULL ? _T("<unknown>") : hfd->emptyname;
         if (offset == 0) {
-            long outlen2;
             uae_u8* tmp;
             int tmplen = 512;
             tmp = (uae_u8*)xmalloc(uae_u8, tmplen);
             if (tmp) {
                 memset(tmp, 0xa1, tmplen);
                 hdf_seek(hfd, offset);
-                outlen2 = fread(tmp, 1, tmplen, hfd->handle->h);
+                fread(tmp, 1, tmplen, hfd->handle->h);
                 if (memcmp(hfd->cache, tmp, tmplen) != 0 || outlen != len)
                     gui_message(_T("\"%s\"\n\nblock zero write failed!"), name);
                 xfree(tmp);
@@ -643,7 +642,7 @@ static int hdf_write_2(struct hardfiledata* hfd, void* buffer, uae_u64 offset, i
     } else if (hfd->handle_valid == HDF_HANDLE_ZFILE) {
         outlen = zfile_fwrite(hfd->cache, 1, len, hfd->handle->zf);
     }
-    return outlen;
+    return (int)outlen;
 }
 int hdf_write_target(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int len) {
     int got = 0;

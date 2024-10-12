@@ -104,7 +104,7 @@ void uae_set_thread_priority(uae_thread_id*, int) {
 }
 
 uae_thread_id uae_thread_get_id(void) {
-    return (uae_thread_id)SDL_GetThreadID(nullptr);
+    return reinterpret_cast<uae_thread_id>((size_t)SDL_GetThreadID(nullptr));
 }
 
 #ifdef _WIN32

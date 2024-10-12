@@ -8393,6 +8393,8 @@ void default_prefs (struct uae_prefs *p, bool reset, int type)
 	p->sound_stereo = SND_STEREO;
 	p->sound_stereo_separation = 7;
 	p->sound_mixed_stereo_delay = 0;
+//    p->sound_volume_master = 100;
+//    p->sound_volume_paula = 100;
 	p->sound_freq = DEFAULT_SOUND_FREQ;
 	p->sound_maxbsiz = DEFAULT_SOUND_MAXB;
 	p->sound_interpol = 1;

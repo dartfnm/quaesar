@@ -52,7 +52,9 @@
 // clang-format on
 
 #include <debugger/debugger.h>
-#include "quaesar.h"
+#include <log.h>
+#include <src/generic/thread.h>
+#include <src/quaesar.h>
 
 int avioutput_enabled = 0;
 bool beamracer_debug = false;
@@ -73,6 +75,35 @@ uae_u8* start_pc_p = nullptr;
 uae_u32 start_pc = 0;
 uae_u8* cubo_nvram = nullptr;
 
+
+void sdl_event_poll_wnd_proc(SDL_Event& event) {
+    switch (event.type) {
+        case SDL_QUIT:
+            qd::App::get()->requestToQuit();
+            break;
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+                qd::App::get()->requestToQuit();
+                break;
+            } else if (event.key.keysym.sym == SDLK_d) {
+                activate_debugger();
+                // qd::Debugger_toggle(s_debugger, qd::DebuggerMode_Live);
+            }
+            break;
+        case SDL_WINDOWEVENT: {
+            Uint8 wndEvent = event.window.event;
+            if (wndEvent == SDL_WINDOWEVENT_CLOSE) {
+                qd::App::get()->requestToQuit();
+                break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+
 int dos_errno(void) {
     return errno;
 }
@@ -87,7 +118,7 @@ void show_screen(int monid, int mode) {
 
 // from fs-uae
 void vsync_clear() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int vsync_isdone(frame_time_t* dt) {
@@ -138,7 +169,7 @@ static int dummy_init(void) {
 
 // Dummy closing function
 static void dummy_close(void) {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 // Dummy function to acquire an input device
@@ -581,7 +612,7 @@ void clipboard_vsync() {
 }
 
 void close_console() {
-    UNIMPLEMENTED();
+    SDL_Log("uae: close_console()");
 }
 
 int compemu_reset() {
@@ -606,13 +637,20 @@ void console_flush() {
 }
 
 int console_get(char* out, int maxlen) {
-    TCHAR* res = fgets(out, maxlen, stdin);
-    if (res == NULL) {
+    qd::Debugger* dbg = app->getDbg();
+    if (!dbg)
         return -1;
+    for (;;) {
+        int len = dbg->waitConsoleCmd(out, maxlen);
+        if (len > 0)
+            return len;
+        // timeout
+        SDL_Event event;
+        while (SDL_PollEvent(&event) != 0) {
+            sdl_event_poll_wnd_proc(event);
+        }
     }
-
-    int len = strlen(out);
-    return len - 1;
+    return -1;
 }
 
 bool console_isch() {
@@ -631,11 +669,11 @@ bool cpuboard_autoconfig_init(autoconfig_info*) {
 }
 
 void cpuboard_cleanup() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void cpuboard_clear() {
-    TRACE();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void cpuboard_dkb_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
@@ -866,7 +904,7 @@ int get_guid_target(unsigned char*) {
 }
 
 void gfxboard_free() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 bool gfxboard_init_memory(autoconfig_info*) {
@@ -887,10 +925,6 @@ void golemfast_ncr9x_scsi_put(unsigned int, unsigned int, int) {
     UNIMPLEMENTED();
 }
 
-SDL_Window* s_window;
-SDL_Texture* s_texture = nullptr;
-SDL_Renderer* s_renderer = nullptr;
-static qd::Debugger* s_debugger = nullptr;
 
 int graphics_init(bool) {
     int amiga_width = 754;
@@ -916,8 +950,8 @@ int graphics_init(bool) {
 
     buf->monitor_id = 0;
     buf->pixbytes = (depth + 7) / 8;
-    buf->width_allocated = (width + 7) & ~7;
-    buf->height_allocated = height;
+    buf->width_allocated = (width + 7) & ~7;  // =760
+    buf->height_allocated = height;           // 576
 
     int w = buf->width_allocated;
     int h = buf->height_allocated;
@@ -928,32 +962,34 @@ int graphics_init(bool) {
     buf->bufmemend = buf->realbufmem + size - buf->rowbytes;
     buf->bufmem_lockable = true;
 
-    // Create a window
-    s_window = SDL_CreateWindow("Quaesar", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
-                                SDL_WINDOW_RESIZABLE);
+    using namespace qd;
 
-    if (!s_window) {
+    // Create a window
+    app->s_window = SDL_CreateWindow("Quaesar", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
+                                     SDL_WINDOW_RESIZABLE);
+
+    if (!app->s_window) {
         SDL_Log("Could not create window: %s", SDL_GetError());
         SDL_Quit();
         return 0;
     }
 
-    s_renderer = SDL_CreateRenderer(s_window, -1, SDL_RENDERER_ACCELERATED);
+    app->s_renderer = SDL_CreateRenderer(app->s_window, -1, SDL_RENDERER_ACCELERATED);
 
-    if (!s_renderer) {
+    if (!app->s_renderer) {
         SDL_Log("Could not create renderer: %s", SDL_GetError());
-        SDL_DestroyWindow(s_window);
+        SDL_DestroyWindow(app->s_window);
         SDL_Quit();
         return 0;
     }
 
-    s_texture =
-        SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, amiga_width, amiga_height);
+    app->s_texture = SDL_CreateTexture(app->s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+                                       amiga_width, amiga_height);
 
-    if (!s_texture) {
+    if (!app->s_texture) {
         SDL_Log("Could not create texture: %s", SDL_GetError());
-        SDL_DestroyRenderer(s_renderer);
-        SDL_DestroyWindow(s_window);
+        SDL_DestroyRenderer(app->s_renderer);
+        SDL_DestroyWindow(app->s_window);
         SDL_Quit();
         return 0;
     }
@@ -965,8 +1001,7 @@ int graphics_init(bool) {
 
     alloc_colors64k(0, bits, bits, bits, red_shift, green_shift, blue_shift, bits, 24, 0, 0, false);
 
-    s_debugger = qd::Debugger_create();
-
+    qd::onUaeInitialized.set();
     TRACE();
     return 1;
 }
@@ -975,55 +1010,26 @@ bool render_screen(int monid, int, bool) {
     return true;
 }
 
-void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
-    SDL_Event e;
 
-    if (!s_window)
+void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
+    if (!app->s_window)
         return;
 
-    // TODO: Should likley move this somewhere else
     // Handle events on queue
-    while (SDL_PollEvent(&e) != 0) {
-        // User requests quit
-        switch (e.type) {
-            case SDL_QUIT:  // User closes the window
-                // quit_program == UAE_QUIT;
-                // TODO: Fix me
-                exit(0);
-                break;
-            case SDL_KEYDOWN:                      // User presses a key
-                if (e.key.keysym.sym == SDLK_d) {  // If the key is ESC
-                    activate_debugger();
-                }
-                if (e.key.keysym.sym == SDLK_ESCAPE) {  // If the key is ESC
-                    // quit_program == UAE_QUIT;
-                    exit(0);
-                    // TODO: Fix me
-                } else if (e.key.keysym.sym == SDLK_d) {
-                    qd::Debugger_toggle(s_debugger, qd::DebuggerMode_Live);
-                }
-                break;
-            default:
-                break;
-        }
-
-        qd::Debugger_update_event(&e);
+    SDL_Event event;
+    while (SDL_PollEvent(&event) != 0) {
+        sdl_event_poll_wnd_proc(event);
     }
-
-    if (qd::Debugger_is_window_visible(s_debugger))
-        qd::Debugger_update(s_debugger);
 
     uint32_t* pixels = nullptr;
     int pitch = 0;
 
-    if (SDL_LockTexture(s_texture, NULL, (void**)&pixels, &pitch) == 0) {
-        struct amigadisplay* ad = &adisplays[vb_in->monitor_id];
+    if (SDL_LockTexture(app->s_texture, NULL, (void**)&pixels, &pitch) == 0) {
         struct vidbuf_description* avidinfo = &adisplays[vb_in->monitor_id].gfxvidinfo;
         struct vidbuffer* vb = avidinfo->outbuffer;
 
         if (vb && vb->bufmem) {
             uint8_t* sptr = vb->bufmem;
-            uint8_t* endsptr = vb->bufmemend;
 
             int amiga_width = vb->outwidth;
             int amiga_height = vb->outheight;
@@ -1035,7 +1041,7 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
                 sptr += vb->rowbytes;
             }
         }
-        SDL_UnlockTexture(s_texture);
+        SDL_UnlockTexture(app->s_texture);
     }
 
     int amiga_width = 754;
@@ -1045,7 +1051,7 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
     int new_height = 0;
 
     int window_width, window_height;
-    SDL_GetWindowSize(s_window, &window_width, &window_height);
+    SDL_GetWindowSize(::app->s_window, &window_width, &window_height);
 
     // Maintain aspect ratio
     float image_aspect = (float)amiga_width / (float)amiga_height;
@@ -1061,17 +1067,17 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
 
     SDL_Rect rect = {(window_width - new_width) / 2, (window_height - new_height) / 2, new_width, new_height};
 
-    SDL_RenderClear(s_renderer);
-    SDL_RenderCopy(s_renderer, s_texture, NULL, &rect);
-    SDL_RenderPresent(s_renderer);
+    SDL_RenderClear(::app->s_renderer);
+    SDL_RenderCopy(::app->s_renderer, app->s_texture, NULL, &rect);
+    SDL_RenderPresent(::app->s_renderer);
 }
 
 void graphics_leave() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void graphics_reset(bool) {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int graphics_setup() {
@@ -1139,7 +1145,7 @@ void logging_init() {
 }
 
 void machdep_free() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int machdep_init() {
@@ -1366,7 +1372,7 @@ bool samepath(char const*, char const*) {
 }
 
 void sampler_free() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 uae_u8 sampler_getsample(int) {
@@ -1401,7 +1407,7 @@ void serial_hsynchandler() {
 }
 
 void serial_rbf_clear() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 uae_u8 serial_readstatus(uae_u8 v, uae_u8) {
@@ -1428,7 +1434,7 @@ int sleep_millis_main(int) {
 }
 
 void sndboard_free_capture() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int sndboard_get_buffer(int*) {
@@ -1555,24 +1561,23 @@ void target_paste_to_keyboard() {
 }
 
 void target_quit() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_reset() {
-    TRACE();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_restart() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_run() {
-    TRACE();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_save_options(zfile*, uae_prefs*) {
-    TRACE();
-    // UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void tekmagic_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
@@ -1614,7 +1619,7 @@ void* uaenative_get_uaevar() {
 }
 
 void uaeser_clearbuffers(void*) {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int uaeser_getdatalength() {
@@ -1647,7 +1652,7 @@ void uaeser_trigger(void*) {
 }
 
 void uae_slirp_cleanup() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void uae_slirp_end() {
@@ -2035,14 +2040,13 @@ static int dummy_execscsicmd_direct_func(int deviceID, struct amigascsi* cmd) {
     return 0;
 }
 
-static void dummy_play_subchannel_callback(uae_u8* data, int size) {
-    printf("Dummy play_subchannel_callback called with size: %d\n", size);
-}
-
-static int dummy_play_status_callback(int status, int subcode) {
-    printf("Dummy play_status_callback called with status: %d, subcode: %d\n", status, subcode);
-    return 0;
-}
+// static void dummy_play_subchannel_callback(uae_u8* data, int size) {
+//     printf("Dummy play_subchannel_callback called with size: %d\n", size);
+// }
+// static int dummy_play_status_callback(int status, int subcode) {
+//     printf("Dummy play_status_callback called with status: %d, subcode: %d\n", status, subcode);
+//     return 0;
+// }
 
 static int dummy_pause_func(int deviceID, int flags) {
     printf("Dummy pause_func called with deviceID: %d, flags: %d\n", deviceID, flags);
@@ -2215,7 +2219,8 @@ void write_log(const char* format, ...) {
     va_list parms;
 
     va_start(parms, format);
-    vprintf(format, parms);
+    // vprintf(format, parms);
+    qd::logConsole().logV(qd::LogEntry::E_INFO, format, parms);
     va_end(parms);
 }
 
@@ -2224,7 +2229,8 @@ void write_dlog(const char* format, ...) {
     va_list parms;
 
     va_start(parms, format);
-    vprintf(format, parms);
+    // vprintf(format, parms);
+    qd::logConsole().logV(qd::LogEntry::E_INFO, format, parms);
     va_end(parms);
 }
 
@@ -2232,7 +2238,7 @@ void console_out_f(const TCHAR* format, ...) {
     va_list parms;
 
     va_start(parms, format);
-    vprintf(format, parms);
+    qd::logConsole().logV(qd::LogEntry::E_INFO, format, parms);
     va_end(parms);
 }
 
@@ -2241,13 +2247,12 @@ void console_out(const TCHAR* txt) {
 }
 
 TCHAR* buf_out(TCHAR* buffer, int* bufsize, const TCHAR* format, ...) {
-    int count;
     va_list parms;
     va_start(parms, format);
 
     if (buffer == NULL)
         return 0;
-    count = _vsntprintf(buffer, (*bufsize) - 1, format, parms);
+    _vsntprintf(buffer, (*bufsize) - 1, format, parms);
     va_end(parms);
     *bufsize -= uaetcslen(buffer);
     return buffer + uaetcslen(buffer);

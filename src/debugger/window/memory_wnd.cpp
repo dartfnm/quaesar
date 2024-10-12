@@ -55,6 +55,7 @@
 
 #include "memory_wnd.h"
 #include <debugger/debugger.h>
+#include <debugger/vm/vm.h>
 
 namespace qd::window {
 
@@ -77,10 +78,14 @@ QDB_WINDOW_REGISTER(MemoryView);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MemoryView::MemoryView(UiViewCreate* cp) : UiWindow(cp) {
+void MemoryView::onCreate(UiViewCreate* cp) {
+    UiWindow::onCreate(cp);
     mTitle = "Memory";
     mVisible = true;
+    setMemAddr(VM::get()->mem->getRealAddr(0x0000), 512 * 1024, 0x0000);
+}
 
+MemoryView::MemoryView() {
     // Settings
     read_only = false;
     cols = 16;
@@ -108,8 +113,6 @@ MemoryView::MemoryView(UiViewCreate* cp) : UiWindow(cp) {
     highlight_min = hightlight_max = (size_t)-1;
     preview_endianess = 0;
     preview_data_type = ImGuiDataType_S32;
-
-    setMemAddr(getDbg()->addrToPtr(0x0000), 512 * 1024, 0x0000);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -771,6 +774,7 @@ void MemoryView::draw_preview_data(size_t addr, const uint8_t* mem_data, size_t 
     }
     IM_ASSERT(0);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -451,7 +451,7 @@ uae_u32 get_ilong_debug (uaecptr addr)
 uae_u8 *get_real_address_debug(uaecptr addr)
 {
 	if (debug_mmu_mode) {
-		flagtype olds = regs.s;
+		//flagtype olds = regs.s;
 		TRY(p) {
 			if (currprefs.mmu_model >= 68040)
 				addr = mmu_translate(addr, 0, regs.s != 0, (debug_mmu_mode & 1), false, 0);
@@ -574,7 +574,7 @@ static int getoperidx(TCHAR **c, bool *opersigned)
 	int i;
 	TCHAR *p = *c;
 	TCHAR tmp[10];
-	int extra = 0;
+	//int extra = 0;
 
 	i = 0;
 	while (p[i]) {
@@ -917,7 +917,7 @@ static int checkvaltype(TCHAR **cp, uae_u32 *val, int *size, TCHAR def)
 {
 	TCHAR form[256], *p;
 	bool gotop = false;
-	bool copyrest = false;
+	//bool copyrest = false;
 	double out;
 
 	form[0] = 0;
@@ -1740,7 +1740,7 @@ static void heatmap_stats(TCHAR **c)
 
 	if (mask != MW_MASK_CPU_I) {
 
-		int found = -1;
+		//int found = -1;
 		int firstaddress = 0;
 		for (int lines = 0; lines < maxlines; lines++) {
 
@@ -7189,8 +7189,7 @@ static void debug_1 (void)
 		console_out (_T(">"));
 		console_flush ();
 		debug_linecounter = 0;
-		// TODO: CONFILCT: terminal stops execution when 'd' was pressed
-		v = -1; // console_get(input, MAX_LINEWIDTH);
+		v = console_get(input, MAX_LINEWIDTH);
 		if (v < 0)
 			return;
 		if (v == 0)
@@ -8786,8 +8785,13 @@ bool debug_sprintf(uaecptr addr, uae_u32 val, int size)
 	return true;
 }
 
-
-void qd::Debugger::applyConsoleCmd(const char *cmd) {
-    TCHAR* buf = (TCHAR *)cmd;
+//////////////////////////////////////////////////////////////////////////
+namespace qd::uae
+{
+void do_console_cmd_immediate(const char *cmd) {
+    TCHAR *buf = (TCHAR *)cmd;
     ::debug_line(buf);
 }
+}; // namespace qd::uae
+//////////////////////////////////////////////////////////////////////////
+
