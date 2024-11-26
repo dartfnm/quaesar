@@ -59,7 +59,7 @@
 #include <imgui_eastl.h>
 #include <stdint.h>  // uint8_t, etc.
 #include <stdio.h>   // sprintf, scanf
-#include "debugger/ui/ui_view.h"
+#include "src/ui/ui_view.h"
 
 namespace qd::window {
 
@@ -136,7 +136,8 @@ public:
         }
     };
 
-    MemoryView(UiViewCreate* cp);
+    MemoryView();
+    virtual void onCreate(UiViewCreate* cp) override;
     virtual void drawContent() override;
 
     void goto_address_and_highlight(size_t addr_min, size_t addr_max);

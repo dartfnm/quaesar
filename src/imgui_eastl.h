@@ -1,5 +1,6 @@
 #pragma once
 #include <EASTL/fixed_vector.h>
+#include <EASTL/string.h>
 #include <EASTL/utility.h>
 #include <dear_imgui/imgui.h>
 #include "eastl.h"
@@ -39,10 +40,10 @@ static int _inputFixedStringCallback(ImGuiInputTextCallbackData* data) {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
         TString* str = static_cast<TString*>(user_data->str);
         IM_ASSERT(data->Buf == str->c_str());
-        if (str->capacity() >= data->BufTextLen) {
+        if (str->capacity() >= (size_t)data->BufTextLen) {
             str->resize(data->BufTextLen);
         } else {
-            data->BufTextLen = str->capacity();
+            data->BufTextLen = (int)str->capacity();
             data->BufDirty = true;
         }
         data->Buf = (char*)str->c_str();
@@ -56,7 +57,7 @@ bool InputText(const char* label, eastl::fixed_string<char, S, OV, A>* str, ImGu
     using TString = eastl::basic_string<char, typename eastl::fixed_string<char, S, OV, A>::fixed_allocator_type>;
     FixedStringInputTextCallback data = {static_cast<TString*>(str)};
     return ImGui::InputText(label, str->data(), str->capacity() + 1, flags,
-                            _inputFixedStringCallback<TString::allocator_type>, &data);
+                            _inputFixedStringCallback<typename TString::allocator_type>, &data);
 }
 
 }  // namespace ImGui

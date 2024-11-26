@@ -1,5 +1,5 @@
 #pragma once
-#include <debugger/generic/types.h>
+#include <src/generic/types.h>
 
 namespace qd {
 

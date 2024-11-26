@@ -19,7 +19,7 @@ extern uae_thread_id uae_thread_get_id(void);
 
 // #include "commpipe.h"
 
-inline void uae_wait_thread(uae_thread_id tid) {
+inline void uae_wait_thread(uae_thread_id /*tid*/) {
     // WaitForSingleObject (tid, INFINITE);
     // CloseHandle (tid);
 }

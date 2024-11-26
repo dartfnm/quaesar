@@ -1,16 +1,12 @@
 #include "screen_wnd.h"
 #include <SDL.h>
 #include <debugger/debugger.h>
-#include <debugger/vm.h>
+#include <debugger/vm/vm.h>
 #include <imgui_eastl.h>
 #include <quaesar.h>
 
 namespace qd::window {
 QDB_WINDOW_REGISTER(ScreenWnd);
-
-ScreenWnd::ScreenWnd(UiViewCreate* cp) : UiWindow(cp) {
-    mTitle = "Screen";
-}
 
 void ScreenWnd::drawContent() {
     VM* vm = getDbg()->getVm();
@@ -23,10 +19,10 @@ void ScreenWnd::drawContent() {
         if (SDL_Init(SDL_INIT_VIDEO) != 0)
             return;
 
-        SDL_Texture* scrTexture = SDL_CreateTexture(getDbg()->renderer, SDL_PIXELFORMAT_ARGB8888,
+        SDL_Texture* scrTexture = SDL_CreateTexture(getDbg()->getRenderer(), SDL_PIXELFORMAT_ARGB8888,
                                                     SDL_TEXTUREACCESS_STREAMING, amiga_width, amiga_height);
         if (scrTexture) {
-            mTextureId = scrTexture;
+            mTextureId = (ImTextureID)scrTexture;
             SDL_SetTextureBlendMode(scrTexture, SDL_BLENDMODE_BLEND);
             SDL_SetTextureScaleMode(scrTexture, SDL_ScaleModeLinear);
         } else {
@@ -35,7 +31,7 @@ void ScreenWnd::drawContent() {
     }
 
     if (mTextureId) {
-        SDL_Texture* scrTexture = static_cast<SDL_Texture*>(mTextureId);
+        SDL_Texture* scrTexture = (SDL_Texture*)(mTextureId);
         void* pixels = nullptr;
         int pitch;
         if (SDL_LockTexture(scrTexture, nullptr, &pixels, &pitch) == 0) {
@@ -48,8 +44,7 @@ void ScreenWnd::drawContent() {
                 for (int y = 0; y < amiga_height; y++) {
                     uint8_t* sptr = (uint8_t*)scrBuf + (y * vbPitch);
                     uint32_t* dest = ((uint32_t*)pixels) + (y * amiga_width);
-                    // memcpy(dest, sptr, amiga_width * 4);
-                    for (int x = 0; x < amiga_height; ++x) {
+                    for (int x = 0; x < amiga_width; ++x) {
                         Color c = *(uint32_t*)(sptr);
                         c.a = 255;
                         *dest = c;
@@ -64,7 +59,7 @@ void ScreenWnd::drawContent() {
 
     ImVec2 scrollingChildSize = ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 20);
     ImGui::BeginChild("##scrolling", scrollingChildSize, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
-    ImGui::Image(mTextureId, ImVec2(amiga_width, amiga_height), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f),
+    ImGui::Image(mTextureId, ImVec2((float)amiga_width, (float)amiga_height), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f),
                  ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImGui::GetStyleColorVec4(ImGuiCol_Border));
     ImGui::EndChild();
 }

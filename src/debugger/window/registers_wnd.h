@@ -1,15 +1,18 @@
 #pragma once
-#include "debugger/ui/ui_view.h"
+#include "src/ui/ui_view.h"
 
 namespace qd::window {
 class RegistersView : public UiWindow {
     QDB_CLASS_ID(WndId::Registers);
 
 public:
-    RegistersView(UiViewCreate* cp);
+    virtual void onCreate(UiViewCreate* cp) override {
+        UiWindow::onCreate(cp);
+        mTitle = "Registers";
+    }
 
     virtual void drawContent() override;
 
-};  // class
+} QDB_WINDOW_REGISTER(RegistersView);  // class
 
 };  // namespace qd::window

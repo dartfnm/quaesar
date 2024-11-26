@@ -36,7 +36,7 @@ void uae_sem_wait(uae_sem_t* sem) {
     SDL_SemWait((SDL_sem*)sem);
 }
 
-void uae_sem_init(uae_sem_t* sem, int manual_reset, int initial_state) {
+void uae_sem_init(uae_sem_t* sem, int /*manual_reset*/, int initial_state) {
     if (*sem) {
         SDL_SemPost((SDL_sem*)sem);
     } else {
@@ -86,7 +86,7 @@ int uae_start_thread_fast(void (*fn)(void*), void* arg, uae_thread_id* tid) {
     return uae_start_thread(NULL, fn, arg, tid);
 }
 
-void uae_end_thread(uae_thread_id* thread) {
+void uae_end_thread(uae_thread_id* /*thread*/) {
     /*
    #ifdef _WIN32
        TerminateThread(SDL_GetThreadID(t), 0);
@@ -104,7 +104,7 @@ void uae_set_thread_priority(uae_thread_id*, int) {
 }
 
 uae_thread_id uae_thread_get_id(void) {
-    return (uae_thread_id)SDL_GetThreadID(nullptr);
+    return reinterpret_cast<uae_thread_id>((size_t)SDL_GetThreadID(nullptr));
 }
 
 #ifdef _WIN32
@@ -115,7 +115,7 @@ uae_atomic atomic_and(volatile uae_atomic* p, uae_u32 v) {
 uae_atomic atomic_or(volatile uae_atomic* p, uae_u32 v) {
     return _InterlockedOr(p, v);
 }
-void atomic_set(volatile uae_atomic* p, uae_u32 v) {
+void atomic_set(volatile uae_atomic* /*p*/, uae_u32 /*v*/) {
 }
 uae_atomic atomic_inc(volatile uae_atomic* p) {
     return _InterlockedIncrement(p);

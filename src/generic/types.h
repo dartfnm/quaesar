@@ -1,6 +1,7 @@
 #pragma once
 #include <EASTL/internal/config.h>
-#include <debugger/generic/memory.h>
+#include <SDL_endian.h>
+#include <debugger/vm/memory.h>
 #include <stdint.h>
 
 #if !defined(NOMINMAX)
@@ -31,16 +32,25 @@ template <typename T, typename T1, typename T2>
     return Value;
 }
 
+
 // returns byte color to float [0.0f - 1.0f]
 inline static constexpr float byte_to_float_01(uint8_t x) {
     union {
         float f;
         uint32_t i;
     } u = {u.f = 32768.0f};
+
     u.i |= x;
     return (u.f - 32768.0f) * (256.0f / 255.0f);
 }
 
+template <typename T>
+constexpr T c_def(T v) {
+    return v;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 template <typename TInt>
 class TPoint {
     typedef TPoint<TInt> TThis;
@@ -109,7 +119,63 @@ public:
 
 };  // class TPoint
 
-using IVec2 = TPoint<int>;
+//////////////////////////////////////////////////////////////////////////
+using Int2 = TPoint<int>;
 using Vec2 = TPoint<float>;
+
+
+//////////////////////////////////////////////////////////////////////////
+struct EFlow {
+    enum Type : uint8_t {
+        NO_RESULT = 0,
+        SUCCESS = 1,
+        FAILED = 2,
+        REPEAT = 3,
+    };
+    EFlow::Type mVal = (EFlow::Type)0;
+
+    template <typename TInt>
+    EFlow(TInt val) : mVal(static_cast<Type>(val)) {
+    }
+
+    constexpr operator EFlow::Type() const {
+        return mVal;
+    }
+
+};  // enum EFlow
+//////////////////////////////////////////////////////////////////////////
+
+
+// endan bit's swaping from littlendian to bigendian
+template <int TBytesCount>
+inline void swapBytes_(void* p);
+
+template <>
+inline void swapBytes_<1>(void*) {
+}
+
+template <>
+inline void swapBytes_<2>(void* p) {
+    uint16_t* c = reinterpret_cast<uint16_t*>(p);
+    *c = SDL_Swap16(*c);
+}
+
+template <>
+inline void swapBytes_<4>(void* p) {
+    uint32_t* c = reinterpret_cast<uint32_t*>(p);
+    *c = SDL_Swap32(*c);
+}
+
+template <>
+inline void swapBytes_<8>(void* p) {
+    uint64_t* c = reinterpret_cast<uint64_t*>(p);
+    *c = SDL_Swap64(*c);
+}
+
+// swaps bytes order if Platform is BigEndian
+template <typename TInt>
+inline void swapBytes(TInt* p) {
+    swapBytes_<sizeof(TInt)>(p);
+}
 
 };  // namespace qd

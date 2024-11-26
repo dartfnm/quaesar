@@ -7189,8 +7189,7 @@ static void debug_1 (void)
 		console_out (_T(">"));
 		console_flush ();
 		debug_linecounter = 0;
-		// TODO: CONFILCT: terminal stops execution when 'd' was pressed
-		v = -1; // console_get(input, MAX_LINEWIDTH);
+		v = console_get(input, MAX_LINEWIDTH);
 		if (v < 0)
 			return;
 		if (v == 0)
@@ -8786,8 +8785,13 @@ bool debug_sprintf(uaecptr addr, uae_u32 val, int size)
 	return true;
 }
 
-
-void qd::Debugger::applyConsoleCmd(const char *cmd) {
-    TCHAR* buf = (TCHAR *)cmd;
+//////////////////////////////////////////////////////////////////////////
+namespace qd::uae
+{
+void do_console_cmd_immediate(const char *cmd) {
+    TCHAR *buf = (TCHAR *)cmd;
     ::debug_line(buf);
 }
+}; // namespace qd::uae
+//////////////////////////////////////////////////////////////////////////
+
