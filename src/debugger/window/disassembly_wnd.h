@@ -3,7 +3,8 @@
 #include <debugger/vm/memory.h>
 #include <src/ui/ui_view.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class DisassemblyView : public UiWindow {
     QDB_CLASS_ID(WndId::Disassembly);
@@ -20,4 +21,5 @@ public:
 
 };  // class DisassemblyView
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

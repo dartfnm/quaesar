@@ -57,7 +57,8 @@
 #include <debugger/debugger.h>
 #include <debugger/vm/vm.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 QDB_WINDOW_REGISTER(MemoryView);
 
@@ -785,4 +786,5 @@ void MemoryView::draw_preview_data(size_t addr, const uint8_t* mem_data, size_t 
 #pragma warning(pop)
 #endif
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

@@ -9,7 +9,8 @@
 #include <imgui_eastl.h>
 #include <src/ui/ui_style.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 QDB_WINDOW_REGISTER(DisassemblyView);
 
@@ -116,4 +117,5 @@ void DisassemblyView::drawContent() {
     cs_free(instructions, instructionCount);
 }
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

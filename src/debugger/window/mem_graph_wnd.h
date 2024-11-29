@@ -2,7 +2,8 @@
 #include <src/generic/types.h>
 #include <src/ui/ui_view.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class MemoryGraphWnd : public UiWindow {
     QDB_CLASS_ID(WndId::MemoryGraph);
@@ -27,4 +28,5 @@ public:
 
 };  // class
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

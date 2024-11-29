@@ -18,7 +18,8 @@
 #include <src/generic/types.h>
 
 
-namespace qd::vm {
+namespace qd {
+namespace vm {
 namespace imp {
 
 class UaeEmuVmImp final : public VM {
@@ -125,5 +126,5 @@ public:
 
 
 };  // namespace imp
-
-};  // namespace qd::vm
+};  // namespace vm
+};  // namespace qd

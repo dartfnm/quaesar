@@ -45,25 +45,27 @@ namespace imp {
 class ConsoleQueue {
 public:
     eastl::queue<eastl::string> mConsoleCmdQueue;
-    qd::thread::Event mEvent;
-    qd::thread::Mutex mMutex;
+    qd::thread::Event* mpEvent;
+    qd::thread::Mutex* mpMutex;
 
 public:
     ConsoleQueue() {
+        mpEvent = new qd::thread::Event(true);
+        mpMutex = new qd::thread::Mutex();
     }
 
     void addCmdToQueue(eastl::string cmd) {
         if (cmd.empty())
             return;
-        mMutex.lock();
+        mpMutex->lock();
         mConsoleCmdQueue.push(eastl::move(cmd));
-        mMutex.unlock();
-        mEvent.set();
+        mpMutex->unlock();
+        mpEvent->set();
     }
 
     bool waitConsoleCmd(eastl::string& out) {
-        mEvent.wait(100);
-        qd::thread::MutexLock ml(mMutex);
+        mpEvent->wait(100);
+        qd::thread::MutexLock ml(*mpMutex);
         if (mConsoleCmdQueue.empty())
             return false;
         const eastl::string& cmd = mConsoleCmdQueue.front();
@@ -73,9 +75,16 @@ public:
     }
 
     void destroy() {
+        mConsoleCmdQueue = {};
+        if (mpEvent) {
+            mpEvent->set();
+            SAFE_DELETE(mpEvent);
+        }
+        SAFE_DELETE(mpMutex);
     }
 
     ~ConsoleQueue() {
+        destroy();
     }
 
 };  // class ConsoleQueue
@@ -96,13 +105,14 @@ static bool uae_bp_reg_convert(int uae_reg, EReg& out) {
 //////////////////////////////////////////////////////////////////////////
 
 void Debugger::init() {
+    mbInit = true;
     createRenderWindow();
     initImGui();
     vm = VM::setVmInst(new qd::vm::imp::UaeEmuVmImp());
     vm->init();
     gui = new GuiManager(this);
-    actions = action::ActionManager::get();
-    actions->create(gui, this);
+    mActions = action::ActionManager::get();
+    mActions->create(gui, this);
     capstone = new csh();
 
     // TODO: Pick correct CPU depending on starting CPU
@@ -127,7 +137,6 @@ void Debugger::createRenderWindow() {
 
     if (!window) {
         fprintf(stderr, "Error creating window.\n");
-        SDL_Quit();
         return;
     }
 
@@ -135,7 +144,6 @@ void Debugger::createRenderWindow() {
     if (!mRenderer) {
         SDL_DestroyWindow(window);
         SDL_Log("Error creating SDL_Renderer!");
-        SDL_Quit();
         return;
     }
     mWindow = window;
@@ -160,6 +168,11 @@ void Debugger::initImGui() {
 }
 
 
+Debugger::~Debugger() {
+    assert(!mbInit);
+}
+
+
 bool Debugger::isDebugActivated() {
     return ::debugging > 0 && (::debugger_active > 0);
 }
@@ -178,13 +191,13 @@ void Debugger::setDebugMode(DebuggerMode debug_mode) {
         }
     } else if (debug_mode == DebuggerMode_Live) {
         action::msg::DoDebugTraceContinue m;
-        actions->applyActionMsg(&m);
+        mActions->applyActionMsg(&m);
         ::debugger_active = 0;
     }
 }
 
 qd::EFlow Debugger::applyActionMsg(qd::action::msg::Base* p_msg) const {
-    return actions->applyActionMsg(p_msg);
+    return mActions->applyActionMsg(p_msg);
 }
 
 
@@ -215,6 +228,9 @@ void Debugger::destroy() {
     if (gui)
         gui->destroy();
     imp::console_queue.destroy();
+    if (mActions)
+        mActions->destroy();
+    mActions = nullptr;
 
     // Cleanup
     ImGui_ImplSDLRenderer2_Shutdown();
@@ -232,6 +248,8 @@ void Debugger::destroy() {
     mRenderer = nullptr;
     SDL_DestroyWindow(mWindow);
     mWindow = nullptr;
+
+    mbInit = false;
 }
 
 

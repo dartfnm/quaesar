@@ -2,7 +2,8 @@
 #include <SDL_log.h>
 #include <SDL_mutex.h>
 
-namespace qd::thread {
+namespace qd {
+namespace thread {
 
 class Mutex {
     SDL_mutex* mpMutex;
@@ -67,17 +68,14 @@ class Event {
 
 public:
     Event(bool auto_reset_event = true);
+    ~Event();
     void reset();
     void set();
     void wait();
     bool wait(uint32_t time_out_ms);
 
-    inline ~Event() {
-        SDL_DestroyCond(mpCondition);
-        SDL_DestroyMutex(mpMutex);
-    }
-
 };  // class thread::Event
 //////////////////////////////////////////////////////////////////////////
 
-};  // namespace qd::thread
+};  // namespace thread
+};  // namespace qd

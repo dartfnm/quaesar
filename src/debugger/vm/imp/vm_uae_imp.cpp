@@ -22,7 +22,8 @@ extern bool get_custom_color_reg(int colreg, uae_u8* r, uae_u8* g, uae_u8* b);
 extern uaecptr bplpt[MAX_PLANES], bplptx[MAX_PLANES];
 
 
-namespace qd::vm {
+namespace qd {
+namespace vm {
 namespace imp {
 
 UaeEmuVmImp::UaeEmuVmImp() {
@@ -120,4 +121,5 @@ void UaeEmuVmImp::Copper::fetch() {
 };  // namespace imp
 //////////////////////////////////////////////////////////////////////////
 
-};  // namespace qd::vm
+};  // namespace vm
+};  // namespace qd

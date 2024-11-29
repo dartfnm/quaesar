@@ -2,7 +2,8 @@
 #include <imgui.h>
 #include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 
 class CustomRegsWnd : public UiWindow {
@@ -21,4 +22,5 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

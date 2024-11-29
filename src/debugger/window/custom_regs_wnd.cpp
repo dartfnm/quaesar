@@ -3,7 +3,8 @@
 #include <imgui_eastl.h>
 #include <ui/ui_style.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 
 struct FlagsTooltipContent {
@@ -140,4 +141,5 @@ void CustomRegsWnd::drawContent() {
     //    }
 }
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

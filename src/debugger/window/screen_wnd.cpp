@@ -5,7 +5,8 @@
 #include <imgui_eastl.h>
 #include <quaesar.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 QDB_WINDOW_REGISTER(ScreenWnd);
 
 void ScreenWnd::drawContent() {
@@ -64,4 +65,5 @@ void ScreenWnd::drawContent() {
     ImGui::EndChild();
 }
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

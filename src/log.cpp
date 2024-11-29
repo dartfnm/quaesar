@@ -1,4 +1,5 @@
 #include "log.h"
+#include <src/generic/base.h>
 
 
 namespace qd {
@@ -18,10 +19,10 @@ void Log::destroyWriter(ILogWriter* p_ptr) {
     if (!p_ptr)
         return;
     for (auto it = mpLogWriters.begin(); it != mpLogWriters.end(); ++it) {
-        ILogWriter* curWriter = *it;
-        if (curWriter == p_ptr) {
-            curWriter->onDestroy();
+        ILogWriter* pCurWriter = *it;
+        if (pCurWriter == p_ptr) {
             mpLogWriters.erase(it);
+            SAFE_DESTROY_AND_DELETE(pCurWriter);
             return;
         }
     }
@@ -32,8 +33,7 @@ void Log::done() {
     while (!mpLogWriters.empty()) {
         ILogWriter* pCurWriter = mpLogWriters.back();
         mpLogWriters.pop_back();
-        pCurWriter->onDestroy();
-        delete pCurWriter;
+        SAFE_DESTROY_AND_DELETE(pCurWriter);
     }
 }
 

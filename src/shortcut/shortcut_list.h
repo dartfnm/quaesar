@@ -4,7 +4,9 @@
 
 FORWARD_DECLARATION_2(qd, Shortcut);
 
-namespace qd::shortcut {
+
+namespace qd {
+namespace shortcut {
 
 #define SHORTCUT(name, setup_func)
 
@@ -40,4 +42,5 @@ enum class EId {
 
 extern qd::Shortcut* makeInstance(qd::shortcut::EId id);
 
-};  // namespace qd::shortcut
+};  // namespace shortcut
+};  // namespace qd

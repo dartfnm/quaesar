@@ -16,8 +16,8 @@ void* operator new[](size_t size, size_t alignment, size_t /*alignmentOffset*/, 
     return malloc(size);
 }
 
-// EASTL also wants us to define this (see string.h line 197)
-int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat, va_list arguments) {
+// EASTL also wants us to define this (see string.h line 217)
+int Vsnprintf8(char* pDestination, size_t n, const char* pFormat, va_list arguments) {
 #ifdef _MSC_VER
     return _vsnprintf(pDestination, n, pFormat, arguments);
 #else
@@ -40,7 +40,7 @@ int Vsnprintf16(wchar_t* pDestination, size_t n, const wchar_t* pFormat, va_list
 }
 int Vsnprintf32(char8_t* pDestination, size_t n, const char32_t* pFormat, va_list arguments) {
 #ifdef _MSC_VER
-    return _vsnprintf(pDestination, n, (char*)pFormat, arguments);
+    return _vsnprintf((char*)pDestination, n, (char*)pFormat, arguments);
 #else
     return vsnprintf(pDestination, n, (char*)pFormat, arguments);
 #endif

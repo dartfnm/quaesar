@@ -1,7 +1,8 @@
 #include "thread.h"
 
 
-namespace qd::thread {
+namespace qd {
+namespace thread {
 
 Event::Event(bool auto_reset_event) : mbState(false), mbAutoReset(auto_reset_event) {
     mpCondition = SDL_CreateCond();
@@ -11,6 +12,8 @@ Event::Event(bool auto_reset_event) : mbState(false), mbAutoReset(auto_reset_eve
     }
     mpMutex = SDL_CreateMutex();
     if (!mpMutex) {
+        SDL_DestroyCond(mpCondition);
+        mpCondition = nullptr;
         SDL_Log("Thread::Event::create() (mutex)");
         return;
     }
@@ -85,4 +88,11 @@ void Event::reset() {
 }
 
 
-};  // namespace qd::thread
+Event::~Event() {
+    SDL_DestroyCond(mpCondition);
+    SDL_DestroyMutex(mpMutex);
+}
+
+
+};  // namespace thread
+};  // namespace qd

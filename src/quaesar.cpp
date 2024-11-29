@@ -107,18 +107,26 @@ int SDL_main(int argc, char* argv[]) {
 
     // start UAE in separate thread
     SDL_Thread* uae_thread_handler;
-    uae_thread_handler = SDL_CreateThreadWithStackSize(&uae_thread_main_func, "UAE emulator", 2 << 10, nullptr);
+    uae_thread_handler = SDL_CreateThread(&uae_thread_main_func, "UAE emulator", nullptr);
 
     // wait UAE initialization
-    qd::onUaeInitialized.wait();
+    qd::onUaeInitialized = new qd::thread::Event(true);
+    qd::onUaeInitialized->wait();
 
     // quaesar main loop
     ::app->init();
     ::app->mainLoop();
 
+    // quit
+    SDL_Log("Waiting UAE thread over ...");
+    app->mDebugger->execConsoleCmd("q");
+
     // wait UAE done
     SDL_WaitThread(uae_thread_handler, nullptr);
+    SAFE_DELETE(qd::onUaeInitialized);
+
     ::app->destroy();
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);
     return 0;
 }
 
@@ -126,7 +134,7 @@ int SDL_main(int argc, char* argv[]) {
 //////////////////////////////////////////////////////////////////////////
 namespace qd {
 
-qd::thread::Event onUaeInitialized(true);
+qd::thread::Event* onUaeInitialized = nullptr;
 
 void App::requestToQuit() {
     mQuitRequestPosted = true;
@@ -156,9 +164,10 @@ void App::mainLoop() {
         }
         while (SDL_PollEvent(&event) != 0) {
             switch (event.type) {
-                case SDL_QUIT:
+                case SDL_QUIT: {
                     requestToQuit();
                     break;
+                }
                 case SDL_KEYDOWN:
                     if (event.key.keysym.sym == SDLK_ESCAPE) {
                         // requestToQuit();
@@ -188,17 +197,22 @@ void App::mainLoop() {
         }
         renderUaeWindow();
     }
+}
 
-    // quit
-    SDL_Log("Waiting UAE thread over ...");
-    mDebugger->execConsoleCmd("q");
+
+void App::destroyUaeWindow() {
+    SDL_DestroyTexture(mUaeScrTexture);
+    mUaeScrTexture = nullptr;
+    SDL_DestroyRenderer(mUaeRenderer);
+    mUaeRenderer = nullptr;
+    SDL_DestroyWindow(mUaeWindow);
+    mUaeWindow = nullptr;
 }
 
 
 void App::createUaeWindow() {
     const int amiga_width = 754;
     const int amiga_height = 576;
-    const int depth = 32;
     int wndWidth = amiga_width;
     int wndHeight = amiga_height;
 
@@ -210,7 +224,6 @@ void App::createUaeWindow() {
 
     if (!app->mUaeWindow) {
         SDL_Log("Could not create window: %s", SDL_GetError());
-        SDL_Quit();
         return;
     }
 
@@ -219,7 +232,6 @@ void App::createUaeWindow() {
     if (!app->mUaeRenderer) {
         SDL_Log("Could not create renderer: %s", SDL_GetError());
         SDL_DestroyWindow(app->mUaeWindow);
-        SDL_Quit();
         return;
     }
 
@@ -230,7 +242,6 @@ void App::createUaeWindow() {
         SDL_Log("Could not create texture: %s", SDL_GetError());
         SDL_DestroyRenderer(mUaeRenderer);
         SDL_DestroyWindow(mUaeWindow);
-        SDL_Quit();
         return;
     }
 }
@@ -292,9 +303,8 @@ void App::unlockUaeScreenTexBuf() {
 
 
 void App::destroy() {
-    if (mDebugger)
-        mDebugger->destroy();
-    mDebugger = nullptr;
+    SAFE_DESTROY(mDebugger);
+    destroyUaeWindow();
 }
 
 

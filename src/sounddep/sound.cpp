@@ -145,10 +145,10 @@ static void docorrection(struct sound_dp* s, int sndbuf, float sync, int granula
         granulaty = 10;
 
     if (tfprev != timeframes) {
-        const auto avg = s->avg_correct / s->cnt_correct;
+        const int avg = s->avg_correct / s->cnt_correct;
 
-        auto skipmode = sync / 100.0f;
-        const auto avgskipmode = avg / (10000.0f / granulaty);
+        float skipmode = sync / 100.0f;
+        const float avgskipmode = avg / (10000.0f / granulaty);
 
         gui_data.sndbuf = sndbuf;
 
@@ -208,7 +208,7 @@ static void clearbuffer_sdl2(struct sound_data* sd) {
 }
 
 static void clearbuffer(struct sound_data* sd) {
-    auto* s = sd->data;
+    sound_dp* s = sd->data;
     if (sd->devicetype == SOUND_DEVICE_SDL2)
         clearbuffer_sdl2(sd);
     if (s->pullbuffer) {
@@ -288,9 +288,9 @@ static void finish_sound_buffer_pull(struct sound_data* sd, uae_u16* sndbuffer) 
 
 static int open_audio_sdl2(struct sound_data* sd, int index) {
     sound_dp* const s = sd->data;
-    const auto freq = sd->freq;
-    const auto ch = sd->channels;
-    auto devname = sound_devices[index]->name;
+    const int freq = sd->freq;
+    const int ch = sd->channels;
+    TCHAR* devname = sound_devices[index]->name;
 
     sd->devicetype = SOUND_DEVICE_SDL2;
     if (sd->sndbufsize < 0x80)
@@ -339,7 +339,7 @@ static int open_audio_sdl2(struct sound_data* sd, int index) {
 }
 
 int open_sound_device(struct sound_data* sd, int index, int bufsize, int freq, int channels) {
-    auto* dp = xcalloc(struct sound_dp, 1);
+    sound_dp* dp = xcalloc(struct sound_dp, 1);
 
     sd->data = dp;
     sd->sndbufsize = bufsize;
@@ -347,7 +347,7 @@ int open_sound_device(struct sound_data* sd, int index, int bufsize, int freq, i
     sd->channels = channels;
     sd->paused = 1;
     sd->index = index;
-    const auto ret = open_audio_sdl2(sd, index);
+    const int ret = open_audio_sdl2(sd, index);
     sd->samplesize = sd->channels * 2;
     sd->sndbufframes = sd->sndbufsize / sd->samplesize;
     return ret;
@@ -391,7 +391,7 @@ int get_default_audio_device() {
 }
 
 static int open_sound() {
-    auto size = currprefs.sound_maxbsiz;
+    int size = currprefs.sound_maxbsiz;
 
     if (!currprefs.produce_sound)
         return 0;
@@ -412,8 +412,8 @@ static int open_sound() {
         currprefs.win32_soundcard = changed_prefs.win32_soundcard = get_default_audio_device();
     if ((unsigned)currprefs.win32_soundcard >= (unsigned)num)
         currprefs.win32_soundcard = changed_prefs.win32_soundcard = 0;
-    const auto ch = get_audio_nativechannels(active_sound_stereo);
-    const auto ret = open_sound_device(sdp, currprefs.win32_soundcard, size, currprefs.sound_freq, ch);
+    const int ch = get_audio_nativechannels(active_sound_stereo);
+    const int ret = open_sound_device(sdp, currprefs.win32_soundcard, size, currprefs.sound_freq, ch);
     if (!ret)
         return 0;
     currprefs.sound_freq = changed_prefs.sound_freq = sdp->freq;
@@ -523,9 +523,9 @@ static void disable_sound() {
 #endif  //
 
 static int reopen_sound(void) {
-    const auto paused = sdp->paused != 0;
+    const bool paused = sdp->paused != 0;
     close_sound();
-    const auto v = open_sound();
+    const int v = open_sound();
     if (v && !paused)
         resume_sound_device(sdp);
     return v;
@@ -551,7 +551,7 @@ static void finish_sound_buffer_sdl2_push(struct sound_data* sd, uae_u16* sndbuf
 }
 
 static void finish_sound_buffer_sdl2(struct sound_data* sd, uae_u16* sndbuffer) {
-    const auto* s = sd->data;
+    const sound_dp* s = sd->data;
     if (!sd->waiting_for_buffer)
         return;
 
@@ -562,15 +562,15 @@ static void finish_sound_buffer_sdl2(struct sound_data* sd, uae_u16* sndbuffer) 
 }
 
 static void channelswap(uae_s16* sndbuffer, int len) {
-    for (auto i = 0; i < len; i += 2) {
-        const auto t = sndbuffer[i];
+    for (int i = 0; i < len; i += 2) {
+        const uae_s16 t = sndbuffer[i];
         sndbuffer[i] = sndbuffer[i + 1];
         sndbuffer[i + 1] = t;
     }
 }
 static void channelswap6(uae_s16* sndbuffer, int len) {
-    for (auto i = 0; i < len; i += 6) {
-        auto t = sndbuffer[i + 0];
+    for (int i = 0; i < len; i += 6) {
+        uae_s16 t = sndbuffer[i + 0];
         sndbuffer[i + 0] = sndbuffer[i + 1];
         sndbuffer[i + 1] = t;
         t = sndbuffer[i + 4];
@@ -580,7 +580,8 @@ static void channelswap6(uae_s16* sndbuffer, int len) {
 }
 
 static bool send_sound_do(struct sound_data* sd) {
-    if (const int type = sd->devicetype; type == SOUND_DEVICE_SDL2) {
+    const int type = sd->devicetype;
+    if (type == SOUND_DEVICE_SDL2) {
         finish_sound_buffer_pull(sd, paula_sndbuffer);
         return true;
     }
@@ -594,8 +595,8 @@ static void send_sound(struct sound_data* sd, uae_u16* sndbuffer) {
     if (sd->paused)
         return;
     if (sd->softvolume >= 0) {
-        auto* p = reinterpret_cast<uae_s16*>(sndbuffer);
-        for (auto i = 0; i < sd->sndbufsize / 2; i++) {
+        uae_s16* p = reinterpret_cast<uae_s16*>(sndbuffer);
+        for (int i = 0; i < sd->sndbufsize / 2; i++) {
             p[i] = p[i] * sd->softvolume / 32768;
         }
     }
@@ -634,7 +635,8 @@ bool audio_is_event_frame_possible(int) {
 int audio_is_pull() {
     if (sdp->reset)
         return 0;
-    if (auto* s = sdp->data; s && s->pullmode) {
+    sound_dp* s = sdp->data;
+    if (s && s->pullmode) {
         return sdp->paused || sdp->deactive ? -1 : 1;
     }
     return 0;
@@ -647,8 +649,8 @@ int audio_pull_buffer() {
     const struct sound_dp* s = sdp->data;
     if (s->pullbufferlen > 0) {
         cnt++;
-        if (const auto size = reinterpret_cast<uae_u8*>(paula_sndbufpt) - reinterpret_cast<uae_u8*>(paula_sndbuffer);
-            size > static_cast<long>(sdp->sndbufsize) * 2 / 3)
+        const size_t size = reinterpret_cast<uae_u8*>(paula_sndbufpt) - reinterpret_cast<uae_u8*>(paula_sndbuffer);
+        if (size > static_cast<size_t>(sdp->sndbufsize) * 2 / 3)
             cnt++;
     }
     return cnt;
@@ -774,7 +776,7 @@ int enumerate_sound_devices() {
         num_sound_devices = SDL_GetNumAudioDevices(SDL_FALSE);
         write_log("Detected %d sound playback devices\n", num_sound_devices);
         for (int i = 0; i < num_sound_devices && i < MAX_SOUND_DEVICES; i++) {
-            const auto devname = SDL_GetAudioDeviceName(i, SDL_FALSE);
+            const char* devname = SDL_GetAudioDeviceName(i, SDL_FALSE);
             write_log("Sound playback device %d: %s\n", i, devname);
             sound_devices[i] = xcalloc(struct sound_device, 1);
             sound_devices[i]->id = i;
@@ -788,7 +790,7 @@ int enumerate_sound_devices() {
         num_record_devices = SDL_GetNumAudioDevices(SDL_TRUE);
         write_log("Detected %d sound recording devices\n", num_record_devices);
         for (int i = 0; i < num_record_devices && i < MAX_SOUND_DEVICES; i++) {
-            const auto devname = SDL_GetAudioDeviceName(i, SDL_TRUE);
+            const char* devname = SDL_GetAudioDeviceName(i, SDL_TRUE);
             write_log("Sound recording device %d: %s\n", i, devname);
             record_devices[i] = xcalloc(struct sound_device, 1);
             record_devices[i]->id = i;
@@ -849,7 +851,8 @@ void sound_volume(int dir) {
 void master_sound_volume(int dir) {
     int vol, mute;
 
-    if (const auto r = get_master_volume(&vol, &mute); !r)
+    const int r = get_master_volume(&vol, &mute);
+    if (!r)
         return;
     if (dir == 0)
         mute = mute ? 0 : 1;
@@ -864,8 +867,8 @@ void master_sound_volume(int dir) {
 
 // Audio callback function
 void sdl2_audio_callback(void* userdata, Uint8* stream, int len) {
-    const auto* sd = static_cast<sound_data*>(userdata);
-    auto* s = sd->data;
+    const sound_data* sd = static_cast<sound_data*>(userdata);
+    sound_dp* s = sd->data;
 
     if (!s->stream_initialised || sd->mute) {
         memset(stream, 0, len);
@@ -894,7 +897,7 @@ void sdl2_audio_callback(void* userdata, Uint8* stream, int len) {
 }
 
 int sound_get_silence() {
-    const auto* s = sdp->data;
+    const sound_dp* s = sdp->data;
     return s->silence_written;
 }
 

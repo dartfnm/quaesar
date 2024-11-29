@@ -5,7 +5,8 @@
 #include <src/log.h>
 
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class ConsoleLogWriter : public ILogWriter {
     eastl::vector<LogEntry> msgList;
@@ -107,4 +108,5 @@ qd::window::ConsoleLogWriter::EntriesList ConsoleLogWriter::getEntriesList() {
 }
 
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

@@ -1,7 +1,9 @@
 #include "uae_actions.h"
 
 
-namespace qd::action::uae {
+namespace qd {
+namespace action {
+namespace uae {
 
 void DebugDmaOption::onDrawMainMenuItem(UiDrawEvent::Type event, void*) {
     switch (event) {
@@ -23,4 +25,6 @@ void DebugDmaOption::onDrawMainMenuItem(UiDrawEvent::Type event, void*) {
     }
 }
 
-};  // namespace qd::action::uae
+};  // namespace uae
+};  // namespace action
+};  // namespace qd

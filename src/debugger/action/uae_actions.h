@@ -29,7 +29,9 @@
 // instead they are should triggered via messages (dbg->applyActionMsg(m)) or shortcuts.
 //
 
-namespace qd::action::uae {
+namespace qd {
+namespace action {
+namespace uae {
 
 //////////////////////////////////////////////////////////////////////////
 static constexpr int ACTIONS_AUTO_ID_START = (__COUNTER__ - 1);
@@ -306,4 +308,6 @@ struct UaeWndAlwaysOnTop : public Action {
 #undef REG
 #undef AUTO_ID
 #undef ACTIONS_AUTO_ID_START
-};  // namespace qd::action::uae
+};  // namespace uae
+};  // namespace action
+};  // namespace qd

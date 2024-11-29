@@ -1,7 +1,8 @@
 #pragma once
 #include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 class RegistersView : public UiWindow {
     QDB_CLASS_ID(WndId::Registers);
 
@@ -15,4 +16,5 @@ public:
 
 } QDB_WINDOW_REGISTER(RegistersView);  // class
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

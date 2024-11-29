@@ -8,7 +8,8 @@
 #include <quaesar.h>
 
 
-namespace qd::window {
+namespace qd {
+namespace window {
 QDB_WINDOW_REGISTER(MemoryGraphWnd);
 
 void MemoryGraphWnd::drawContent() {
@@ -68,6 +69,7 @@ void MemoryGraphWnd::drawContent() {
                                        (uint32_t)curBank.startAddr + curBank.size);
             if (ImGui::Selectable(selBankName.c_str(), nBank == mCurBank)) {
                 mCurBank = nBank;
+                mTextureMod = 0;
                 pCurBank = vm->mem->getBankByInd(mCurBank);
             }
         }
@@ -195,4 +197,5 @@ void MemoryGraphWnd::drawContent() {
     }
 }
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

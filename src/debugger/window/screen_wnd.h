@@ -1,7 +1,8 @@
 #pragma once
 #include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class ScreenWnd : public UiWindow {
     QDB_CLASS_ID(WndId::Screen);
@@ -18,4 +19,5 @@ public:
 
 };  // class
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

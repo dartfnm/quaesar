@@ -1,7 +1,8 @@
 #pragma once
 #include <src/ui/ui_view.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class ConsoleLogWriter;
 
@@ -20,4 +21,5 @@ public:
 } QDB_WINDOW_REGISTER(ConsoleWnd);
 //////////////////////////////////////////////////////////////////////////
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

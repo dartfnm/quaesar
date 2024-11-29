@@ -61,7 +61,8 @@
 #include <stdio.h>   // sprintf, scanf
 #include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class MemoryView : public UiWindow {
     QDB_CLASS_ID(WndId::MemoryView);
@@ -156,4 +157,5 @@ private:
     void* endianness_copy(void* dst, void* src, size_t size) const;
 };
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

@@ -2,6 +2,33 @@
 #include <EASTL/string.h>
 
 
+#define SAFE_DELETE(p) \
+    {                  \
+        delete (p);    \
+        (p) = nullptr; \
+    }
+#define SAFE_FREE(p)   \
+    {                  \
+        free(p);       \
+        (p) = nullptr; \
+    }
+#define SAFE_DESTROY(p)     \
+    {                       \
+        if (p) {            \
+            (p)->destroy(); \
+            (p) = nullptr;  \
+        }                   \
+    }
+#define SAFE_DESTROY_AND_DELETE(p) \
+    {                              \
+        if (p) {                   \
+            (p)->destroy();        \
+            delete (p);            \
+            (p) = nullptr;         \
+        }                          \
+    }
+
+
 #define ASSERT_F(expr, format, ...) \
     EASTL_ASSERT_MSG(0, eastl::string(eastl::string::CtorSprintf(), format, __VA_ARGS__).c_str());
 

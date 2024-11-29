@@ -71,7 +71,7 @@ public:
     csh* capstone = nullptr;
     VM* vm = nullptr;
     GuiManager* gui = nullptr;
-    action::ActionManager* actions = nullptr;
+    action::ActionManager* mActions = nullptr;
 
     SDL_Renderer* getRenderer() const {
         return mRenderer;
@@ -79,6 +79,7 @@ public:
 
 private:
     int mWaitScanLines = 1;
+    int mbInit = false;
 
 public:
     void init();
@@ -94,7 +95,7 @@ public:
     }
 
     action::ActionManager* getActions() const {
-        return actions;
+        return mActions;
     }
 
     static bool isDebugActivated();
@@ -131,7 +132,7 @@ private:
     void createRenderWindow();
     void initImGui();
     Debugger() = default;
-    ~Debugger() = default;
+    ~Debugger();
 };  // class Debugger
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

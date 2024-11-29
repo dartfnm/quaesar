@@ -11,7 +11,7 @@ struct SDL_Renderer;
 
 
 namespace qd {
-extern qd::thread::Event onUaeInitialized;
+extern qd::thread::Event* onUaeInitialized;
 
 class App {
     SDL_Texture* mUaeScrTexture = nullptr;
@@ -47,6 +47,7 @@ public:
 private:
     void createUaeWindow();
     void renderUaeWindow();
+    void destroyUaeWindow();
 
 };  // class App
 //////////////////////////////////////////////////////////////////////////

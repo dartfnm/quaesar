@@ -47,14 +47,17 @@
 #include "rommgr.h"
 #include "newcpu.h"
 #include "fpp.h"
-#include "xwin.h"
-#include <SDL.h>
+#include "custom.h"
+#include "drawing.h"
 // clang-format on
 
+#include <SDL.h>
 #include <debugger/debugger.h>
 #include <log.h>
 #include <src/generic/thread.h>
 #include <src/quaesar.h>
+#include <src/sounddep/sound.h>
+
 
 int avioutput_enabled = 0;
 bool beamracer_debug = false;
@@ -74,34 +77,6 @@ uae_u32 redc[3 * 256], grec[3 * 256], bluc[3 * 256];
 uae_u8* start_pc_p = nullptr;
 uae_u32 start_pc = 0;
 uae_u8* cubo_nvram = nullptr;
-
-
-void sdl_event_poll_wnd_proc(SDL_Event& event) {
-    switch (event.type) {
-        case SDL_QUIT:
-            qd::App::get()->requestToQuit();
-            break;
-        case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE) {
-                qd::App::get()->requestToQuit();
-                break;
-            } else if (event.key.keysym.sym == SDLK_d) {
-                activate_debugger();
-                // qd::Debugger_toggle(s_debugger, qd::DebuggerMode_Live);
-            }
-            break;
-        case SDL_WINDOWEVENT: {
-            Uint8 wndEvent = event.window.event;
-            if (wndEvent == SDL_WINDOWEVENT_CLOSE) {
-                qd::App::get()->requestToQuit();
-                break;
-            }
-            break;
-        }
-        default:
-            break;
-    }
-}
 
 
 int dos_errno(void) {
@@ -290,8 +265,14 @@ extern int target_get_display(const TCHAR*) {
     return 0;
 }
 
-int target_cfgfile_load(struct uae_prefs* /*p*/, const TCHAR* /*filename*/, int /*type*/, int /*isdefault*/) {
-    TRACE();
+int target_cfgfile_load(struct uae_prefs* p, const TCHAR* /*filename*/, int type, int /*isdefault*/) {
+    if (type == 0 || type == 1) {
+        discard_prefs(p, 0);
+    }
+    if (type == 0 || type == 3) {
+        default_prefs(p, true, type);
+    }
+    write_log(_T("config reset\n"));
     return 1;
 }
 
@@ -645,11 +626,6 @@ int console_get(char* out, int maxlen) {
         int len = dbg->waitConsoleCmd(out, maxlen);
         if (len > 0)
             return len;
-        // timeout
-        SDL_Event event;
-        while (SDL_PollEvent(&event) != 0) {
-            sdl_event_poll_wnd_proc(event);
-        }
     }
     return -1;
 }
@@ -932,6 +908,7 @@ int graphics_init(bool) {
     const int amiga_height = 576;
     const int depth = 32;
 
+    int monitor_id = 0;
     struct vidbuf_description* avidinfo = &adisplays[0].gfxvidinfo;
 
     avidinfo->drawbuffer.inwidth = avidinfo->drawbuffer.outwidth = amiga_width;
@@ -970,7 +947,7 @@ int graphics_init(bool) {
 
     alloc_colors64k(0, bits, bits, bits, red_shift, green_shift, blue_shift, bits, 24, 0, 0, false);
 
-    qd::onUaeInitialized.set();
+    qd::onUaeInitialized->set();
     return 1;
 }
 
@@ -1004,6 +981,13 @@ void unlockscr(struct vidbuffer* vb_in, int /*y_start*/, int /*y_end*/) {
 
 void graphics_leave() {
     SDL_Log("quaesar: %s()", __FUNCTION__);
+
+    int monitor_id = 0;
+    struct vidbuf_description* avidinfo = &adisplays[monitor_id].gfxvidinfo;
+
+    reset_sound();
+    freevidbuffer(monitor_id, &avidinfo->drawbuffer);
+    freevidbuffer(monitor_id, &avidinfo->tempbuffer);
 }
 
 void graphics_reset(bool) {

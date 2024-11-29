@@ -4,7 +4,9 @@
 #include <src/shortcut/shortcut_mgr.h>
 
 
-namespace qd::action::comp {
+namespace qd {
+namespace action {
+namespace comp {
 
 class ShortcutComp : public comp::Base {
 public:
@@ -39,7 +41,9 @@ public:
     }
 
 };  // class Shortcuts
-};  // namespace qd::action::comp
+};  // namespace comp
+};  // namespace action
+};  // namespace qd
 
 
 inline void qd::action::Action::addShortcut(shortcut::EId sid) {

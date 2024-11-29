@@ -1,7 +1,8 @@
 #pragma once
 #include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class ColorsWnd : public UiWindow {
     QDB_CLASS_ID(WndId::Colors);
@@ -17,4 +18,5 @@ public:
 } QDB_WINDOW_REGISTER(ColorsWnd);
 //////////////////////////////////////////////////////////////////////////
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

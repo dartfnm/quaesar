@@ -211,11 +211,7 @@ class ActionManager {
 
 public:
     void create(GuiManager* p_gui_mgr, Debugger* p_dbg);
-    void done();
-
-    ~ActionManager() {
-        done();
-    }
+    void destroy();
 
     EFlow applyActionMsg(qd::action::msg::Base* p_msg) const;
 
@@ -255,6 +251,12 @@ public:
     static ActionManager* get() {
         static ActionManager instance;
         return &instance;
+    }
+
+private:
+    ActionManager() = default;
+    ~ActionManager() {
+        assert(!mInit);
     }
 };  // class ActionManager
 

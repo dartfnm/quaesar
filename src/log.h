@@ -26,7 +26,7 @@ struct LogEntry {
 class ILogWriter {
 public:
     virtual void addLogEntry(const LogEntry& entry) = 0;
-    virtual void onDestroy() {
+    virtual void destroy() {
     }
     virtual ~ILogWriter() = default;
 };  // class ILogWriter

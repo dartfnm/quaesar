@@ -5,8 +5,8 @@
 #include <imgui_eastl.h>
 #include <src/generic/color.h>
 
-namespace qd::window {
-
+namespace qd {
+namespace window {
 
 void ColorsWnd::drawContent() {
     VM* vm = getDbg()->getVm();
@@ -60,4 +60,5 @@ void ColorsWnd::drawContent() {
     }
 }
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

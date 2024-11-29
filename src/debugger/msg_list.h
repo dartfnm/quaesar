@@ -5,7 +5,9 @@
 #include <src/generic/types.h>
 
 
-namespace qd::action::msg {
+namespace qd {
+namespace action {
+namespace msg {
 
 static constexpr int AUTO_ID_START = (__COUNTER__ - 1);
 #define AUTO_ID (__COUNTER__ - AUTO_ID_START)
@@ -48,4 +50,6 @@ struct CopperTraceStep : Base_<AUTO_ID> {};
 
 #undef AUTO_ID
 #undef AUTO_ID_START
-};  // namespace qd::action::msg
+};  // namespace msg
+};  // namespace action
+};  // namespace qd

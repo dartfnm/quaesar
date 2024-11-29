@@ -5,7 +5,8 @@
 #include <src/ui/gui_manager.h>
 
 
-namespace qd::action {
+namespace qd {
+namespace action {
 uint32_t details::qdbActionAutoClassId = 0;
 
 
@@ -63,9 +64,9 @@ void ActionManager::create(GuiManager* pGuiMgr, Debugger* pDbg) {
 }
 
 
-void ActionManager::done() {
+void ActionManager::destroy() {
     mInit = false;
-    while (mActions.empty()) {
+    while (!mActions.empty()) {
         delete mActions.back();
         mActions.pop_back();
     }
@@ -97,4 +98,5 @@ EFlow ActionManager::applyActionMsg(qd::action::msg::Base* p_msg) const {
 }
 
 
-};  // namespace qd::action
+};  // namespace action
+};  // namespace qd

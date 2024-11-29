@@ -4,7 +4,8 @@
 #include <imgui_eastl.h>
 #include <src/ui/ui_style.h>
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 
 void RegistersView::drawContent() {
@@ -126,4 +127,5 @@ void RegistersView::drawContent() {
     }
 }
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

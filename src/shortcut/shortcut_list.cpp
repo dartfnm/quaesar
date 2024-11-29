@@ -2,12 +2,13 @@
 #include <src/shortcut/shortcut_mgr.h>
 
 
-namespace qd::shortcut {
+namespace qd {
+namespace shortcut {
 
 
 typedef void (*ShortcutSetupFunc)(qd::Shortcut&);
 
-static constexpr ShortcutSetupFunc shortcuts_list[] = {
+static ShortcutSetupFunc shortcuts_list[] = {
 #define SHORTCUT(name, setup_func) setup_func,
     SHORTCUT_LIST(SHORTCUT)
 #undef SHORTCUT
@@ -22,4 +23,5 @@ qd::Shortcut* makeInstance(shortcut::EId id) {
     return pInst;
 };
 
-};  // namespace qd::shortcut
+};  // namespace shortcut
+};  // namespace qd
