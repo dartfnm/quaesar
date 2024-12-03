@@ -8786,12 +8786,21 @@ bool debug_sprintf(uaecptr addr, uae_u32 val, int size)
 }
 
 //////////////////////////////////////////////////////////////////////////
-namespace qd::uae
-{
-void do_console_cmd_immediate(const char *cmd) {
-    TCHAR *buf = (TCHAR *)cmd;
+namespace qd { namespace uae {
+
+void do_console_cmd_immediate(const char* cmd) {
+    TCHAR* buf = (TCHAR*)cmd;
     ::debug_line(buf);
 }
-}; // namespace qd::uae
+
+void on_app_exit_debug()
+{
+    free(cop_record[0]);
+    cop_record[0] = NULL;
+    free(cop_record[1]);
+    cop_record[1] = NULL;
+}
+
+}}; // namespace qd::uae
 //////////////////////////////////////////////////////////////////////////
 

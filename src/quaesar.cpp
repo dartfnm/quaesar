@@ -301,10 +301,17 @@ void App::unlockUaeScreenTexBuf() {
     SDL_AtomicIncRef(&scrFrameNo);
 }
 
+namespace uae {
+extern void on_app_exit_debug();
+extern void on_app_exit_drawing();
+};  // namespace uae
 
 void App::destroy() {
     SAFE_DESTROY(mDebugger);
     destroyUaeWindow();
+
+    qd::uae::on_app_exit_debug();
+    qd::uae::on_app_exit_drawing();
 }
 
 

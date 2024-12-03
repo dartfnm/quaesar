@@ -363,6 +363,7 @@ void do_leave_program (void)
 	virtualdevice_free();
 	graphics_leave();
 	close_sound();
+	exit_table68k();
 	if (! no_gui)
 		gui_exit();
 #ifdef USE_SDL

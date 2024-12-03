@@ -50,6 +50,8 @@ STATIC_INLINE void init_comm_pipe (smp_comm_pipe *p, int size, int chunks)
 
 STATIC_INLINE void destroy_comm_pipe (smp_comm_pipe *p)
 {
+	xfree(p->data);
+	p->data = NULL;
 	uae_sem_destroy (&p->lock);
 	uae_sem_destroy (&p->reader_wait);
 	uae_sem_destroy (&p->writer_wait);

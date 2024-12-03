@@ -5511,3 +5511,22 @@ int isvsync(void)
 	else
 		return isvsync_chipset ();
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+namespace qd { namespace uae {
+void on_app_exit_drawing()
+{
+    free(row_map);
+    row_map = NULL;
+    free(row_map_genlock);
+    row_map_genlock = NULL;
+
+    free(amiga2aspect_line_map);
+    amiga2aspect_line_map = NULL;
+
+    free(native2amiga_line_map);
+    native2amiga_line_map = NULL;
+}
+}}; // namespace qd::uae
+//////////////////////////////////////////////////////////////////////////
