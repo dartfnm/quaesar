@@ -1,7 +1,8 @@
 #pragma once
-#include "debugger/ui/ui_view.h"
+#include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class ScreenWnd : public UiWindow {
     QDB_CLASS_ID(WndId::Screen);
@@ -9,10 +10,14 @@ class ScreenWnd : public UiWindow {
     ImTextureID mTextureId = 0;
 
 public:
-    ScreenWnd(UiViewCreate* cp);
+    virtual void onCreate(UiViewCreate* cp) override {
+        UiWindow::onCreate(cp);
+        mTitle = "Screen";
+    }
 
     virtual void drawContent() override;
 
 };  // class
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

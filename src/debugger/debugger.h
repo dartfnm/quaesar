@@ -1,15 +1,28 @@
 #pragma once
 
-#include <capstone/capstone.h>
-#include <stdint.h>
+#include <EASTL/fixed_set.h>
+#include <EASTL/fixed_vector.h>
+#include <EASTL/string.h>
+#include <debugger/vm/memory.h>
+#include <debugger/vm/vm.h>
+#include <src/generic/base.h>
 
 struct SDL_Window;
 struct SDL_Renderer;
 union SDL_Event;
+typedef size_t csh;
 
+FORWARD_DECLARATION_4S(qd, action, msg, Base);
+
+//////////////////////////////////////////////////////////////////////////
 namespace qd {
 class GuiManager;
 class VM;
+namespace action {
+class ActionManager;
+};  // namespace action
+
+constexpr static int BREAKPOINTS_MAX = 20;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,38 +30,111 @@ enum DebuggerMode {
     DebuggerMode_Live,
     DebuggerMode_Break,
 };
+//////////////////////////////////////////////////////////////////////////
 
-class Debugger {
+class Breakpoint {
 public:
-    SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
-    csh capstone;
-    VM* vm = nullptr;
-    GuiManager* gui = nullptr;
+    AddrRef addr1 = {};
+    AddrRef addr2 = {};
+    bool enabled = false;
+    EReg reg;
+};  // class Breakpoint
+//////////////////////////////////////////////////////////////////////////
+
+
+class BreakpointsSortedList {
+    eastl::fixed_vector<Breakpoint, qd::BREAKPOINTS_MAX, false> breakpoints;
+
+    struct OneAddrBp {
+        AddrRef addr;
+        int bpIdx;
+
+        bool operator<(const OneAddrBp& rh) const {
+            return addr < rh.addr;
+        }
+    };
+    eastl::fixed_set<OneAddrBp, qd::BREAKPOINTS_MAX, false> oneAddrBps;
 
 public:
     void create();
+    const qd::Breakpoint* getBpByAddr(AddrRef addr, EReg reg) const;
+};  // BreakpointsSortedList
+//////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+class Debugger {
+    SDL_Window* mWindow = nullptr;
+    SDL_Renderer* mRenderer = nullptr;
+
+public:
+    csh* capstone = nullptr;
+    VM* vm = nullptr;
+    GuiManager* gui = nullptr;
+    action::ActionManager* mActions = nullptr;
+
+    SDL_Renderer* getRenderer() const {
+        return mRenderer;
+    }
+
+private:
+    int mWaitScanLines = 1;
+    int mbInit = false;
+
+public:
+    void init();
     void destroy();
-
-    bool isDebugActivated();
-    void setDebugMode(DebuggerMode debug_mode);
-
-    void* addrToPtr(uint32_t addr);
-
-    void applyConsoleCmd(const char* cmd);
+    void update();
+    void render();
+    bool isVisible() const;
+    void toggleWndVisible(DebuggerMode mode);
+    void sdlEventProc(SDL_Event* event);
 
     qd::VM* getVm() const {
         return vm;
     }
-};  // class Debugger
 
+    action::ActionManager* getActions() const {
+        return mActions;
+    }
+
+    static bool isDebugActivated();
+    static bool isDebugActivatedFull();
+    void setDebugMode(DebuggerMode debug_mode);
+
+    EFlow applyActionMsg(qd::action::msg::Base* p_msg) const;
+
+    void execConsoleCmd(eastl::string&& cmd);
+
+    void applyImmediateConsoleCmd(eastl::string&& cmd);
+
+    int waitConsoleCmd(char* out, int maxlen);
+
+    int getWaitScanLines() const {
+        return mWaitScanLines;
+    }
+    void setWaitScanLines(int waitScanLines) {
+        mWaitScanLines = waitScanLines;
+    }
+
+    static Debugger* get() {
+        static Debugger instance;
+        return &instance;
+    }
+
+    BreakpointsSortedList getBreakpointsSorted() const {
+        BreakpointsSortedList bp;
+        bp.create();
+        return bp;
+    }
+
+private:
+    void createRenderWindow();
+    void initImGui();
+    Debugger() = default;
+    ~Debugger();
+};  // class Debugger
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Debugger* Debugger_create();
-void Debugger_update(Debugger* debugger);
-void Debugger_update_event(SDL_Event* event);
-void Debugger_destroy(Debugger* debugger);
-void Debugger_toggle(Debugger* debugger, DebuggerMode mode);
-bool Debugger_is_window_visible(Debugger* debugger);
 
 };  // namespace qd

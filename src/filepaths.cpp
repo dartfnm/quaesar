@@ -4,7 +4,7 @@
 int relativepaths = 0;
 
 // convert path to absolute or relative
-void fullpath(TCHAR* path, int size, bool userelative) {
+void fullpath(TCHAR* path, int /*size*/, bool /*userelative*/) {
     // FIXME: forward/backslash fix needed
     if (path[0] == 0 || (path[0] == '\\' && path[1] == '\\') || path[0] == ':') {
         return;

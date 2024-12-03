@@ -59,9 +59,10 @@
 #include <imgui_eastl.h>
 #include <stdint.h>  // uint8_t, etc.
 #include <stdio.h>   // sprintf, scanf
-#include "debugger/ui/ui_view.h"
+#include "src/ui/ui_view.h"
 
-namespace qd::window {
+namespace qd {
+namespace window {
 
 class MemoryView : public UiWindow {
     QDB_CLASS_ID(WndId::MemoryView);
@@ -136,7 +137,8 @@ public:
         }
     };
 
-    MemoryView(UiViewCreate* cp);
+    MemoryView();
+    virtual void onCreate(UiViewCreate* cp) override;
     virtual void drawContent() override;
 
     void goto_address_and_highlight(size_t addr_min, size_t addr_max);
@@ -155,4 +157,5 @@ private:
     void* endianness_copy(void* dst, void* src, size_t size) const;
 };
 
-};  // namespace qd::window
+};  // namespace window
+};  // namespace qd

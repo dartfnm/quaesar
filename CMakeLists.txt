@@ -1,5 +1,5 @@
 # Minimum CMake version requirement
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.6)
 
 option(ENABLE_CODE_GENERATION "Enable code generation" OFF)
 
@@ -34,6 +34,7 @@ if (WIN32)
     string(REGEX REPLACE "/Z[iI7]" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
     add_link_options("/INCREMENTAL")
+    add_compile_options("/MP") # multiprocessor build
   endif()
 endif()
 
@@ -96,7 +97,7 @@ if (ENABLE_CODE_GENERATION)
     gen_blitter(../uae_src/blittable.cpp t)
 endif()
 
-add_executable(quaesar 
+set(UAE_SOURCE_LIST
     uae_src/aros.rom.cpp
     uae_src/akiko.cpp
     uae_src/amax.cpp
@@ -207,11 +208,17 @@ add_executable(quaesar
     uae_src/jit/comptbl.h
     uae_src/blit.h
 )
+add_executable(quaesar ${UAE_SOURCE_LIST})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UAE_SOURCE_LIST})
 
 # Recursively glob for all .cpp files in the src directory
 file(GLOB_RECURSE CROSS_FILES "src/*.cpp")
 file(GLOB_RECURSE QUAE_HEADERS "src/*.h")
 target_sources(quaesar PRIVATE ${CROSS_FILES} ${QUAE_HEADERS})
+
+# Create the source groups for source tree with root at CMAKE_CURRENT_SOURCE_DIR.
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${QUAE_HEADERS} ${CROSS_FILES} ${SDL2_INCLUDE_DIRS})
 
 if (APPLE OR LINUX OR UNIX)
 	target_compile_options(quaesar PRIVATE -DUAE=1 -D_cdecl= -DFILEFLAG_WRITE=1 -DOS_NAME=\"linux\")
@@ -225,11 +232,14 @@ if (WIN32)
     target_include_directories(quaesar PRIVATE "${CMAKE_SOURCE_DIR}/external/sdl2/include")
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
        target_link_libraries(quaesar PRIVATE "${CMAKE_SOURCE_DIR}/external/sdl2/x64/sdl2.lib")
+       target_link_libraries(quaesar PRIVATE "${CMAKE_SOURCE_DIR}/external/sdl2/x64/SDL2main.lib")
     else()
        target_link_libraries(quaesar PRIVATE "${CMAKE_SOURCE_DIR}/external/sdl2/win32/sdl2.lib")
+	   target_link_libraries(quaesar PRIVATE "${CMAKE_SOURCE_DIR}/external/sdl2/win32/SDL2main.lib")
     endif()
     target_link_libraries(quaesar PRIVATE Ws2_32.lib Winmm.lib Version.lib Imm32.lib Setupapi.lib)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT quaesar)
+	set_target_properties(quaesar PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT quaesar) # makes startup project
 endif()
 
 if (APPLE)

@@ -10,21 +10,21 @@
 
 void uae_sem_destroy(uae_sem_t* sem) {
     if (*sem) {
-        SDL_DestroySemaphore((SDL_sem*)sem);
+        SDL_DestroySemaphore((SDL_sem*)(*sem));
         *sem = nullptr;
     }
 }
 
 int uae_sem_trywait(uae_sem_t* sem) {
-    return SDL_SemTryWait((SDL_sem*)sem);
+    return SDL_SemTryWait((SDL_sem*)(*sem));
 }
 
 int uae_sem_trywait_delay(uae_sem_t* sem, int ms) {
-    return SDL_SemWaitTimeout((SDL_sem*)sem, ms);
+    return SDL_SemWaitTimeout((SDL_sem*)(*sem), ms);
 }
 
 void uae_sem_post(uae_sem_t* sem) {
-    SDL_SemPost((SDL_sem*)sem);
+    SDL_SemPost((SDL_sem*)(*sem));
 }
 
 void uae_sem_unpost(uae_sem_t*) {
@@ -33,12 +33,12 @@ void uae_sem_unpost(uae_sem_t*) {
 }
 
 void uae_sem_wait(uae_sem_t* sem) {
-    SDL_SemWait((SDL_sem*)sem);
+    SDL_SemWait((SDL_sem*)(*sem));
 }
 
-void uae_sem_init(uae_sem_t* sem, int manual_reset, int initial_state) {
+void uae_sem_init(uae_sem_t* sem, int /*manual_reset*/, int initial_state) {
     if (*sem) {
-        SDL_SemPost((SDL_sem*)sem);
+        SDL_SemPost((SDL_sem*)(*sem));
     } else {
         *sem = (uae_sem_t*)SDL_CreateSemaphore(initial_state);
     }
@@ -86,7 +86,7 @@ int uae_start_thread_fast(void (*fn)(void*), void* arg, uae_thread_id* tid) {
     return uae_start_thread(NULL, fn, arg, tid);
 }
 
-void uae_end_thread(uae_thread_id* thread) {
+void uae_end_thread(uae_thread_id* /*thread*/) {
     /*
    #ifdef _WIN32
        TerminateThread(SDL_GetThreadID(t), 0);
@@ -104,7 +104,7 @@ void uae_set_thread_priority(uae_thread_id*, int) {
 }
 
 uae_thread_id uae_thread_get_id(void) {
-    return (uae_thread_id)SDL_GetThreadID(nullptr);
+    return reinterpret_cast<uae_thread_id>((size_t)SDL_GetThreadID(nullptr));
 }
 
 #ifdef _WIN32
@@ -115,7 +115,7 @@ uae_atomic atomic_and(volatile uae_atomic* p, uae_u32 v) {
 uae_atomic atomic_or(volatile uae_atomic* p, uae_u32 v) {
     return _InterlockedOr(p, v);
 }
-void atomic_set(volatile uae_atomic* p, uae_u32 v) {
+void atomic_set(volatile uae_atomic* /*p*/, uae_u32 /*v*/) {
 }
 uae_atomic atomic_inc(volatile uae_atomic* p) {
     return _InterlockedIncrement(p);

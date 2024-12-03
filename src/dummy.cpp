@@ -47,12 +47,17 @@
 #include "rommgr.h"
 #include "newcpu.h"
 #include "fpp.h"
-#include "xwin.h"
-#include <SDL.h>
+#include "custom.h"
+#include "drawing.h"
 // clang-format on
 
+#include <SDL.h>
 #include <debugger/debugger.h>
-#include "quaesar.h"
+#include <log.h>
+#include <src/generic/thread.h>
+#include <src/quaesar.h>
+#include <src/sounddep/sound.h>
+
 
 int avioutput_enabled = 0;
 bool beamracer_debug = false;
@@ -73,6 +78,7 @@ uae_u8* start_pc_p = nullptr;
 uae_u32 start_pc = 0;
 uae_u8* cubo_nvram = nullptr;
 
+
 int dos_errno(void) {
     return errno;
 }
@@ -81,21 +87,21 @@ void pausevideograb(int) {
     UNIMPLEMENTED();
 }
 
-void show_screen(int monid, int mode) {
+void show_screen(int /*monid*/, int /*mode*/) {
     TRACE();
 }
 
 // from fs-uae
 void vsync_clear() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
-int vsync_isdone(frame_time_t* dt) {
+int vsync_isdone(frame_time_t* /*dt*/) {
     TRACE();
     return 1;
 }
 
-bool target_osd_keyboard(int show) {
+bool target_osd_keyboard(int /*show*/) {
     UNIMPLEMENTED();
     return false;
 }
@@ -108,22 +114,22 @@ void setmouseactive(int, int) {
     // UNIMPLEMENTED();
 }
 
-void screenshot(int monid, int, int) {
+void screenshot(int /*monid*/, int, int) {
     UNIMPLEMENTED();
 }
 
-int same_aname(const TCHAR* an1, const TCHAR* an2) {
+int same_aname(const TCHAR* /*an1*/, const TCHAR* /*an2*/) {
     UNIMPLEMENTED();
     return 0;
 }
 
-int input_get_default_keyboard(int i) {
+int input_get_default_keyboard(int /*i*/) {
     TRACE();
     // UNIMPLEMENTED();
     return 0;
 }
 
-uae_s64 getsetpositionvideograb(uae_s64 framepos) {
+uae_s64 getsetpositionvideograb(uae_s64 /*framepos*/) {
     UNIMPLEMENTED();
     return 0;
 }
@@ -138,11 +144,11 @@ static int dummy_init(void) {
 
 // Dummy closing function
 static void dummy_close(void) {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 // Dummy function to acquire an input device
-static int dummy_acquire(int device_id, int exclusive) {
+static int dummy_acquire(int /*device_id*/, int /*exclusive*/) {
     // UNIMPLEMENTED();
     return 0;  // Return 0 for success, -1 for failure
 }
@@ -164,37 +170,38 @@ static int dummy_get_num(void) {
 }
 
 // Dummy function to get the friendly name of an input device
-static TCHAR* dummy_get_friendlyname(int device_id) {
+static TCHAR* dummy_get_friendlyname(int /*device_id*/) {
     UNIMPLEMENTED();
     return nullptr;
 }
 
 // Dummy function to get the unique name of an input device
-static TCHAR* dummy_get_uniquename(int device_id) {
+static TCHAR* dummy_get_uniquename(int /*device_id*/) {
     UNIMPLEMENTED();
     return nullptr;
 }
 
 // Dummy function to get the number of widgets (input elements) in an input device
-static int dummy_get_widget_num(int device_id) {
+static int dummy_get_widget_num(int /*device_id*/) {
     UNIMPLEMENTED();
     return 4;  // Return the number of widgets
 }
 
 // Dummy function to get the type and name of a widget
-static int dummy_get_widget_type(int device_id, int widget_id, TCHAR* widget_name, uae_u32* widget_type) {
+static int dummy_get_widget_type(int /*device_id*/, int /*widget_id*/, TCHAR* /*widget_name*/,
+                                 uae_u32* /*widget_type*/) {
     UNIMPLEMENTED();
     return 0;  // Return 0 for success, -1 for failure
 }
 
 // Dummy function to get the first widget (input element) in an input device
-static int dummy_get_widget_first(int device_id, int widget_type) {
+static int dummy_get_widget_first(int /*device_id*/, int /*widget_type*/) {
     UNIMPLEMENTED();
     return 0;
 }
 
 // Dummy function to get the flags of an input device
-int dummy_get_flags(int device_id) {
+int dummy_get_flags(int /*device_id*/) {
     return 0;  // Return flags (if any) for the input device
 }
 
@@ -225,24 +232,24 @@ const TCHAR* my_getfilepart(const TCHAR* filename) {
     return filename;
 }
 
-void fetch_statefilepath(TCHAR* out, int size) {
+void fetch_statefilepath(TCHAR* /*out*/, int /*size*/) {
     UNIMPLEMENTED();
 }
 
-uae_u32 cpuboard_ncr9x_scsi_get(uaecptr addr) {
+uae_u32 cpuboard_ncr9x_scsi_get(uaecptr /*addr*/) {
     UNIMPLEMENTED();
     return 0;
 }
 
-void cpuboard_ncr9x_scsi_put(uaecptr addr, uae_u32 v) {
+void cpuboard_ncr9x_scsi_put(uaecptr /*addr*/, uae_u32 /*v*/) {
     UNIMPLEMENTED();
 }
 
-void getfilepart(TCHAR* out, int size, const TCHAR* path) {
+void getfilepart(TCHAR* /*out*/, int /*size*/, const TCHAR* /*path*/) {
     UNIMPLEMENTED();
 }
 
-void toggle_fullscreen(int monid, int) {
+void toggle_fullscreen(int /*monid*/, int) {
     UNIMPLEMENTED();
 }
 
@@ -258,55 +265,61 @@ extern int target_get_display(const TCHAR*) {
     return 0;
 }
 
-int target_cfgfile_load(struct uae_prefs* p, const TCHAR* filename, int type, int isdefault) {
-    TRACE();
+int target_cfgfile_load(struct uae_prefs* p, const TCHAR* /*filename*/, int type, int /*isdefault*/) {
+    if (type == 0 || type == 1) {
+        discard_prefs(p, 0);
+    }
+    if (type == 0 || type == 3) {
+        default_prefs(p, true, type);
+    }
+    write_log(_T("config reset\n"));
     return 1;
 }
 
-void target_addtorecent(const TCHAR* name, int t) {
+void target_addtorecent(const TCHAR* /*name*/, int /*t*/) {
     UNIMPLEMENTED();
 }
 
-int my_truncate(const TCHAR* name, uae_u64 len) {
+int my_truncate(const TCHAR* /*name*/, uae_u64 /*len*/) {
     UNIMPLEMENTED();
     return 0;
 }
 
-bool my_issamepath(const TCHAR* path1, const TCHAR* path2) {
+bool my_issamepath(const TCHAR* /*path1*/, const TCHAR* /*path2*/) {
     UNIMPLEMENTED();
     return false;
 }
 
-int input_get_default_joystick(struct uae_input_device* uid, int i, int port, int af, int mode, bool gp,
-                               bool joymouseswap) {
+int input_get_default_joystick(struct uae_input_device* /*uid*/, int /*i*/, int /*port*/, int /*af*/, int /*mode*/,
+                               bool /*gp*/, bool /*joymouseswap*/) {
     UNIMPLEMENTED();
     return 0;
 }
 
-bool get_plugin_path(TCHAR* out, int len, const TCHAR* path) {
+bool get_plugin_path(TCHAR* /*out*/, int /*len*/, const TCHAR* /*path*/) {
     TRACE();
     return false;
 }
 
-void getgfxoffset(int monid, float* dxp, float* dyp, float* mxp, float* myp) {
+void getgfxoffset(int /*monid*/, float* /*dxp*/, float* /*dyp*/, float* /*mxp*/, float* /*myp*/) {
     UNIMPLEMENTED();
 }
 
-void fixtrailing(TCHAR* p) {
+void fixtrailing(TCHAR* /*p*/) {
     UNIMPLEMENTED();
 }
 
-int uae_slirp_redir(int is_udp, int host_port, struct in_addr guest_addr, int guest_port) {
-    UNIMPLEMENTED();
-    return 0;
-}
-
-int translate_message(int msg, TCHAR* out) {
+int uae_slirp_redir(int /*is_udp*/, int /*host_port*/, struct in_addr /*guest_addr*/, int /*guest_port*/) {
     UNIMPLEMENTED();
     return 0;
 }
 
-bool toggle_rtg(int monid, int mode) {
+int translate_message(int /*msg*/, TCHAR* /*out*/) {
+    UNIMPLEMENTED();
+    return 0;
+}
+
+bool toggle_rtg(int /*monid*/, int /*mode*/) {
     UNIMPLEMENTED();
     return false;
 }
@@ -320,7 +333,7 @@ void refreshtitle() {
     UNIMPLEMENTED();
 }
 
-bool my_utime(const TCHAR* name, struct mytimeval* tv) {
+bool my_utime(const TCHAR* /*name*/, struct mytimeval* /*tv*/) {
     UNIMPLEMENTED();
     return false;
 }
@@ -361,7 +374,7 @@ uae_u8* save_log(int, size_t*) {
     return nullptr;
 }
 
-int my_unlink(const TCHAR* name, bool dontrecycle) {
+int my_unlink(const TCHAR* /*name*/, bool /*dontrecycle*/) {
     UNIMPLEMENTED();
     return 0;
 }
@@ -382,7 +395,7 @@ void cpuboard_ncr710_io_bput(unsigned int, unsigned int) {
     UNIMPLEMENTED();
 }
 
-uae_u32 cpuboard_ncr720_io_bget(uaecptr addr) {
+uae_u32 cpuboard_ncr720_io_bget(uaecptr /*addr*/) {
     UNIMPLEMENTED();
     return 0;
 }
@@ -391,22 +404,22 @@ void cpuboard_ncr720_io_bput(unsigned int, unsigned int) {
     UNIMPLEMENTED();
 }
 
-void cpuboard_setboard(struct uae_prefs* p, int type, int subtype) {
+void cpuboard_setboard(struct uae_prefs* /*p*/, int /*type*/, int /*subtype*/) {
     UNIMPLEMENTED();
 }
 
-int cpuboard_memorytype(struct uae_prefs* p) {
+int cpuboard_memorytype(struct uae_prefs* /*p*/) {
     TRACE();
     // UNIMPLEMENTED();
     return 0;
 }
 
-bool cpuboard_fc_check(uaecptr addr, uae_u32* v, int size, bool write) {
+bool cpuboard_fc_check(uaecptr /*addr*/, uae_u32* /*v*/, int /*size*/, bool /*write*/) {
     UNIMPLEMENTED();
     return false;
 }
 
-int fsdb_name_invalid_dir(a_inode*, const TCHAR* n) {
+int fsdb_name_invalid_dir(a_inode*, const TCHAR* /*n*/) {
     UNIMPLEMENTED();
     return 0;
 }
@@ -439,7 +452,7 @@ int a2386_init(autoconfig_info*) {
 }
 */
 
-void a4000t_add_scsi_unit(int ch, struct uaedev_config_info* ci, struct romconfig* rc) {
+void a4000t_add_scsi_unit(int /*ch*/, struct uaedev_config_info* /*ci*/, struct romconfig* /*rc*/) {
     UNIMPLEMENTED();
 }
 
@@ -581,7 +594,7 @@ void clipboard_vsync() {
 }
 
 void close_console() {
-    UNIMPLEMENTED();
+    SDL_Log("uae: close_console()");
 }
 
 int compemu_reset() {
@@ -606,13 +619,15 @@ void console_flush() {
 }
 
 int console_get(char* out, int maxlen) {
-    TCHAR* res = fgets(out, maxlen, stdin);
-    if (res == NULL) {
+    qd::Debugger* dbg = app->getDbg();
+    if (!dbg)
         return -1;
+    for (;;) {
+        int len = dbg->waitConsoleCmd(out, maxlen);
+        if (len > 0)
+            return len;
     }
-
-    int len = strlen(out);
-    return len - 1;
+    return -1;
 }
 
 bool console_isch() {
@@ -631,11 +646,11 @@ bool cpuboard_autoconfig_init(autoconfig_info*) {
 }
 
 void cpuboard_cleanup() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void cpuboard_clear() {
-    TRACE();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void cpuboard_dkb_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
@@ -866,7 +881,7 @@ int get_guid_target(unsigned char*) {
 }
 
 void gfxboard_free() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 bool gfxboard_init_memory(autoconfig_info*) {
@@ -887,16 +902,13 @@ void golemfast_ncr9x_scsi_put(unsigned int, unsigned int, int) {
     UNIMPLEMENTED();
 }
 
-SDL_Window* s_window;
-SDL_Texture* s_texture = nullptr;
-SDL_Renderer* s_renderer = nullptr;
-static qd::Debugger* s_debugger = nullptr;
 
 int graphics_init(bool) {
-    int amiga_width = 754;
-    int amiga_height = 576;
-    int depth = 32;
+    const int amiga_width = 754;
+    const int amiga_height = 576;
+    const int depth = 32;
 
+    int monitor_id = 0;
     struct vidbuf_description* avidinfo = &adisplays[0].gfxvidinfo;
 
     avidinfo->drawbuffer.inwidth = avidinfo->drawbuffer.outwidth = amiga_width;
@@ -911,13 +923,13 @@ int graphics_init(bool) {
 
     struct vidbuffer* buf = &avidinfo->drawbuffer;
 
-    int width = 754;
-    int height = 576;
+    int width = amiga_width;
+    int height = amiga_height;
 
     buf->monitor_id = 0;
     buf->pixbytes = (depth + 7) / 8;
-    buf->width_allocated = (width + 7) & ~7;
-    buf->height_allocated = height;
+    buf->width_allocated = (width + 7) & ~7;  // =760
+    buf->height_allocated = height;           // 576
 
     int w = buf->width_allocated;
     int h = buf->height_allocated;
@@ -928,36 +940,6 @@ int graphics_init(bool) {
     buf->bufmemend = buf->realbufmem + size - buf->rowbytes;
     buf->bufmem_lockable = true;
 
-    // Create a window
-    s_window = SDL_CreateWindow("Quaesar", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
-                                SDL_WINDOW_RESIZABLE);
-
-    if (!s_window) {
-        SDL_Log("Could not create window: %s", SDL_GetError());
-        SDL_Quit();
-        return 0;
-    }
-
-    s_renderer = SDL_CreateRenderer(s_window, -1, SDL_RENDERER_ACCELERATED);
-
-    if (!s_renderer) {
-        SDL_Log("Could not create renderer: %s", SDL_GetError());
-        SDL_DestroyWindow(s_window);
-        SDL_Quit();
-        return 0;
-    }
-
-    s_texture =
-        SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, amiga_width, amiga_height);
-
-    if (!s_texture) {
-        SDL_Log("Could not create texture: %s", SDL_GetError());
-        SDL_DestroyRenderer(s_renderer);
-        SDL_DestroyWindow(s_window);
-        SDL_Quit();
-        return 0;
-    }
-
     int bits = 8;
     int red_shift = 16;
     int green_shift = 8;
@@ -965,66 +947,23 @@ int graphics_init(bool) {
 
     alloc_colors64k(0, bits, bits, bits, red_shift, green_shift, blue_shift, bits, 24, 0, 0, false);
 
-    s_debugger = qd::Debugger_create();
-
-    TRACE();
+    qd::onUaeInitialized->set();
     return 1;
 }
 
-bool render_screen(int monid, int, bool) {
+bool render_screen(int /*monid*/, int, bool) {
     return true;
 }
 
-void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
-    SDL_Event e;
 
-    if (!s_window)
-        return;
-
-    // TODO: Should likley move this somewhere else
-    // Handle events on queue
-    while (SDL_PollEvent(&e) != 0) {
-        // User requests quit
-        switch (e.type) {
-            case SDL_QUIT:  // User closes the window
-                // quit_program == UAE_QUIT;
-                // TODO: Fix me
-                exit(0);
-                break;
-            case SDL_KEYDOWN:                      // User presses a key
-                if (e.key.keysym.sym == SDLK_d) {  // If the key is ESC
-                    activate_debugger();
-                }
-                if (e.key.keysym.sym == SDLK_ESCAPE) {  // If the key is ESC
-                    // quit_program == UAE_QUIT;
-                    exit(0);
-                    // TODO: Fix me
-                } else if (e.key.keysym.sym == SDLK_d) {
-                    qd::Debugger_toggle(s_debugger, qd::DebuggerMode_Live);
-                }
-                break;
-            default:
-                break;
-        }
-
-        qd::Debugger_update_event(&e);
-    }
-
-    if (qd::Debugger_is_window_visible(s_debugger))
-        qd::Debugger_update(s_debugger);
-
-    uint32_t* pixels = nullptr;
-    int pitch = 0;
-
-    if (SDL_LockTexture(s_texture, NULL, (void**)&pixels, &pitch) == 0) {
-        struct amigadisplay* ad = &adisplays[vb_in->monitor_id];
+void unlockscr(struct vidbuffer* vb_in, int /*y_start*/, int /*y_end*/) {
+    // copy UAE screen to texture buf
+    if (uint32_t* pixels = app->lockUaeScreenTexBuf()) {
         struct vidbuf_description* avidinfo = &adisplays[vb_in->monitor_id].gfxvidinfo;
         struct vidbuffer* vb = avidinfo->outbuffer;
 
         if (vb && vb->bufmem) {
             uint8_t* sptr = vb->bufmem;
-            uint8_t* endsptr = vb->bufmemend;
-
             int amiga_width = vb->outwidth;
             int amiga_height = vb->outheight;
 
@@ -1035,43 +974,24 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
                 sptr += vb->rowbytes;
             }
         }
-        SDL_UnlockTexture(s_texture);
+        app->unlockUaeScreenTexBuf();
     }
-
-    int amiga_width = 754;
-    int amiga_height = 576;
-
-    int new_width = 0;
-    int new_height = 0;
-
-    int window_width, window_height;
-    SDL_GetWindowSize(s_window, &window_width, &window_height);
-
-    // Maintain aspect ratio
-    float image_aspect = (float)amiga_width / (float)amiga_height;
-    float window_aspect = (float)window_width / (float)window_height;
-
-    if (window_aspect < image_aspect) {
-        new_width = window_width;
-        new_height = (int)(window_width / image_aspect);
-    } else {
-        new_height = window_height;
-        new_width = (int)(window_height * image_aspect);
-    }
-
-    SDL_Rect rect = {(window_width - new_width) / 2, (window_height - new_height) / 2, new_width, new_height};
-
-    SDL_RenderClear(s_renderer);
-    SDL_RenderCopy(s_renderer, s_texture, NULL, &rect);
-    SDL_RenderPresent(s_renderer);
 }
 
+
 void graphics_leave() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
+
+    int monitor_id = 0;
+    struct vidbuf_description* avidinfo = &adisplays[monitor_id].gfxvidinfo;
+
+    reset_sound();
+    freevidbuffer(monitor_id, &avidinfo->drawbuffer);
+    freevidbuffer(monitor_id, &avidinfo->tempbuffer);
 }
 
 void graphics_reset(bool) {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int graphics_setup() {
@@ -1139,7 +1059,7 @@ void logging_init() {
 }
 
 void machdep_free() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int machdep_init() {
@@ -1366,7 +1286,7 @@ bool samepath(char const*, char const*) {
 }
 
 void sampler_free() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 uae_u8 sampler_getsample(int) {
@@ -1401,7 +1321,7 @@ void serial_hsynchandler() {
 }
 
 void serial_rbf_clear() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 uae_u8 serial_readstatus(uae_u8 v, uae_u8) {
@@ -1428,7 +1348,7 @@ int sleep_millis_main(int) {
 }
 
 void sndboard_free_capture() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int sndboard_get_buffer(int*) {
@@ -1555,24 +1475,23 @@ void target_paste_to_keyboard() {
 }
 
 void target_quit() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_reset() {
-    TRACE();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_restart() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_run() {
-    TRACE();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void target_save_options(zfile*, uae_prefs*) {
-    TRACE();
-    // UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void tekmagic_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
@@ -1614,7 +1533,7 @@ void* uaenative_get_uaevar() {
 }
 
 void uaeser_clearbuffers(void*) {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 int uaeser_getdatalength() {
@@ -1647,7 +1566,7 @@ void uaeser_trigger(void*) {
 }
 
 void uae_slirp_cleanup() {
-    UNIMPLEMENTED();
+    SDL_Log("quaesar: %s()", __FUNCTION__);
 }
 
 void uae_slirp_end() {
@@ -1929,7 +1848,7 @@ void target_default_options(uae_prefs*, int) {
 static int old_w = -1;
 static int old_h = -1;
 
-bool target_graphics_buffer_update(int monid, bool force) {
+bool target_graphics_buffer_update(int monid, bool /*force*/) {
     struct vidbuf_description* avidinfo = &adisplays[monid].gfxvidinfo;
     struct vidbuffer* vb = avidinfo->drawbuffer.tempbufferinuse ? &avidinfo->tempbuffer : &avidinfo->drawbuffer;
 
@@ -2014,35 +1933,34 @@ static void dummy_close_device_func(int deviceID) {
     printf("Dummy close_device_func called with deviceID: %d\n", deviceID);
 }
 
-static struct device_info* dummy_info_device_func(int deviceID, struct device_info* info, int size, int flags) {
+static struct device_info* dummy_info_device_func(int deviceID, struct device_info* /*info*/, int size, int flags) {
     printf("Dummy info_device_func called with deviceID: %d, size: %d, flags: %d\n", deviceID, size, flags);
     return NULL;
 }
 
-static uae_u8* dummy_execscsicmd_out_func(int deviceID, uae_u8* cmd, int size) {
+static uae_u8* dummy_execscsicmd_out_func(int deviceID, uae_u8* /*cmd*/, int size) {
     printf("Dummy execscsicmd_out_func called with deviceID: %d, size: %d\n", deviceID, size);
     return NULL;
 }
 
-static uae_u8* dummy_execscsicmd_in_func(int deviceID, uae_u8* cmd, int size, int* result) {
+static uae_u8* dummy_execscsicmd_in_func(int deviceID, uae_u8* /*cmd*/, int size, int* result) {
     printf("Dummy execscsicmd_in_func called with deviceID: %d, size: %d\n", deviceID, size);
     *result = 0;
     return NULL;
 }
 
-static int dummy_execscsicmd_direct_func(int deviceID, struct amigascsi* cmd) {
+static int dummy_execscsicmd_direct_func(int deviceID, struct amigascsi* /*cmd*/) {
     printf("Dummy execscsicmd_direct_func called with deviceID: %d\n", deviceID);
     return 0;
 }
 
-static void dummy_play_subchannel_callback(uae_u8* data, int size) {
-    printf("Dummy play_subchannel_callback called with size: %d\n", size);
-}
-
-static int dummy_play_status_callback(int status, int subcode) {
-    printf("Dummy play_status_callback called with status: %d, subcode: %d\n", status, subcode);
-    return 0;
-}
+// static void dummy_play_subchannel_callback(uae_u8* data, int size) {
+//     printf("Dummy play_subchannel_callback called with size: %d\n", size);
+// }
+// static int dummy_play_status_callback(int status, int subcode) {
+//     printf("Dummy play_status_callback called with status: %d, subcode: %d\n", status, subcode);
+//     return 0;
+// }
 
 static int dummy_pause_func(int deviceID, int flags) {
     printf("Dummy pause_func called with deviceID: %d, flags: %d\n", deviceID, flags);
@@ -2054,8 +1972,8 @@ static int dummy_stop_func(int deviceID) {
     return 0;
 }
 
-static int dummy_play_func(int deviceID, int track, int index, int flags, play_status_callback status_callback,
-                           play_subchannel_callback subchannel_callback) {
+static int dummy_play_func(int deviceID, int track, int index, int flags, play_status_callback /*status_callback*/,
+                           play_subchannel_callback /*subchannel_callback*/) {
     printf("Dummy play_func called with deviceID: %d, track: %d, index: %d, flags: %d\n", deviceID, track, index,
            flags);
     return 0;
@@ -2066,28 +1984,28 @@ static uae_u32 dummy_volume_func(int deviceID, uae_u16 left, uae_u16 right) {
     return 0;
 }
 
-static int dummy_qcode_func(int deviceID, uae_u8* qcode, int size, bool msf) {
+static int dummy_qcode_func(int deviceID, uae_u8* /*qcode*/, int size, bool msf) {
     printf("Dummy qcode_func called with deviceID: %d, size: %d, msf: %d\n", deviceID, size, msf);
     return 0;
 }
 
-static int dummy_toc_func(int deviceID, struct cd_toc_head* toc) {
+static int dummy_toc_func(int deviceID, struct cd_toc_head* /*toc*/) {
     printf("Dummy toc_func called with deviceID: %d\n", deviceID);
     return 0;
 }
 
-static int dummy_read_func(int deviceID, uae_u8* buffer, int size, int flags) {
+static int dummy_read_func(int deviceID, uae_u8* /*buffer*/, int size, int flags) {
     printf("Dummy read_func called with deviceID: %d, size: %d, flags: %d\n", deviceID, size, flags);
     return 0;
 }
 
-static int dummy_rawread_func(int deviceID, uae_u8* buffer, int size, int subcode, int flags, uae_u32 offset) {
+static int dummy_rawread_func(int deviceID, uae_u8* /*buffer*/, int size, int subcode, int flags, uae_u32 offset) {
     printf("Dummy rawread_func called with deviceID: %d, size: %d, subcode: %d, flags: %d, offset: %u\n", deviceID,
            size, subcode, flags, offset);
     return 0;
 }
 
-static int dummy_write_func(int deviceID, uae_u8* buffer, int size, int flags) {
+static int dummy_write_func(int deviceID, uae_u8* /*buffer*/, int size, int flags) {
     printf("Dummy write_func called with deviceID: %d, size: %d, flags: %d\n", deviceID, size, flags);
     return 0;
 }
@@ -2102,7 +2020,7 @@ int dummy_ismedia_func(int deviceID, int flags) {
     return 0;
 }
 
-int dummy_scsiemu_func(int deviceID, uae_u8* data) {
+int dummy_scsiemu_func(int deviceID, uae_u8* /*data*/) {
     printf("Dummy scsiemu_func called with deviceID: %d\n", deviceID);
     return 0;
 }
@@ -2179,7 +2097,7 @@ TCHAR avioutput_filename_gui[MAX_DPATH];
 void* pushall_call_handler = nullptr;
 
 #ifdef _WIN32
-void gettimeofday(struct timeval* tv, void* blah) {
+void gettimeofday(struct timeval* tv, void* /*blah*/) {
 #if 1
     struct timeb time;
 
@@ -2215,7 +2133,8 @@ void write_log(const char* format, ...) {
     va_list parms;
 
     va_start(parms, format);
-    vprintf(format, parms);
+    // vprintf(format, parms);
+    qd::logConsole().logV(qd::LogEntry::E_INFO, format, parms);
     va_end(parms);
 }
 
@@ -2224,7 +2143,8 @@ void write_dlog(const char* format, ...) {
     va_list parms;
 
     va_start(parms, format);
-    vprintf(format, parms);
+    // vprintf(format, parms);
+    qd::logConsole().logV(qd::LogEntry::E_INFO, format, parms);
     va_end(parms);
 }
 
@@ -2232,7 +2152,7 @@ void console_out_f(const TCHAR* format, ...) {
     va_list parms;
 
     va_start(parms, format);
-    vprintf(format, parms);
+    qd::logConsole().logV(qd::LogEntry::E_INFO, format, parms);
     va_end(parms);
 }
 
@@ -2241,13 +2161,12 @@ void console_out(const TCHAR* txt) {
 }
 
 TCHAR* buf_out(TCHAR* buffer, int* bufsize, const TCHAR* format, ...) {
-    int count;
     va_list parms;
     va_start(parms, format);
 
     if (buffer == NULL)
         return 0;
-    count = _vsntprintf(buffer, (*bufsize) - 1, format, parms);
+    _vsntprintf(buffer, (*bufsize) - 1, format, parms);
     va_end(parms);
     *bufsize -= uaetcslen(buffer);
     return buffer + uaetcslen(buffer);
@@ -2269,6 +2188,6 @@ TCHAR* setconsolemode(TCHAR* buffer, int maxlen) {
 }
 
 // dummy win support for blkdev.cpp
-int GetDriveType(TCHAR* vol) {
+int GetDriveType(TCHAR* /*vol*/) {
     return 0;
 }

@@ -18,11 +18,9 @@ bool DebuggerAPI_has_debugger() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void DebuggerAPI_register(DebuggerAPI* api, void* user_data) {
-    void* self = api->create(user_data);
-
-    Debugger debugger = {user_data, api};
-
+void DebuggerAPI_register(DebuggerAPI* dbg_api, void* user_data) {
+    dbg_api->create(user_data);
+    Debugger debugger = {user_data, dbg_api};
     s_debuggers.push_back(debugger);
 }
 

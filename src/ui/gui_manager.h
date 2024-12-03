@@ -1,24 +1,26 @@
 #pragma once
 #include <EASTL/vector.h>
 #include <debugger/debugger.h>
-#include <debugger/ui/base.h>
-#include <debugger/ui/ui_view.h>
+#include <src/ui/ui_view.h>
 
 namespace qd {
-
 class UiView;
+namespace action {
 class Action;
+};
 
 class GuiManager {
     eastl::vector<UiView*> windows;
-    eastl::vector<Action*> actions;
     Debugger* dbg = nullptr;
 
 public:
     GuiManager(Debugger* dbg);
     ~GuiManager();
 
-    void drawImGuiFrame();
+    void drawImGuiMainFrame();
+
+    void _drawMainToolBar();
+    void _drawDebuggerWindows();
     void destroy();
 
     Debugger* getDbg() const {

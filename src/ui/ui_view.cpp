@@ -1,5 +1,5 @@
 #include "ui_view.h"
-#include <debugger/ui/gui_manager.h>
+#include <src/ui/gui_manager.h>
 
 namespace qd {
 
