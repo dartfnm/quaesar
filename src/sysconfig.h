@@ -614,6 +614,7 @@ typedef long uae_atomic;
 #define UNIMPLEMENTED()                                                            \
     do {                                                                           \
         fprintf(stderr, "Function '%s' is unimplemented. Exiting...\n", __func__); \
+        assert(0 && "FUNCTION " __FUNCTION__ " NOT IMPLEMENTED");                  \
         exit(EXIT_FAILURE);                                                        \
     } while (0)
 

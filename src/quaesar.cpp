@@ -29,6 +29,10 @@ qd::App* app = nullptr;
 extern void real_main(int argc, TCHAR** argv);
 extern void keyboard_settrans();
 
+namespace qd {
+extern void quae_parse_cmdline(int argc, TCHAR** argv);
+};  // namespace qd
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Move this somewhere else
@@ -49,24 +53,46 @@ bool ends_with(const char* str, const char* suffix) {
 }
 
 
-int uae_thread_main_func(void* /*args*/ = nullptr) {
-    real_main(0, nullptr);
+
+static std::vector<std::string> uaeCliArgVals;
+
+int uae_thread_main_func(void*) {
+    std::vector<const char*> argv;
+    argv.push_back("quasar.exe");
+    argv.reserve(uaeCliArgVals.size() * 2 + 1);
+    for (const std::string& s : uaeCliArgVals) {
+        argv.push_back("-s");
+        argv.push_back(s.c_str());
+    }
+    qd::quae_parse_cmdline((int)argv.size(), const_cast<char**>(&argv[0]));
+
+    ::real_main(0, nullptr);
     return 0;
 }
 
 
 // Quaesar main
 int SDL_main(int argc, char* argv[]) {
+    //SDL_assert(0);
+    for (int i = 0; i < argc; ++i)
+        SDL_Log("arg_%i: '%s'", i, argv[i]);
+
     syncbase = 1000000;
     app = qd::App::get();
 
     Options options;
     CLI::App cliApp{"Quaesar"};
-
-    cliApp.add_option("input", options.input, "Executable or image file (adf, dms)")->check(CLI::ExistingFile);
-    cliApp.add_option("-k,--kickstart", options.kickstart, "Path to the kickstart ROM")->check(CLI::ExistingFile);
+    cliApp.allow_extras();
+    cliApp.add_option("input", options.input, "Executable or image file (adf, dms)"); // ->check(CLI::ExistingFile);
+    cliApp.add_option("-k,--kickstart", options.kickstart, "Path to the kickstart ROM"); // ->check(CLI::ExistingFile);
     cliApp.add_option("--serial_port", options.serial_port, "Serial port path");
-    CLI11_PARSE(cliApp, argc, argv);
+
+    cliApp.add_option("-s", uaeCliArgVals, "UAE");
+
+//     CLI::App* pUae = cliApp.add_subcommand("u", "Send command to UAE");
+//     pUae->add_option("args", uaeCliArgVals);
+
+    cliApp.parse(argc, argv);
 
     keyboard_settrans();
     default_prefs(&currprefs, true, 0);
@@ -75,8 +101,14 @@ int SDL_main(int argc, char* argv[]) {
     if (!options.input.empty()) {
         // TODO: cleanup
         if (ends_with(options.input.c_str(), ".exe") || !ends_with(options.input.c_str(), ".adf")) {
-            Adf::create_for_exefile(options.input.c_str());
-            strcpy(currprefs.floppyslots[0].df, "dummy.adf");
+            if (FILE* check_file = fopen(options.input.c_str(), "rb")) {
+                fclose(check_file);
+                Adf::create_for_exefile(options.input.c_str());
+                strcpy(currprefs.floppyslots[0].df, "dummy.adf");
+            }
+            else {
+                SDL_Log("can't open input file:'%s'", options.input.c_str());
+            }
         } else {
             strcpy(currprefs.floppyslots[0].df, options.input.c_str());
         }
@@ -95,6 +127,7 @@ int SDL_main(int argc, char* argv[]) {
     //    currprefs.turbo_emulation = 1; // it disables sound
     currprefs.sound_stereo_separation = 0;
     currprefs.uaeboard = 1;
+    currprefs.win32_filesystem_mangle_reserved_names = true; // required for FS
 
     strcpy(currprefs.romfile, options.kickstart.c_str());
 
