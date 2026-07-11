@@ -79,6 +79,8 @@ void pausevideograb(int) {
 }
 
 void show_screen(int monid, int mode) {
+    (void)monid; // Unused parameter
+    (void)mode; // Unused parameter
     TRACE();
 }
 
@@ -88,11 +90,13 @@ void vsync_clear() {
 }
 
 int vsync_isdone(frame_time_t* dt) {
+    (void)dt; // Unused parameter
     TRACE();
     return 1;
 }
 
 bool target_osd_keyboard(int show) {
+    (void)show; // Unused parameter
     UNIMPLEMENTED();
     return false;
 }
@@ -106,21 +110,26 @@ void setmouseactive(int, int) {
 }
 
 void screenshot(int monid, int, int) {
+    (void)monid; // Unused parameter
     UNIMPLEMENTED();
 }
 
 int same_aname(const TCHAR* an1, const TCHAR* an2) {
+    (void)an1; // Unused parameter
+    (void)an2; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 int input_get_default_keyboard(int i) {
+    (void)i; // Unused parameter
     TRACE();
     // UNIMPLEMENTED();
     return 0;
 }
 
 uae_s64 getsetpositionvideograb(uae_s64 framepos) {
+    (void)framepos; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
@@ -140,6 +149,8 @@ static void dummy_close(void) {
 
 // Dummy function to acquire an input device
 static int dummy_acquire(int device_id, int exclusive) {
+    (void)device_id; // Unused parameter
+    (void)exclusive; // Unused parameter
     // UNIMPLEMENTED();
     return 0;  // Return 0 for success, -1 for failure
 }
@@ -162,36 +173,46 @@ static int dummy_get_num(void) {
 
 // Dummy function to get the friendly name of an input device
 static TCHAR* dummy_get_friendlyname(int device_id) {
+    (void)device_id; // Unused parameter
     UNIMPLEMENTED();
     return nullptr;
 }
 
 // Dummy function to get the unique name of an input device
 static TCHAR* dummy_get_uniquename(int device_id) {
+    (void)device_id; // Unused parameter
     UNIMPLEMENTED();
     return nullptr;
 }
 
 // Dummy function to get the number of widgets (input elements) in an input device
 static int dummy_get_widget_num(int device_id) {
+    (void)device_id; // Unused parameter
     UNIMPLEMENTED();
     return 4;  // Return the number of widgets
 }
 
 // Dummy function to get the type and name of a widget
 static int dummy_get_widget_type(int device_id, int widget_id, TCHAR* widget_name, uae_u32* widget_type) {
+    (void)device_id; // Unused parameter
+    (void)widget_id; // Unused parameter
+    (void)widget_name; // Unused parameter
+    (void)widget_type; // Unused parameter
     UNIMPLEMENTED();
     return 0;  // Return 0 for success, -1 for failure
 }
 
 // Dummy function to get the first widget (input element) in an input device
 static int dummy_get_widget_first(int device_id, int widget_type) {
+    (void)device_id; // Unused parameter
+    (void)widget_type; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 // Dummy function to get the flags of an input device
 int dummy_get_flags(int device_id) {
+    (void)device_id; // Unused parameter
     return 0;  // Return flags (if any) for the input device
 }
 
@@ -223,23 +244,32 @@ const TCHAR* my_getfilepart(const TCHAR* filename) {
 }
 
 void fetch_statefilepath(TCHAR* out, int size) {
+    (void)out; // Unused parameter
+    (void)size; // Unused parameter
     UNIMPLEMENTED();
 }
 
 uae_u32 cpuboard_ncr9x_scsi_get(uaecptr addr) {
+    (void)addr; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 void cpuboard_ncr9x_scsi_put(uaecptr addr, uae_u32 v) {
+    (void)addr; // Unused parameter
+    (void)v; // Unused parameter
     UNIMPLEMENTED();
 }
 
 void getfilepart(TCHAR* out, int size, const TCHAR* path) {
+    (void)out; // Unused parameter
+    (void)size; // Unused parameter
+    (void)path; // Unused parameter
     UNIMPLEMENTED();
 }
 
 void toggle_fullscreen(int monid, int) {
+    (void)monid; // Unused parameter
     UNIMPLEMENTED();
 }
 
@@ -256,54 +286,85 @@ extern int target_get_display(const TCHAR*) {
 }
 
 int target_cfgfile_load(struct uae_prefs* p, const TCHAR* filename, int type, int isdefault) {
+    (void)p; (void)filename; (void)type; (void)isdefault;
     TRACE();
     return 1;
 }
 
 void target_addtorecent(const TCHAR* name, int t) {
+    (void)name; // Unused parameter
+    (void)t; // Unused parameter
     UNIMPLEMENTED();
 }
 
 int my_truncate(const TCHAR* name, uae_u64 len) {
+    (void)name; // Unused parameter
+    (void)len; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 bool my_issamepath(const TCHAR* path1, const TCHAR* path2) {
+    (void)path1; // Unused parameter
+    (void)path2; // Unused parameter
     UNIMPLEMENTED();
     return false;
 }
 
 int input_get_default_joystick(struct uae_input_device* uid, int i, int port, int af, int mode, bool gp,
                                bool joymouseswap) {
+    (void)uid; // Unused parameter
+    (void)i; // Unused parameter
+    (void)port; // Unused parameter
+    (void)af; // Unused parameter
+    (void)mode; // Unused parameter
+    (void)gp; // Unused parameter
+    (void)joymouseswap; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 bool get_plugin_path(TCHAR* out, int len, const TCHAR* path) {
+    (void)out; // Unused parameter
+    (void)len; // Unused parameter
+    (void)path; // Unused parameter
     TRACE();
     return false;
 }
 
 void getgfxoffset(int monid, float* dxp, float* dyp, float* mxp, float* myp) {
+    (void)monid; // Unused parameter
+    (void)dxp; // Unused parameter
+    (void)dyp; // Unused parameter
+    (void)mxp; // Unused parameter
+    (void)myp; // Unused parameter
     UNIMPLEMENTED();
 }
 
 void fixtrailing(TCHAR* p) {
+    (void)p; // Unused parameter
     UNIMPLEMENTED();
 }
 
 int uae_slirp_redir(int is_udp, int host_port, struct in_addr guest_addr, int guest_port) {
+    (void)is_udp; // Unused parameter
+    (void)host_port; // Unused parameter
+    (void)guest_addr; // Unused parameter
+    (void)guest_port; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 int translate_message(int msg, TCHAR* out) {
+    (void)msg; // Unused parameter
+    (void)out; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 bool toggle_rtg(int monid, int mode) {
+    (void)monid; // Unused parameter
+    (void)mode; // Unused parameter
     UNIMPLEMENTED();
     return false;
 }
@@ -318,6 +379,8 @@ void refreshtitle() {
 }
 
 bool my_utime(const TCHAR* name, struct mytimeval* tv) {
+    (void)name; // Unused parameter
+    (void)tv; // Unused parameter
     UNIMPLEMENTED();
     return false;
 }
@@ -333,17 +396,20 @@ int my_rename(char const*, char const*) {
 }
 
 void masoboshi_ncr9x_scsi_put(unsigned int, unsigned int, int) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 struct autoconfig_info;
 
 bool isa_expansion_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return false;
 }
 
 uae_u32 gfxboard_get_romtype(rtgboardconfig*) {
+    // Parameter unused
     TRACE();
     // UNIMPLEMENTED();
     return 0;
@@ -359,6 +425,8 @@ uae_u8* save_log(int, size_t*) {
 }
 
 int my_unlink(const TCHAR* name, bool dontrecycle) {
+    (void)name; // Unused parameter
+    (void)dontrecycle; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
@@ -380,6 +448,7 @@ void cpuboard_ncr710_io_bput(unsigned int, unsigned int) {
 }
 
 uae_u32 cpuboard_ncr720_io_bget(uaecptr addr) {
+    (void)addr; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
@@ -389,26 +458,36 @@ void cpuboard_ncr720_io_bput(unsigned int, unsigned int) {
 }
 
 void cpuboard_setboard(struct uae_prefs* p, int type, int subtype) {
+    (void)p; // Unused parameter
+    (void)type; // Unused parameter
+    (void)subtype; // Unused parameter
     UNIMPLEMENTED();
 }
 
 int cpuboard_memorytype(struct uae_prefs* p) {
+    (void)p; // Unused parameter
     TRACE();
     // UNIMPLEMENTED();
     return 0;
 }
 
 bool cpuboard_fc_check(uaecptr addr, uae_u32* v, int size, bool write) {
+    (void)addr; // Unused parameter
+    (void)v; // Unused parameter
+    (void)size; // Unused parameter
+    (void)write; // Unused parameter
     UNIMPLEMENTED();
     return false;
 }
 
 int fsdb_name_invalid_dir(a_inode*, const TCHAR* n) {
+    (void)n; // Unused parameter
     UNIMPLEMENTED();
     return 0;
 }
 
 int fsdb_mode_supported(const a_inode*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return 0;
 }
@@ -437,14 +516,19 @@ int a2386_init(autoconfig_info*) {
 */
 
 void a4000t_add_scsi_unit(int ch, struct uaedev_config_info* ci, struct romconfig* rc) {
+    (void)ch; // Unused parameter
+    (void)ci; // Unused parameter
+    (void)rc; // Unused parameter
     UNIMPLEMENTED();
 }
 
 bool a4000t_scsi_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return false;
 }
 void a4091_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 void activate_console() {
@@ -452,50 +536,61 @@ void activate_console() {
 }
 
 void alf3_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 void amiga_clipboard_die(TrapContext*) {
+    // Parameter unused
     UNIMPLEMENTED();
 }
 
 void amiga_clipboard_got_data(TrapContext*, unsigned int, unsigned int, unsigned int) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 void amiga_clipboard_init(TrapContext*) {
+    // Parameter unused
     UNIMPLEMENTED();
 }
 
 uaecptr amiga_clipboard_proc_start(TrapContext*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return 0;
 }
 
 void amiga_clipboard_task_start(TrapContext*, unsigned int) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 int amiga_clipboard_want_data(TrapContext*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return 0;
 }
 
 bool ariadne2_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return false;
 }
 
 void AVIOutput_Restart(bool) {
+    // Parameter unused
     TRACE();
     // UNIMPLEMENTED();
 }
 
 void AVIOutput_Toggle(int, bool) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 void blizzardppc_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
@@ -504,6 +599,7 @@ void bsdlib_install() {
 }
 
 uaecptr bsdlib_startup(TrapContext*, unsigned int) {
+    // All parameters unused
     UNIMPLEMENTED();
     return 0;
 }
@@ -517,39 +613,47 @@ void casablanca_map_overlay() {
 }
 
 addrbank* cd32_fmv_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return nullptr;
 }
 
 void cd32_fmv_set_sync(float, float) {
+    // Parameters unused
     TRACE();
     // return 0;
 }
 
 void cdtv_add_scsi_unit(int, uaedev_config_info*, romconfig*) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 uae_u8 cdtv_battram_read(int) {
+    // Parameter unused
     UNIMPLEMENTED();
     return 0;
 }
 
 void cdtv_battram_write(int, int) {
+    // All parameters unused
     UNIMPLEMENTED();
 }
 
 bool cdtv_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return false;
 }
 
 bool cdtvscsi_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return false;
 }
 
 bool cdtvsram_init(autoconfig_info*) {
+    // Parameter unused
     UNIMPLEMENTED();
     return false;
 }
@@ -589,6 +693,7 @@ int compemu_reset() {
 struct cpu_history;
 
 int compile_block(cpu_history*, int, int) {
+    // All parameters unused
     UNIMPLEMENTED();
     return 0;
 }
@@ -608,8 +713,8 @@ int console_get(char* out, int maxlen) {
         return -1;
     }
 
-    int len = strlen(out);
-    return len - 1;
+    size_t len = strlen(out);
+    return static_cast<int>(len) - 1;
 }
 
 bool console_isch() {
@@ -966,10 +1071,12 @@ int graphics_init(bool) {
 }
 
 bool render_screen(int monid, int, bool) {
+    (void)monid;
     return true;
 }
 
 void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
+    (void)y_start; (void)y_end;
     SDL_Event e;
 
     if (!s_window)
@@ -981,7 +1088,7 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
         // User requests quit
         switch (e.type) {
             case SDL_QUIT:  // User closes the window
-                quit_program == UAE_QUIT;
+                quit_program = UAE_QUIT;
                 // TODO: Fix me
                 exit(0);
                 break;
@@ -990,7 +1097,7 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
                     activate_debugger();
                 }
                 if (e.key.keysym.sym == SDLK_ESCAPE) {  // If the key is ESC
-                    quit_program == UAE_QUIT;
+                    quit_program = UAE_QUIT;
                     exit(0);
                     // TODO: Fix me
                 }
@@ -1004,7 +1111,6 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
     int pitch = 0;
 
     if (SDL_LockTexture(s_texture, NULL, (void**)&pixels, &pitch) == 0) {
-        struct amigadisplay* ad = &adisplays[vb_in->monitor_id];
         struct vidbuf_description* avidinfo = &adisplays[vb_in->monitor_id].gfxvidinfo;
         struct vidbuffer* vb = avidinfo->outbuffer;
 
@@ -1012,7 +1118,7 @@ void unlockscr(struct vidbuffer* vb_in, int y_start, int y_end) {
             return;
 
         uint8_t* sptr = vb->bufmem;
-        uint8_t* endsptr = vb->bufmemend;
+        // uint8_t* endsptr = vb->bufmemend; // Unused - kept for future bounds checking
 
         int amiga_width = vb->outwidth;
         int amiga_height = vb->outheight;
@@ -1919,6 +2025,7 @@ static int old_w = -1;
 static int old_h = -1;
 
 bool target_graphics_buffer_update(int monid, bool force) {
+    (void)force;
     struct vidbuf_description* avidinfo = &adisplays[monid].gfxvidinfo;
     struct vidbuffer* vb = avidinfo->drawbuffer.tempbufferinuse ? &avidinfo->tempbuffer : &avidinfo->drawbuffer;
 
@@ -2004,34 +2111,42 @@ static void dummy_close_device_func(int deviceID) {
 }
 
 static struct device_info* dummy_info_device_func(int deviceID, struct device_info* info, int size, int flags) {
+    (void)info;
     printf("Dummy info_device_func called with deviceID: %d, size: %d, flags: %d\n", deviceID, size, flags);
     return NULL;
 }
 
 static uae_u8* dummy_execscsicmd_out_func(int deviceID, uae_u8* cmd, int size) {
+    (void)cmd;
     printf("Dummy execscsicmd_out_func called with deviceID: %d, size: %d\n", deviceID, size);
     return NULL;
 }
 
 static uae_u8* dummy_execscsicmd_in_func(int deviceID, uae_u8* cmd, int size, int* result) {
+    (void)cmd; // Unused in dummy implementation
     printf("Dummy execscsicmd_in_func called with deviceID: %d, size: %d\n", deviceID, size);
     *result = 0;
     return NULL;
 }
 
 static int dummy_execscsicmd_direct_func(int deviceID, struct amigascsi* cmd) {
+    (void)cmd; // Unused in dummy implementation
     printf("Dummy execscsicmd_direct_func called with deviceID: %d\n", deviceID);
     return 0;
 }
 
+#if 0 // Unused callback functions - commented out to avoid warnings
 static void dummy_play_subchannel_callback(uae_u8* data, int size) {
+    (void)data; // Unused in dummy implementation
     printf("Dummy play_subchannel_callback called with size: %d\n", size);
 }
 
 static int dummy_play_status_callback(int status, int subcode) {
+    (void)subcode; // Unused in dummy implementation
     printf("Dummy play_status_callback called with status: %d, subcode: %d\n", status, subcode);
     return 0;
 }
+#endif
 
 static int dummy_pause_func(int deviceID, int flags) {
     printf("Dummy pause_func called with deviceID: %d, flags: %d\n", deviceID, flags);
@@ -2045,6 +2160,8 @@ static int dummy_stop_func(int deviceID) {
 
 static int dummy_play_func(int deviceID, int track, int index, int flags, play_status_callback status_callback,
                            play_subchannel_callback subchannel_callback) {
+    (void)status_callback; // Unused in dummy implementation
+    (void)subchannel_callback; // Unused in dummy implementation
     printf("Dummy play_func called with deviceID: %d, track: %d, index: %d, flags: %d\n", deviceID, track, index,
            flags);
     return 0;
@@ -2056,27 +2173,32 @@ static uae_u32 dummy_volume_func(int deviceID, uae_u16 left, uae_u16 right) {
 }
 
 static int dummy_qcode_func(int deviceID, uae_u8* qcode, int size, bool msf) {
+    (void)qcode; // Unused in dummy implementation
     printf("Dummy qcode_func called with deviceID: %d, size: %d, msf: %d\n", deviceID, size, msf);
     return 0;
 }
 
 static int dummy_toc_func(int deviceID, struct cd_toc_head* toc) {
+    (void)toc; // Unused in dummy implementation
     printf("Dummy toc_func called with deviceID: %d\n", deviceID);
     return 0;
 }
 
 static int dummy_read_func(int deviceID, uae_u8* buffer, int size, int flags) {
+    (void)buffer; // Unused in dummy implementation
     printf("Dummy read_func called with deviceID: %d, size: %d, flags: %d\n", deviceID, size, flags);
     return 0;
 }
 
 static int dummy_rawread_func(int deviceID, uae_u8* buffer, int size, int subcode, int flags, uae_u32 offset) {
+    (void)buffer; // Unused in dummy implementation
     printf("Dummy rawread_func called with deviceID: %d, size: %d, subcode: %d, flags: %d, offset: %u\n", deviceID,
            size, subcode, flags, offset);
     return 0;
 }
 
 static int dummy_write_func(int deviceID, uae_u8* buffer, int size, int flags) {
+    (void)buffer; // Unused in dummy implementation
     printf("Dummy write_func called with deviceID: %d, size: %d, flags: %d\n", deviceID, size, flags);
     return 0;
 }
@@ -2092,6 +2214,7 @@ int dummy_ismedia_func(int deviceID, int flags) {
 }
 
 int dummy_scsiemu_func(int deviceID, uae_u8* data) {
+    (void)data; // Unused in dummy implementation
     printf("Dummy scsiemu_func called with deviceID: %d\n", deviceID);
     return 0;
 }
@@ -2167,7 +2290,7 @@ const TCHAR* specialmonitorconfignames[] = {_T("none"), NULL};
 TCHAR avioutput_filename_gui[MAX_DPATH];
 void* pushall_call_handler = nullptr;
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_MSC_VER)
 void gettimeofday(struct timeval* tv, void* blah) {
 #if 1
     struct timeb time;
@@ -2230,13 +2353,12 @@ void console_out(const TCHAR* txt) {
 }
 
 TCHAR* buf_out(TCHAR* buffer, int* bufsize, const TCHAR* format, ...) {
-    int count;
     va_list parms;
     va_start(parms, format);
 
     if (buffer == NULL)
         return 0;
-    count = _vsntprintf(buffer, (*bufsize) - 1, format, parms);
+    _vsntprintf(buffer, (*bufsize) - 1, format, parms);
     va_end(parms);
     *bufsize -= uaetcslen(buffer);
     return buffer + uaetcslen(buffer);
@@ -2259,5 +2381,6 @@ TCHAR* setconsolemode(TCHAR* buffer, int maxlen) {
 
 // dummy win support for blkdev.cpp
 int GetDriveType(TCHAR* vol) {
+    (void)vol; // Unused in dummy implementation
     return 0;
 }

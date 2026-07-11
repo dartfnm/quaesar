@@ -18,7 +18,7 @@ static uaecptr beginio;
 
 void consolehook_config (struct uae_prefs *p)
 {
-	struct uaedev_config_info ci = { 0 };
+	struct uaedev_config_info ci = {}; 
 	int roms[] = { 15, 31, 16, 46, -1 };
 
 	default_prefs (p, true, 0);
@@ -61,6 +61,7 @@ void consolehook_config (struct uae_prefs *p)
 
 static void console_thread (void *v)
 {
+	(void)v; // Unused parameter
 	uae_set_thread_priority (NULL, 1);
 	for (;;) {
 		TCHAR wc = console_getch ();
@@ -81,6 +82,7 @@ int consolehook_activate (void)
 
 void consolehook_ret(TrapContext *ctx, uaecptr condev, uaecptr oldbeginio)
 {
+	(void)ctx; // Unused parameter
 	beginio = oldbeginio;
 	write_log (_T("console.device at %08X\n"), condev);
 

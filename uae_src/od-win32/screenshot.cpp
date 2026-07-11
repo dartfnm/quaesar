@@ -630,7 +630,7 @@ void Screenshot_RGBinfo (int rb, int gb, int bb, int ab, int rs, int gs, int bs,
 
 extern bool get_custom_color_reg(int colreg, uae_u8 *r, uae_u8 *g, uae_u8 *b);
 
-static uae_u32 uniquecolors[256] = { 0 };
+static uae_u32 uniquecolors[256] = {}; 
 static int uniquecolorcount, uniquecolordepth;
 static uae_u8 *palettebm;
 
@@ -639,11 +639,11 @@ static void count_colors(bool alpha)
 	int h = bi->bmiHeader.biHeight;
 	int w = bi->bmiHeader.biWidth;
 	int d = bi->bmiHeader.biBitCount;
-	uae_u32 customcolors[256] = { 0 };
-	bool uniquecolorsa[256] = { 0 };
-	bool palettea[256] = { 0 };
-	uae_u32 palette[256] = { 0 };
-	uae_u8 indextab[256] = { 0 };
+	uae_u32 customcolors[256] = {}; 
+	bool uniquecolorsa[256] = {}; 
+	bool palettea[256] = {}; 
+	uae_u32 palette[256] = {}; 
+	uae_u8 indextab[256] = {}; 
 	int palettecount = 0;
 
 	uniquecolorcount = 0;

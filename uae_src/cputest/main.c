@@ -646,7 +646,7 @@ static int set_berr(int mask, int ask)
 static int load_file_offset(FILE *f, int *foffsetp)
 {
 	int size = -1;
-	unsigned char buf[4] = { 0 };
+	unsigned char buf[4] = {}; 
 	fseek(f, *foffsetp, SEEK_SET);
 	fread(buf, 1, sizeof(buf), f);
 	if (buf[0] == 0xaf && buf[1] == 'M' && buf[2] == 'R' && buf[3] == 'G') {
@@ -3620,7 +3620,7 @@ static void freestuff(void)
 
 static uae_u32 read_u32(uae_u8 *headerfile, int *poffset)
 {
-	uae_u8 data[4] = { 0 };
+	uae_u8 data[4] = {}; 
 	memcpy(data, headerfile + (*poffset), 4);
 	(*poffset) += 4;
 	return gl(data);

@@ -465,27 +465,52 @@ static uae_u8 *REGPARAM2 hrtmem_xlate (uaecptr addr)
 	return hrtmemory + addr;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static addrbank hrtmem_bank = {
 	hrtmem_lget, hrtmem_wget, hrtmem_bget,
 	hrtmem_lput, hrtmem_wput, hrtmem_bput,
 	hrtmem_xlate, hrtmem_check, NULL, NULL, _T("Cartridge Bank"),
 	hrtmem_lget, hrtmem_wget,
-	ABFLAG_RAM, S_READ, S_WRITE
+	ABFLAG_RAM, S_READ, S_WRITE,
+	NULL, // sub_banks initialization
+	0, // mask initialization
+	0, // startmask initialization
+	0, // start initialization
+	0, // allocated_size initialization
+	0 // reserved_size initialization
 };
 static addrbank hrtmem2_bank = {
 	hrtmem2_lget, hrtmem2_wget, hrtmem2_bget,
 	hrtmem2_lput, hrtmem2_wput, hrtmem2_bput,
 	hrtmem2_xlate, hrtmem2_check, NULL, NULL, _T("Cartridge Bank 2"),
 	hrtmem2_lget, hrtmem2_wget,
-	ABFLAG_RAM, S_READ, S_WRITE
+	ABFLAG_RAM, S_READ, S_WRITE,
+	NULL, // sub_banks initialization
+	0, // mask initialization
+	0, // startmask initialization
+	0, // start initialization
+	0, // allocated_size initialization
+	0 // reserved_size initialization
 };
 static addrbank hrtmem3_bank = {
 	hrtmem3_lget, hrtmem3_wget, hrtmem3_bget,
 	hrtmem3_lput, hrtmem3_wput, hrtmem3_bput,
 	hrtmem3_xlate, hrtmem3_check, NULL, NULL, _T("Cartridge Bank 3"),
 	hrtmem3_lget, hrtmem3_wget,
-	ABFLAG_RAM, S_READ, S_WRITE
+	ABFLAG_RAM, S_READ, S_WRITE,
+	NULL, // sub_banks initialization
+	0, // mask initialization
+	0, // startmask initialization
+	0, // start initialization
+	0, // allocated_size initialization
+	0 // reserved_size initialization
 };
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 static void copyfromamiga (uae_u8 *dst, uaecptr src, int len)
 {
@@ -508,7 +533,7 @@ static int ar_state1 = -1, ar_state2 = -1, ar_hide;
 static int ar_rom_file_size;
 
 /* Use this for relocating AR? */
-static int ar_rom_location;
+// static int ar_rom_location; // Currently unused
 /*static*/ int armodel;
 static uae_u8 artemp[4]; /* Space to store the 'real' level 7 interrupt */
 static uae_u8 armode_read, armode_write;
@@ -561,12 +586,12 @@ STATIC_INLINE int ar3a (uaecptr addr, uae_u8 b, int writing)
 					wait_for_pc = get_long(m68k_areg (regs, 7) + 2); /* Get (SP+2) */
 					set_special (SPCFLAG_ACTION_REPLAY);
 
-					uaecptr pc = m68k_getpc ();
+					// uaecptr pc = m68k_getpc (); // Currently unused
 					/*		    write_log_debug ("Action Replay marked as ACTION_REPLAY_WAIT_PC, PC=%p\n",pc);*/
 				}
 				else
 				{
-					uaecptr pc = m68k_getpc ();
+					// uaecptr pc = m68k_getpc (); // Currently unused
 					/*		    write_log_debug ("Action Replay marked as IDLE, PC=%p\n",pc);*/
 					action_replay_flag = ACTION_REPLAY_IDLE;
 				}
@@ -872,20 +897,39 @@ static uae_u8 *REGPARAM2 arrom_xlate (uaecptr addr)
 	return armemory_rom + addr;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static addrbank arrom_bank = {
 	arrom_lget, arrom_wget, arrom_bget,
 	arrom_lput, arrom_wput, arrom_bput,
 	arrom_xlate, arrom_check, NULL, NULL, _T("Action Replay ROM"),
 	arrom_lget, arrom_wget,
-	ABFLAG_ROM, S_READ, S_WRITE
+	ABFLAG_ROM, S_READ, S_WRITE,
+	NULL, // sub_banks initialization
+	0, // mask initialization
+	0, // startmask initialization
+	0, // start initialization
+	0, // allocated_size initialization
+	0 // reserved_size initialization
 };
 static addrbank arram_bank = {
 	arram_lget, arram_wget, arram_bget,
 	arram_lput, arram_wput, arram_bput,
 	arram_xlate, arram_check, NULL, NULL, _T("Action Replay RAM"),
 	arram_lget, arram_wget,
-	ABFLAG_RAM, S_READ, S_WRITE
+	ABFLAG_RAM, S_READ, S_WRITE,
+	NULL, // sub_banks initialization
+	0, // mask initialization
+	0, // startmask initialization
+	0, // start initialization
+	0, // allocated_size initialization
+	0 // reserved_size initialization
 };
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 
 static void action_replay_map_banks (void)
@@ -949,6 +993,7 @@ static void action_replay_go (void)
 
 static void action_replay_go1 (int irq)
 {
+	(void)irq; // Parameter unused in current implementation
 	cartridge_enter();
 	hide_cart (0);
 	action_replay_flag = ACTION_REPLAY_ACTIVE;
@@ -1341,6 +1386,8 @@ static uae_u8* get_checksum_location (void)
 
 /* Replaces the existing cart checksum with a correct one. */
 /* Useful if you want to patch the rom. */
+// static void action_replay_fixup_checksum (uae_u32 new_checksum); // Currently unused
+#if 0
 static void action_replay_fixup_checksum (uae_u32 new_checksum)
 {
 	uae_u32* checksum = (uae_u32*)get_checksum_location();
@@ -1350,6 +1397,7 @@ static void action_replay_fixup_checksum (uae_u32 new_checksum)
 		write_log (_T("Unable to locate Checksum in ROM.\n"));
 	return;
 }
+#endif
 
 /* Longword search on word boundary
 * the search_value is assumed to already be in the local endian format
@@ -1488,6 +1536,7 @@ static void action_replay_unsetbanks (void)
 /* param to allow us to unload the cart. Currently we know it is safe if we are doing a reset to unload it.*/
 int action_replay_unload (int in_memory_reset)
 {
+	(void)in_memory_reset; // Parameter reserved for future use
 	static const TCHAR *state[] = {
 		_T("ACTION_REPLAY_WAIT_PC"),
 		_T("ACTION_REPLAY_INACTIVE"),
@@ -1520,7 +1569,7 @@ int action_replay_unload (int in_memory_reset)
 static int superiv_init (struct romdata *rd, struct zfile *f)
 {
 	uae_u32 chip = currprefs.chipmem.size - 0x10000;
-	int subtype = rd->id;
+	// int subtype = rd->id; // Currently unused
 	int flags = rd->type & ROMTYPE_MASK;
 	const TCHAR *memname1, *memname2, *memname3;
 

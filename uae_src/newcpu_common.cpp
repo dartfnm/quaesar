@@ -411,6 +411,7 @@ void REGPARAM2 x_put_bitfield (uae_u32 dst, uae_u32 bdata[2], uae_u32 val, uae_s
 
 uae_u32 REGPARAM2 get_disp_ea_020 (uae_u32 base, int idx)
 {
+	(void)idx;
 	uae_u16 dp = next_diword ();
 	int reg = (dp >> 12) & 15;
 	uae_s32 regd = regs.regs[reg];
@@ -447,6 +448,7 @@ uae_u32 REGPARAM2 get_disp_ea_020 (uae_u32 base, int idx)
 
 uae_u32 REGPARAM2 x_get_disp_ea_020 (uae_u32 base, int idx)
 {
+	(void)idx;
 	uae_u16 dp = x_next_iword ();
 	int reg = (dp >> 12) & 15;
 	int cycles = 0;
@@ -502,6 +504,7 @@ uae_u32 REGPARAM2 x_get_disp_ea_020 (uae_u32 base, int idx)
 	if (cycles && currprefs.cpu_cycle_exact)
 		x_do_cycles (cycles * cpucycleunit);
 #endif
+	(void)cycles; // Set but not used outside #if 0 block
 	return v;
 }
 
@@ -509,6 +512,7 @@ uae_u32 REGPARAM2 x_get_disp_ea_020 (uae_u32 base, int idx)
 
 uae_u32 REGPARAM2 x_get_disp_ea_ce030 (uae_u32 base, int idx)
 {
+	(void)idx;
 	uae_u16 dp = next_iword_030ce ();
 	int reg = (dp >> 12) & 15;
 	uae_u32 v;
@@ -556,6 +560,7 @@ uae_u32 REGPARAM2 x_get_disp_ea_ce030 (uae_u32 base, int idx)
 
 uae_u32 REGPARAM2 x_get_disp_ea_ce020 (uae_u32 base, int idx)
 {
+	(void)idx;
 	uae_u16 dp = next_iword_020ce ();
 	int reg = (dp >> 12) & 15;
 	uae_u32 v;
@@ -603,6 +608,7 @@ uae_u32 REGPARAM2 x_get_disp_ea_ce020 (uae_u32 base, int idx)
 
 uae_u32 REGPARAM2 x_get_disp_ea_040(uae_u32 base, int idx)
 {
+	(void)idx;
 	uae_u16 dp = next_iword_cache040();
 	int reg = (dp >> 12) & 15;
 	uae_s32 regd = regs.regs[reg];
@@ -1079,6 +1085,7 @@ void setchkundefinedflags(uae_s32 src, uae_s32 dst, int size)
 // Someone else can attempt to simplify this..
 void setchk2undefinedflags(uae_s32 lower, uae_s32 upper, uae_s32 val, int size)
 {
+	(void)size;
 	if (currprefs.cpu_model == 68060) {
 		SET_VFLG(0);
 		SET_NFLG(val < 0);
@@ -1210,6 +1217,7 @@ static void divsl_overflow(uae_u16 extra, uae_s64 a, uae_s32 divider)
 
 static void divul_overflow(uae_u16 extra, uae_s64 a)
 {
+	(void)extra; (void)a;
 	if (currprefs.cpu_model >= 68040) {
 		SET_VFLG(1);
 		SET_CFLG(0);
@@ -1225,6 +1233,7 @@ static void divul_overflow(uae_u16 extra, uae_s64 a)
 
 static void divsl_divbyzero(uae_u16 extra, uae_s64 a, uaecptr oldpc)
 {
+	(void)extra; (void)a;
 	if (currprefs.cpu_model >= 68040) {
 		SET_CFLG(0);
 	} else {
@@ -1237,6 +1246,7 @@ static void divsl_divbyzero(uae_u16 extra, uae_s64 a, uaecptr oldpc)
 
 static void divul_divbyzero(uae_u16 extra, uae_s64 a, uaecptr oldpc)
 {
+	(void)extra; (void)a;
 	if (currprefs.cpu_model >= 68040) {
 		SET_CFLG(0);
 	} else {
@@ -1252,6 +1262,7 @@ static void divul_divbyzero(uae_u16 extra, uae_s64 a, uaecptr oldpc)
 
 int m68k_divl(uae_u32 opcode, uae_u32 src, uae_u16 extra, uaecptr oldpc)
 {
+	(void)opcode;
 	if ((extra & 0x400) && currprefs.int_no_unimplemented && currprefs.cpu_model == 68060) {
 		return -1;
 	}
@@ -1324,6 +1335,7 @@ int m68k_divl(uae_u32 opcode, uae_u32 src, uae_u16 extra, uaecptr oldpc)
 
 int m68k_mull (uae_u32 opcode, uae_u32 src, uae_u16 extra)
 {
+	(void)opcode;
 	if ((extra & 0x400) && currprefs.int_no_unimplemented && currprefs.cpu_model == 68060) {
 		return -1;
 	}
@@ -1612,6 +1624,7 @@ void Exception_build_stack_frame(uae_u32 oldpc, uae_u32 currpc, uae_u32 ssw, int
 
 void Exception_build_stack_frame_common(uae_u32 oldpc, uae_u32 currpc, uae_u32 ssw, int nr, int vector_nr)
 {
+	(void)ssw;
 	if (nr == 5 || nr == 6 || nr == 7 || nr == 9) {
 		if (nr == 9)
 			oldpc = regs.trace_pc;

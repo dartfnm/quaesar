@@ -613,7 +613,7 @@ int huffman_context_base::build_tree(UINT32 totaldata, UINT32 totalweight)
 huffman_error huffman_context_base::assign_canonical_codes()
 {
 	// build up a histogram of bit lengths
-	UINT32 bithisto[33] = { 0 };
+	UINT32 bithisto[33] = {}; 
 	for (int curcode = 0; curcode < m_numcodes; curcode++)
 	{
 		node_t &node = m_huffnode[curcode];

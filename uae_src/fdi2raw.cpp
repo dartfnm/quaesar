@@ -70,7 +70,7 @@ static TCHAR *datalog (uae_u8 *src, int len)
 	return buf + offset2;
 }
 #else
-static const TCHAR *datalog (uae_u8 *src, int len) { return _T(""); }
+static const TCHAR *datalog (uae_u8 *src, int len) { (void)src; (void)len; return _T(""); }
 #endif
 
 #ifdef DEBUG

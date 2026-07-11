@@ -1178,7 +1178,7 @@ static uae_u32 ide_read_word(struct ide_board *board, uaecptr addr)
 				write_log(_T("MASOBOSHI IDE DMA PTR READ = %08x %08x\n"), board->dma_ptr, M68K_GETPC);
 			} else if (addr == 0xf04a || addr == 0xf14a) {
 				v = board->dma_cnt;
-				write_log(_T("MASOBOSHI IDE DMA LEN READ = %04x %08x\n"), board->dma_cnt, v, M68K_GETPC);
+				write_log(_T("MASOBOSHI IDE DMA LEN READ = %04x\n"), board->dma_cnt);
 			} else {
 				int regnum = get_masoboshi_reg(addr, board);
 				if (regnum == IDE_DATA) {

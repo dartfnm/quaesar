@@ -284,10 +284,11 @@ bool uae_vm_free(void *address, int size)
 
 static void *try_reserve(uintptr_t try_addr, uae_u32 size, int flags)
 {
+	(void)flags; // Unused parameter
 	void *address = NULL;
 	if (try_addr) {
 		uae_log("VM: Reserve  0x%-8x bytes, try address 0x%llx\n",
-				size, (uae_u64) try_addr);
+				size, (unsigned long long) try_addr);
 	} else {
 		uae_log("VM: Reserve  0x%-8x bytes\n", size);
 	}
@@ -313,7 +314,7 @@ static void *try_reserve(uintptr_t try_addr, uae_u32 size, int flags)
 		uintptr_t end = (uintptr_t) address + size;
 		if (address && end > (uintptr_t) 0x100000000ULL) {
 			uae_log("VM: Reserve  0x%-8x bytes, got address 0x%llx (> 32-bit)\n",
-					size, (uae_u64) (uintptr_t) address);
+					size, (unsigned long long) (uintptr_t) address);
 #ifdef _WIN32
 			VirtualFree(address, 0, MEM_RELEASE);
 #else
@@ -363,7 +364,7 @@ void *uae_vm_reserve(uae_u32 size, int flags)
 #endif
 	if (address) {
 		uae_log("VM: Reserve  0x%-8x bytes, got address 0x%llx\n",
-				size, (uae_u64) (uintptr_t) address);
+				size, (unsigned long long) (uintptr_t) address);
 	} else {
 		uae_log("VM: Reserve  0x%-8x bytes failed!\n", size);
 	}
@@ -384,7 +385,7 @@ void *uae_vm_reserve_fixed(void *want_addr, uae_u32 size, int flags)
 		return NULL;
 	}
 	uae_log("VM: Reserve  0x%-8x bytes, got address 0x%llx\n",
-			size, (uae_u64) (uintptr_t) address);
+			size, (unsigned long long) (uintptr_t) address);
 	return address;
 }
 

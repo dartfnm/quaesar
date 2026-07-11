@@ -330,7 +330,7 @@ static int make_date(int year, int month, int day, int hour, int minute, int sec
 
 		/* sign extend */
 		if (tz & 0x80)
-			tz |= (-1 << 8);
+			tz |= ((uae_u8)(-1) << 8);
 		
 		/* 
 		 * The timezone offset is unreliable on some disks,
@@ -2228,7 +2228,7 @@ static int get_acorn_filename(struct iso_directory_record *de, char *retname, st
 		*retname = '!';
 	if (((de->flags[0] & 2) == 0) && (chr[13] == 0xff) && ((chr[12] & 0xf0) == 0xf0)) {
 		retname[retnamlen] = ',';
-		sprintf(retname+retnamlen+1, "%3.3x",
+		snprintf(retname+retnamlen+1, 4, "%3.3x",
 			((chr[12] & 0xf) << 8) | chr[11]);
 		retnamlen += 4;
 	}

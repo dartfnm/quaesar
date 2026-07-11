@@ -53,7 +53,7 @@ static long double *fp_nan    = (long double *)xhex_nan;
 static uae_u32 dhex_nan[]   ={0xffffffff, 0x7fffffff};
 static double *fp_nan    = (double *)dhex_nan;
 #endif
-static const double twoto32 = 4294967296.0;
+// static const double twoto32 = 4294967296.0; // Unused
 
 #define	FPCR_ROUNDING_MODE	0x00000030
 #define	FPCR_ROUND_NEAR		0x00000000
@@ -158,6 +158,7 @@ static void set_fpucw_x87(uae_u32 m68k_cw)
 
 static void native_set_fpucw(uae_u32 m68k_cw)
 {
+	(void)m68k_cw;
 #if defined(CPU_i386) || defined(CPU_x86_64)
 	//set_fpucw_x87(m68k_cw);
 #endif
@@ -205,6 +206,7 @@ static void fp_set_mode(uae_u32 mode_control)
 
 static void fp_get_status(uae_u32 *status)
 {
+	(void)status;
 	// These can't be properly emulated using host FPU.
 #if 0
     int exp_flags = fetestexcept(FE_ALL_EXCEPT);
@@ -239,14 +241,17 @@ static void fp_clear_status(void)
 /* Functions for detecting float type */
 static bool fp_is_init(fpdata *fpd)
 {
+	(void)fpd;
 	return false;
 }
 static bool fp_is_snan(fpdata *fpd)
 {
+	(void)fpd;
     return 0; /* FIXME: how to detect SNAN */
 }
 static bool fp_unset_snan(fpdata *fpd)
 {
+	(void)fpd;
     /* FIXME: how to unset SNAN */
 	return 0;
 }
@@ -268,11 +273,13 @@ static bool fp_is_neg(fpdata *fpd)
 }
 static bool fp_is_denormal(fpdata *fpd)
 {
+	(void)fpd;
     return false;
 	//return (isnormal(fpd->fp) == 0); /* FIXME: how to differ denormal/unnormal? */
 }
 static bool fp_is_unnormal(fpdata *fpd)
 {
+	(void)fpd;
 	return false;
     //return (isnormal(fpd->fp) == 0); /* FIXME: how to differ denormal/unnormal? */
 }
@@ -556,6 +563,7 @@ static void fp_round_single(fpdata *fpd)
 // round to double
 static void fp_round_double(fpdata *fpd)
 {
+	(void)fpd;
 #ifdef USE_LONG_DOUBLE
 	fpd->fp = (double) fpd->fp;
 #endif
@@ -586,7 +594,7 @@ static const TCHAR *fp_print(fpdata *fpd, int mode)
 		_stprintf(fsout, _T("#%e"), fpd->fp);
 #endif
 	}
-	if (mode == 0 || mode > _tcslen(fsout))
+	if ((size_t)mode == 0 || mode > (int)_tcslen(fsout))
 		return fsout;
 	fsout[mode] = 0;
 	return fsout;
@@ -968,6 +976,7 @@ static void fp_sgldiv(fpdata *a, fpdata *b)
 
 static void fp_normalize(fpdata *a)
 {
+	(void)a;
 }
 
 static void fp_cmp(fpdata *a, fpdata *b)
@@ -1064,6 +1073,7 @@ static uae_u32 fp_get_internal_grs(void)
 /* Function for denormalizing */
 static void fp_denormalize(fpdata *fpd, int esign)
 {
+	(void)fpd; (void)esign;
 }
 
 static void fp_from_pack (fpdata *src, uae_u32 *wrd, int kfactor)
@@ -1093,9 +1103,9 @@ static void fp_from_pack (fpdata *src, uae_u32 *wrd, int kfactor)
 	fp_to_native(&fp, src);
 
 #ifdef USE_LONG_DOUBLE
-	sprintf (str, "%#.17Le", fp);
+	snprintf (str, sizeof(str), "%#.17Le", fp);
 #else
-	sprintf (str, "%#.17e", fp);
+	snprintf (str, sizeof(str), "%#.17e", fp);
 #endif
 	
 	// get exponent
@@ -1221,6 +1231,7 @@ static void fp_from_pack (fpdata *src, uae_u32 *wrd, int kfactor)
 
 static void fp_to_pack (fpdata *fpd, uae_u32 *wrd, int dummy)
 {
+	(void)dummy;
 	fptype d;
 	char *cp;
 	char str[100];
@@ -1372,9 +1383,9 @@ void fp_init_native(void)
 double softfloat_tan(double v)
 {
 #if SOFTFLOAT_CONVERSIONS
-	struct float_status f = { 0 };
+	struct float_status f = {}; 
 	uae_u32 w1, w2;
-	fpdata fpd = { 0 };
+	fpdata fpd = {}; 
 
 	fpd.fp = v;
 	set_floatx80_rounding_precision(80, &f);

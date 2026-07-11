@@ -265,8 +265,8 @@ struct SubClassData
 
 static void RenderButton(HWND hwnd, HDC hdc, HTHEME hTheme, int iPartID, int iStateID)
 {
-	RECT rcClient = { 0 };
-	TCHAR szText[256] = { 0 };
+	RECT rcClient = {}; 
+	TCHAR szText[256] = {}; 
 	DWORD nState = static_cast<DWORD>(SendMessage(hwnd, BM_GETSTATE, 0, 0));
 	DWORD uiState = static_cast<DWORD>(SendMessage(hwnd, WM_QUERYUISTATE, 0, 0));
 	DWORD nStyle = GetWindowLong(hwnd, GWL_STYLE);
@@ -274,7 +274,7 @@ static void RenderButton(HWND hwnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	HFONT hFont = nullptr;
 	HFONT hOldFont = nullptr;
 	HFONT hCreatedFont = nullptr;
-	LOGFONT lf = { 0 };
+	LOGFONT lf = {}; 
 	if (SUCCEEDED(GetThemeFont(hTheme, hdc, iPartID, iStateID, TMT_FONT, &lf)))
 	{
 		hCreatedFont = CreateFontIndirect(&lf);
@@ -380,7 +380,7 @@ static void PaintButton(HWND hwnd, HDC hdc, SubClassData &buttonData)
 		GetThemeTransitionDuration(buttonData.hTheme, iPartID, buttonData.iStateID, iStateID, TMT_TRANSITIONDURATIONS, &animParams.dwDuration);
 	}
 
-	RECT rcClient = { 0 };
+	RECT rcClient = {}; 
 	GetClientRect(hwnd, &rcClient);
 
 	HDC hdcFrom = nullptr;
@@ -412,7 +412,7 @@ static void PaintGroupbox(HWND hwnd, HDC hdc, SubClassData &buttonData)
 		iStateID = GBS_DISABLED;
 	}
 
-	RECT rcClient = { 0 };
+	RECT rcClient = {}; 
 	GetClientRect(hwnd, &rcClient);
 
 	RECT rcText = rcClient;
@@ -421,7 +421,7 @@ static void PaintGroupbox(HWND hwnd, HDC hdc, SubClassData &buttonData)
 	HFONT hFont = nullptr;
 	HFONT hOldFont = nullptr;
 	HFONT hCreatedFont = nullptr;
-	LOGFONT lf = { 0 };
+	LOGFONT lf = {}; 
 	if (SUCCEEDED(GetThemeFont(buttonData.hTheme, hdc, iPartID, iStateID, TMT_FONT, &lf))) {
 		hCreatedFont = CreateFontIndirect(&lf);
 		hFont = hCreatedFont;
@@ -433,11 +433,11 @@ static void PaintGroupbox(HWND hwnd, HDC hdc, SubClassData &buttonData)
 
 	hOldFont = (HFONT)SelectObject(hdc, hFont);
 
-	TCHAR szText[256] = { 0 };
+	TCHAR szText[256] = {}; 
 	GetWindowText(hwnd, szText, sizeof(szText) / sizeof(TCHAR));
 
 	if (szText[0]) {
-		SIZE textSize = { 0 };
+		SIZE textSize = {}; 
 		GetTextExtentPoint32(hdc, szText, static_cast<int>(wcslen(szText)), &textSize);
 		rcBackground.top += textSize.cy / 2;
 		rcText.left += 7;
@@ -445,7 +445,7 @@ static void PaintGroupbox(HWND hwnd, HDC hdc, SubClassData &buttonData)
 		rcText.right = rcText.left + textSize.cx + 4;
 		ExcludeClipRect(hdc, rcText.left, rcText.top, rcText.right, rcText.bottom);
 	} else {
-		SIZE textSize = { 0 };
+		SIZE textSize = {}; 
 		GetTextExtentPoint32(hdc, L"M", 1, &textSize);
 		rcBackground.top += textSize.cy / 2;
 	}
@@ -507,7 +507,7 @@ void SubclassButtonControl(HWND hwnd)
 						DWORD nButtonStyle = nStyle & 0xF;
 						if (nButtonStyle == BS_CHECKBOX || nButtonStyle == BS_AUTOCHECKBOX || nButtonStyle == BS_RADIOBUTTON || nButtonStyle == BS_AUTORADIOBUTTON ||
 							nButtonStyle == BS_3STATE || nButtonStyle == BS_AUTO3STATE || nButtonStyle == BS_GROUPBOX) {
-							PAINTSTRUCT ps = { 0 };
+							PAINTSTRUCT ps = {}; 
 							HDC hdc = reinterpret_cast<HDC>(wParam);
 							if (!hdc) {
 								hdc = BeginPaint(hWnd, &ps);

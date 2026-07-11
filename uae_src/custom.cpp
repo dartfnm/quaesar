@@ -2754,6 +2754,7 @@ static uaecptr update_refptr(int slot, int end, bool process, bool overwrite)
 // Strobe+refresh (always first, second possible if ECS and NTSC) slot conflict
 static void fetch_strobe_conflict(int nr, int fm, int hpos, bool addmodulo)
 {
+	(void)fm;
 	int slot = (hpos - REFRESH_FIRST_HPOS) / 2;
 	static int warned1 = 30;
 
@@ -4135,6 +4136,7 @@ static void record_color_change(int hpos, int regno, uae_u32 value);
 
 static void hack_shres_delay(int hpos)
 {
+	(void)hpos;
 #if 0
 	if (currprefs.chipset_hr)
 		return;
@@ -5583,6 +5585,7 @@ superhires pixels (if AGA).  */
 
 static void record_sprite(int num, int sprxp, uae_u16 *data, uae_u16 *datb, unsigned int ctl)
 {
+	(void)ctl;
 	struct sprite_entry *e = curr_sprite_entries + next_sprite_entry;
 	int word_offs;
 	uae_u32 collision_mask;
@@ -7049,7 +7052,7 @@ void compute_framesync(void)
 		hblank_hz,
 		maxhpos, maxvpos, lof_store ? 1 : 0,
 		cr ? cr->index : -1,
-		cr != NULL && cr->label != NULL ? cr->label : _T("<?>"),
+		cr != NULL && cr->label[0] != 0 ? cr->label : _T("<?>"),
 		currprefs.gfx_apmode[ad->picasso_on ? 1 : 0].gfx_display, ad->picasso_on, ad->picasso_requested_on
 	);
 
@@ -8178,16 +8181,19 @@ static void SPRHSTRT(int hpos, uae_u16 v)
 }
 static void SPRHSTOP(int hpos, uae_u16 v)
 {
+	(void)hpos;
 	sprhstop = v;
 	sprhstop_v = v & (MAXVPOS_LINES_ECS - 1);
 }
 static void BPLHSTRT(int hpos, uae_u16 v)
 {
+	(void)hpos;
 	bplhstrt = v;
 	bplhstrt_v = v & (MAXVPOS_LINES_ECS - 1);
 }
 static void BPLHSTOP(int hpos, uae_u16 v)
 {
+	(void)hpos;
 	bplhstop = v;
 	bplhstop_v = v & (MAXVPOS_LINES_ECS - 1);
 }
@@ -8520,7 +8526,9 @@ static void COPJMP(int num, int vblank)
 					// Wake up is delayed by 1 copper cycle if copper is currently loading words
 					cop_state.state = COP_strobe_delay4;
 					break;
-			}
+				default:
+					// Other copper states do not need special handling
+					break;			}
 		} else {
 			cop_state.state = copper_access ? COP_strobe_delay1 : COP_strobe_extra;
 		}
@@ -9404,6 +9412,7 @@ static void DIWSTRT_next(uae_u32 v)
 }
 static void DIWSTRT(int hpos, uae_u16 v)
 {
+	(void)hpos;
 	if (diwstrt == v && !diwhigh_written) {
 		return;
 	}
@@ -9421,6 +9430,7 @@ static void DIWSTOP_next(uae_u32 v)
 }
 static void DIWSTOP(int hpos, uae_u16 v)
 {
+	(void)hpos;
 	if (diwstop == v && !diwhigh_written) {
 		return;
 	}
@@ -9439,6 +9449,7 @@ static void DIWHIGH_next(uae_u32 v)
 }
 static void DIWHIGH(int hpos, uae_u16 v)
 {
+	(void)hpos;
 	if (!ecs_agnus && !ecs_denise) {
 		return;
 	}
@@ -11280,7 +11291,9 @@ next:
 			case COP_strobe_extra:
 				// Wait 1 copper cycle doing nothing
 				cop_state.state = COP_strobe_delay1;
-				break;
+			default:
+				// Other copper states do not need handling
+				break;				break;
 			}
 		}
 
@@ -11964,7 +11977,7 @@ static bool framewait(void)
 
 #ifdef DEBUGGER
 		if (0 || (log_vsync & 2)) {
-			write_log (_T("%06d %06d/%06d %03d%%\n"), t, vsynctimeperline, vsynctimebase, t * 100 / vsynctimebase);
+			write_log (_T("%06lld %06lld/%06lld %03lld%%\n"), (long long)t, (long long)vsynctimeperline, (long long)vsynctimebase, (long long)(t * 100 / vsynctimebase));
 		}
 #endif
 
@@ -12028,7 +12041,7 @@ static bool framewait(void)
 		vsyncmaxtime = curr_time + max;
 
 		if (1)
-			write_log (_T("%06d:%06d/%06d %d %d\n"), adjust, vsynctimeperline, vstb, max, maxvpos_display);
+			write_log (_T("%06lld:%06lld/%06lld %d %d\n"), (long long)adjust, (long long)vsynctimeperline, (long long)vstb, max, maxvpos_display);
 	
 	} else {
 

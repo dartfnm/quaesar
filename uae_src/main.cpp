@@ -432,7 +432,7 @@ void fixup_prefs (struct uae_prefs *p, bool userconfig)
 
 	read_kickstart_version(p);
 
-	if (p->cpuboard_type && p->cpuboardmem1.size > cpuboard_maxmemory(p)) {
+	if (p->cpuboard_type && p->cpuboardmem1.size > (uae_u32)cpuboard_maxmemory(p)) {
 		error_log(_T("Unsupported accelerator board memory size %d (0x%x).\n"), p->cpuboardmem1.size, p->cpuboardmem1.size);
 		p->cpuboardmem1.size = cpuboard_maxmemory(p);
 	}
@@ -808,6 +808,7 @@ void fixup_prefs (struct uae_prefs *p, bool userconfig)
 	inputdevice_fix_prefs(p, userconfig);
 	target_fixup_options (p);
 	cfgfile_createconfigstore(p);
+	(void)err; // Set but not checked - TODO: implement error handling
 }
 
 int quit_program = 0;
@@ -848,6 +849,7 @@ void uae_quit (void)
 /* 0 = normal, 1 = nogui, -1 = disable nogui, -2 = autorestart */
 void uae_restart(struct uae_prefs *p, int opengui, const TCHAR *cfgfile)
 {
+	(void)p;
 	uae_quit ();
 	restart_program = opengui == -2 ? 4 : (opengui > 0 ? 1 : (opengui == 0 ? 2 : 3));
 	restart_config[0] = 0;
@@ -922,7 +924,7 @@ static TCHAR *parsetext (const TCHAR *s)
 		TCHAR c = *s++;
 		int i;
 		d = my_strdup (s);
-		for (i = 0; i < _tcslen (d); i++) {
+		for (i = 0; i < (int)_tcslen (d); i++) {
 			if (d[i] == c) {
 				d[i] = 0;
 				break;
@@ -1131,6 +1133,7 @@ void leave_program (void)
 
 static int real_main2 (int argc, TCHAR **argv)
 {
+	(void)argc; (void)argv;
 
 #ifdef USE_SDL
 	SDL_Init (SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_NOPARACHUTE);

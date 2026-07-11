@@ -134,56 +134,58 @@ void sound_setadjust(float v) {
     }
 }
 
-static void docorrection(struct sound_dp* s, int sndbuf, float sync, int granulaty) {
-    static int tfprev;
+// static void docorrection(struct sound_dp* s, int sndbuf, float sync, int granulaty) // Unused function - kept for future use
+// {
+//     static int tfprev;
+//
+//     s->avg_correct += sync;
+//     s->cnt_correct++;
+//
+//     if (granulaty < 10)
+//         granulaty = 10;
+//
+//     if (tfprev != timeframes) {
+//         const auto avg = s->avg_correct / s->cnt_correct;
+//
+//         auto skipmode = sync / 100.0f;
+//         const auto avgskipmode = avg / (10000.0f / granulaty);
+//
+//         gui_data.sndbuf = sndbuf;
+//
+//         if (skipmode > ADJUST_LIMIT2)
+//             skipmode = ADJUST_LIMIT2;
+//         if (skipmode < -ADJUST_LIMIT2)
+//             skipmode = -ADJUST_LIMIT2;
+//
+//         sound_setadjust(skipmode + avgskipmode);
+//         tfprev = static_cast<int>(timeframes);
+//     }
+// }
 
-    s->avg_correct += sync;
-    s->cnt_correct++;
-
-    if (granulaty < 10)
-        granulaty = 10;
-
-    if (tfprev != timeframes) {
-        const auto avg = s->avg_correct / s->cnt_correct;
-
-        auto skipmode = sync / 100.0f;
-        const auto avgskipmode = avg / (10000.0f / granulaty);
-
-        gui_data.sndbuf = sndbuf;
-
-        if (skipmode > ADJUST_LIMIT2)
-            skipmode = ADJUST_LIMIT2;
-        if (skipmode < -ADJUST_LIMIT2)
-            skipmode = -ADJUST_LIMIT2;
-
-        sound_setadjust(skipmode + avgskipmode);
-        tfprev = static_cast<int>(timeframes);
-    }
-}
-
-static float sync_sound(float m) {
-    float skipmode;
-    if (isvsync()) {
-        skipmode = (float)pow(m < 0 ? -m : m, EXPVS) / 2.0f;
-        if (m < 0)
-            skipmode = -skipmode;
-        if (skipmode < -ADJUST_VSSIZE)
-            skipmode = -ADJUST_VSSIZE;
-        if (skipmode > ADJUST_VSSIZE)
-            skipmode = ADJUST_VSSIZE;
-
-    } else {
-        skipmode = (float)pow(m < 0 ? -m : m, EXP) / 2.0f;
-        if (m < 0)
-            skipmode = -skipmode;
-        if (skipmode < -ADJUST_SIZE)
-            skipmode = -ADJUST_SIZE;
-        if (skipmode > ADJUST_SIZE)
-            skipmode = ADJUST_SIZE;
-    }
-
-    return skipmode;
-}
+// static float sync_sound(float m) // Unused function - kept for future use
+// {
+//     float skipmode;
+//     if (isvsync()) {
+//         skipmode = (float)pow(m < 0 ? -m : m, EXPVS) / 2.0f;
+//         if (m < 0)
+//             skipmode = -skipmode;
+//         if (skipmode < -ADJUST_VSSIZE)
+//             skipmode = -ADJUST_VSSIZE;
+//         if (skipmode > ADJUST_VSSIZE)
+//             skipmode = ADJUST_VSSIZE;
+//
+//     } else {
+//         skipmode = (float)pow(m < 0 ? -m : m, EXP) / 2.0f;
+//         if (m < 0)
+//             skipmode = -skipmode;
+//         if (skipmode < -ADJUST_SIZE)
+//             skipmode = -ADJUST_SIZE;
+//         if (skipmode > ADJUST_SIZE)
+//             skipmode = ADJUST_SIZE;
+//     }
+//
+//     return skipmode;
+// }
 
 static void clearbuffer_sdl2(struct sound_data* sd) {
     const sound_dp* s = sd->data;
@@ -202,11 +204,12 @@ static void clearbuffer(struct sound_data* sd) {
     }
 }
 
-static void set_reset(struct sound_data* sd) {
-    sd->reset = true;
-    sd->resetcnt = 10;
-    sd->resetframecnt = 0;
-}
+// static void set_reset(struct sound_data* sd) // Unused function - kept for future use
+// {
+//     sd->reset = true;
+//     sd->resetcnt = 10;
+//     sd->resetframecnt = 0;
+// }
 
 static void pause_audio_sdl2(struct sound_data* sd) {
     const sound_dp* s = sd->data;
@@ -245,6 +248,7 @@ static void close_audio_sdl2(struct sound_data* sd) {
 
 void set_volume_sound_device(struct sound_data* sd, int volume, int mute) {
     sound_dp* s = sd->data;
+    (void)s; // Unused - volume control TODO
     if (sd->devicetype == SOUND_DEVICE_SDL2) {
         if (volume < 100 && !mute)
             volume = 100 - volume;
@@ -265,7 +269,7 @@ void set_volume(int volume, int mute) {
 static void finish_sound_buffer_pull(struct sound_data* sd, uae_u16* sndbuffer) {
     auto* s = sd->data;
 
-    if (s->pullbufferlen + sd->sndbufsize > s->pullbuffermaxlen) {
+    if (s->pullbufferlen + sd->sndbufsize > (unsigned int)s->pullbuffermaxlen) {
         write_log(_T("pull overflow! %d %d %d\n"), s->pullbufferlen, sd->sndbufsize, s->pullbuffermaxlen);
         s->pullbufferlen = 0;
         gui_data.sndbuf_status = 1;
@@ -274,7 +278,7 @@ static void finish_sound_buffer_pull(struct sound_data* sd, uae_u16* sndbuffer) 
     memcpy(s->pullbuffer + s->pullbufferlen, sndbuffer, sd->sndbufsize);
     s->pullbufferlen += sd->sndbufsize;
 
-    gui_data.sndbuf = (1000.0f * s->pullbufferlen) / s->pullbuffermaxlen;
+    gui_data.sndbuf = static_cast<int>((1000.0f * s->pullbufferlen) / s->pullbuffermaxlen);
 }
 
 static int open_audio_sdl2(struct sound_data* sd, int index) {
@@ -478,7 +482,7 @@ void reset_sound() {
 }
 
 int init_sound() {
-    bool started = false;
+    // bool started = false; // Used only in commented code below
     gui_data.sndbuf_status = 3;
     gui_data.sndbuf = 0;
     gui_data.sndbuf_avail = false;
@@ -502,14 +506,15 @@ int init_sound() {
             currprefs.start_uncaptured && currprefs.inactive_nosound))
         pause_sound();
     */
-    started = true;
+    // started = true; // Commented out
     return 1;
 }
 
-static void disable_sound() {
-    close_sound();
-    currprefs.produce_sound = changed_prefs.produce_sound = 1;
-}
+// static void disable_sound() // Unused function - kept for future use
+// {
+//     close_sound();
+//     currprefs.produce_sound = changed_prefs.produce_sound = 1;
+// }
 
 static int reopen_sound(void) {
     const auto paused = sdp->paused != 0;
@@ -593,7 +598,7 @@ static void send_sound(struct sound_data* sd, uae_u16* sndbuffer) {
 }
 
 int get_sound_event(void) {
-    int type = sdp->devicetype;
+    // int type = sdp->devicetype; // Only used in commented code below
     if (sdp->paused || sdp->deactive)
         return 0;
     // if (type == SOUND_DEVICE_WASAPI || type == SOUND_DEVICE_WASAPI_EXCLUSIVE || type == SOUND_DEVICE_PA) {
@@ -611,7 +616,7 @@ bool audio_is_event_frame_possible(int) {
         return false;
     if (type == SOUND_DEVICE_SDL2) {
         sound_dp* s = sdp->data;
-        int bufsize = reinterpret_cast<uae_u8*>(paula_sndbufpt) - reinterpret_cast<uae_u8*>(paula_sndbuffer);
+        int bufsize = static_cast<int>(reinterpret_cast<uae_u8*>(paula_sndbufpt) - reinterpret_cast<uae_u8*>(paula_sndbuffer));
         bufsize /= sdp->samplesize;
         const int todo = s->sndbufsize - bufsize;
         int samplesperframe = sdp->obtainedfreq / static_cast<int>(vblank_hz);
@@ -661,7 +666,7 @@ bool audio_finish_pull() {
 }
 
 static void handle_reset() {
-    if (sdp->resetframe == timeframes)
+    if ((uae_u32)sdp->resetframe == timeframes)
         return;
     sdp->resetframe = static_cast<int>(timeframes);
     sdp->resetframecnt--;
@@ -697,7 +702,7 @@ static void handle_reset() {
 
 void finish_sound_buffer() {
     static unsigned long tframe;
-    const auto bufsize = reinterpret_cast<uae_u8*>(paula_sndbufpt) - reinterpret_cast<uae_u8*>(paula_sndbuffer);
+    const int bufsize = static_cast<int>(reinterpret_cast<uae_u8*>(paula_sndbufpt) - reinterpret_cast<uae_u8*>(paula_sndbuffer));
 
     if (sdp->reset) {
         handle_reset();
@@ -805,6 +810,8 @@ static int set_master_volume(int volume, int mute) {
 }
 
 static int get_master_volume(int* volume, int* mute) {
+    (void)volume; // Unused parameter - TODO: implement
+    (void)mute; // Unused parameter - TODO: implement
     return currprefs.sound_volume_master;
 }
 

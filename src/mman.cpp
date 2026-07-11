@@ -117,6 +117,7 @@ static void* VirtualAlloc(void* lpAddress, size_t dwSize, int flAllocationType, 
 }
 
 static int VirtualProtect(void* lpAddress, int dwSize, int flNewProtect, unsigned int* lpflOldProtect) {
+    (void)lpflOldProtect;
     write_log("- VirtualProtect addr=%p size=%d prot=%d\n", lpAddress, dwSize, flNewProtect);
     int prot = 0;
     if (flNewProtect == PAGE_READWRITE) {
@@ -136,7 +137,7 @@ static int VirtualProtect(void* lpAddress, int dwSize, int flNewProtect, unsigne
 }
 
 static bool VirtualFree(void* lpAddress, size_t dwSize, int dwFreeType) {
-    int result = 0;
+    // int result = 0; // Unused variable
     if (dwFreeType == MEM_DECOMMIT) {
         return uae_vm_decommit(lpAddress, dwSize);
     } else if (dwFreeType == MEM_RELEASE) {
@@ -149,11 +150,11 @@ static int GetLastError() {
     return errno;
 }
 
-static int my_getpagesize(void) {
-    return uae_vm_page_size();
-}
+// static int my_getpagesize(void) { // Unused function - replaced by getpagesize macro
+//     return uae_vm_page_size();
+// }
 
-#define getpagesize my_getpagesize
+// #define getpagesize my_getpagesize // Unused macro - function also commented out
 
 #define WRITE_WATCH_FLAG_RESET 1
 
@@ -163,10 +164,12 @@ typedef DWORD* LPDWORD;
 
 UINT GetWriteWatch(DWORD dwFlags, PVOID lpBaseAddress, SIZE_T dwRegionSize, PVOID* lpAddresses, ULONG_PTR* lpdwCount,
                    LPDWORD lpdwGranularity) {
+    (void)dwFlags; (void)lpBaseAddress; (void)dwRegionSize; (void)lpAddresses; (void)lpdwCount; (void)lpdwGranularity;
     return 0;
 }
 
 UINT ResetWriteWatch(LPVOID lpBaseAddress, SIZE_T dwRegionSize) {
+    (void)lpBaseAddress; (void)dwRegionSize;
     return 0;
 }
 

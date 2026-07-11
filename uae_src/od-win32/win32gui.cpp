@@ -780,7 +780,7 @@ static BOOL GetSaveFileName_2 (HWND parent, OPENFILENAME *opn, const GUID *guid)
 int DirectorySelection (HWND hDlg, const GUID *guid, TCHAR *path)
 {
 	int val;
-	OPENFILENAME ofn = { 0 };
+	OPENFILENAME ofn = {}; 
 	ofn.hwndOwner = hDlg;
 	ofn.lpstrFile = path;
 	ofn.lpstrInitialDir = path;
@@ -1030,7 +1030,7 @@ static void addeditmenu (HMENU menu, struct favitems *fitem)
 	HMENU emenu = CreatePopupMenu ();
 	TCHAR newpath[MAX_DPATH];
 
-	MENUITEMINFO mii = { 0 };
+	MENUITEMINFO mii = {}; 
 	mii.cbSize = sizeof mii;
 
 	mii.fMask = MIIM_FTYPE;
@@ -1080,7 +1080,7 @@ static int popupmenu (HWND hwnd, struct favitems *items, int morefiles)
 	i = 0;
 	while (items[i].type) {
 		if (items[i].type >= 2) {
-			MENUITEMINFO mii = { 0 };
+			MENUITEMINFO mii = {}; 
 			mii.cbSize = sizeof mii;
 			mii.fMask = MIIM_STRING | MIIM_ID;
 			mii.fType = MFT_STRING;
@@ -1094,7 +1094,7 @@ static int popupmenu (HWND hwnd, struct favitems *items, int morefiles)
 		i++;
 	}
 	if (morefiles < 0) {
-		MENUITEMINFO mii = { 0 };
+		MENUITEMINFO mii = {}; 
 		mii.cbSize = sizeof mii;
 		mii.fMask = MIIM_STRING | MIIM_ID;
 		mii.fType = MFT_STRING;
@@ -1106,7 +1106,7 @@ static int popupmenu (HWND hwnd, struct favitems *items, int morefiles)
 		got = 1;
 	}
 	if (got) {
-		MENUITEMINFO mii = { 0 };
+		MENUITEMINFO mii = {}; 
 		mii.cbSize = sizeof mii;
 		mii.fMask = MIIM_FTYPE;
 		mii.fType = MFT_SEPARATOR;
@@ -1116,7 +1116,7 @@ static int popupmenu (HWND hwnd, struct favitems *items, int morefiles)
 	i = 0;
 	while (items[i].type) {
 		if (items[i].type == 1) {
-			MENUITEMINFO mii = { 0 };
+			MENUITEMINFO mii = {}; 
 			mii.cbSize = sizeof mii;
 			mii.fMask = MIIM_STRING | MIIM_ID;
 			mii.fType = MFT_STRING;
@@ -1646,7 +1646,7 @@ struct romscandata {
 
 static struct romdata *scan_single_rom_2 (struct zfile *f)
 {
-	uae_u8 buffer[20] = { 0 };
+	uae_u8 buffer[20] = {}; 
 	uae_u8 *rombuf;
 	int cl = 0, size;
 	struct romdata *rd = 0;
@@ -2864,9 +2864,9 @@ int DiskSelection_2 (HWND hDlg, WPARAM wParam, int flag, struct uae_prefs *prefs
 	int nosavepath = 0;
 	const GUID *guid = NULL;
 
-	TCHAR szTitle[MAX_DPATH] = { 0 };
+	TCHAR szTitle[MAX_DPATH] = {}; 
 	TCHAR szFormat[MAX_DPATH];
-	TCHAR szFilter[MAX_DPATH] = { 0 };
+	TCHAR szFilter[MAX_DPATH] = {}; 
 
 	memset (&openFileName, 0, sizeof (OPENFILENAME));
 
@@ -4456,7 +4456,7 @@ static void getqualifiername (TCHAR *p, uae_u64 mask)
 
 static int input_get_lv_index(HWND list, int index)
 {
-	LVFINDINFO plvfi = { 0 };
+	LVFINDINFO plvfi = {}; 
 	plvfi.flags = LVFI_PARAM;
 	plvfi.lParam = index;
 	return ListView_FindItem(list, -1, &plvfi);
@@ -4572,7 +4572,7 @@ static int inputmap_handle (HWND list, int currentdevnum, int currentwidgetnum,
 			int evtnum;
 			for (int i = 0; (evtnum = events[i]) >= 0; i++) {
 				const struct inputevent *evt = inputdevice_get_eventinfo (evtnum);
-				LV_ITEM lvstruct = { 0 };
+				LV_ITEM lvstruct = {}; 
 				int devnum;
 				int status;
 				TCHAR name[256];
@@ -4583,7 +4583,7 @@ static int inputmap_handle (HWND list, int currentdevnum, int currentwidgetnum,
 				uae_u64 flags;
 
 				if (list) {
-					LVGROUP group = { 0 };
+					LVGROUP group = {}; 
 					group.cbSize = sizeof (LVGROUP);
 					group.mask = LVGF_HEADER | LVGF_GROUPID;
 					group.pszHeader = (TCHAR*)evt->name;
@@ -4860,7 +4860,7 @@ static void SortListView(HWND list, int sortcolumn, int dir)
 	cnt = ListView_GetItemCount(list);
 	names = xmalloc(TCHAR*, cnt);
 	for (int i = 0; i < cnt; i++) {
-		LVITEM item = { 0 };
+		LVITEM item = {}; 
 		item.iItem = i;
 		item.iSubItem = sortcolumn;
 		item.mask = LVIF_TEXT;
@@ -5438,7 +5438,7 @@ static void InitializeListView (HWND hDlg)
 		listview_column_width[2] = MulDiv(450, dpi, 72);
 		for (i = 0; i < MAX_TOTAL_SCSI_DEVICES; i++) {
 			TCHAR tmp[10];
-			struct device_info di = { 0 };
+			struct device_info di = {}; 
 			struct cdslot *cds = &workprefs.cdslots[i];			
 			
 			if (cds->inuse)
@@ -5694,7 +5694,7 @@ static int listview_find_selected(HWND list, bool paramIndex)
 	for (i = 0; i < items; i++) {
 		if (ListView_GetItemState(list, i, LVIS_SELECTED) == LVIS_SELECTED) {
 			if (paramIndex) {
-				LVITEM pitem = { 0 };
+				LVITEM pitem = {}; 
 				pitem.mask = LVIF_PARAM;
 				pitem.iItem = i;
 				ListView_GetItem(list, &pitem);
@@ -5745,7 +5745,7 @@ static int listview_entry_from_click (HWND list, int *column, bool paramIndex)
 					x += cw;
 				}
 				if (paramIndex) {
-					LVITEM pitem = { 0 };
+					LVITEM pitem = {}; 
 					pitem.mask = LVIF_PARAM;
 					pitem.iItem = entry;
 					ListView_GetItem(list, &pitem);
@@ -6003,7 +6003,7 @@ static bool configsearch(struct ConfigStruct *config)
 			break;
 			case 2:
 			{
-				TCHAR tag[CFG_DESCRIPTION_LENGTH + 1] = { 0 };
+				TCHAR tag[CFG_DESCRIPTION_LENGTH + 1] = {}; 
 				if (config->Tags[0]) {
 					_tcscpy(tag, config->Tags);
 					TCHAR *p = tag;
@@ -6900,7 +6900,7 @@ static void savelog (HWND hDlg, int all)
 		all ? _T("zip") : _T("txt"));
 
 	if (all) {
-		OPENFILENAME openFileName = { 0 };
+		OPENFILENAME openFileName = {}; 
 
 		flush_log ();
 		_tcscpy(tmp, name);
@@ -15000,7 +15000,7 @@ static void sethfdostype (HWND hDlg, int idx)
 
 static void updatehdfinfo(HWND hDlg, bool force, bool defaults, bool realdrive)
 {
-	uae_u8 id[512] = { 0 };
+	uae_u8 id[512] = {}; 
 	uae_u64 bsize;
 	uae_u32 blocks, cyls, i;
 	TCHAR tmp[200], tmp2[200];
@@ -15957,7 +15957,7 @@ static void new_filesys (HWND hDlg, int entry)
 
 static void new_cddrive (HWND hDlg, int entry)
 {
-	struct uaedev_config_info ci = { 0 };
+	struct uaedev_config_info ci = {}; 
 	ci.device_emu_unit = 0;
 	ci.controller_type = current_cddlg.ci.controller_type;
 	ci.controller_unit = current_cddlg.ci.controller_unit;
@@ -15970,7 +15970,7 @@ static void new_cddrive (HWND hDlg, int entry)
 static void new_tapedrive (HWND hDlg, int entry)
 {
 	struct uaedev_config_data *uci;
-	struct uaedev_config_info ci = { 0 };
+	struct uaedev_config_info ci = {}; 
 	ci.controller_type = current_tapedlg.ci.controller_type;
 	ci.controller_unit = current_tapedlg.ci.controller_unit;
 	ci.readonly = current_tapedlg.ci.readonly;
@@ -19452,7 +19452,7 @@ static void remapspeciallistview(HWND list)
 		const struct remapcustoms_s *rc = &remapcustoms[i];
 		TCHAR tmp[MAX_DPATH];
 		_tcscpy(tmp, rc->name);
-		LV_ITEM lvi = { 0 };
+		LV_ITEM lvi = {}; 
 		lvi.mask = LVIF_TEXT | LVIF_PARAM;
 		lvi.pszText = tmp;
 		lvi.lParam = 0;
@@ -19491,7 +19491,7 @@ static INT_PTR CALLBACK RemapSpecialsProc(HWND hDlg, UINT msg, WPARAM wParam, LP
 		int lvflags = LVS_EX_DOUBLEBUFFER | LVS_EX_ONECLICKACTIVATE | LVS_EX_UNDERLINEHOT | LVS_EX_FULLROWSELECT;
 		ListView_SetExtendedListViewStyleEx(list, lvflags, lvflags);
 
-		LV_COLUMN lvc = { 0 };
+		LV_COLUMN lvc = {}; 
 
 		lvc.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
 		lvc.iSubItem = 0;
@@ -19831,7 +19831,7 @@ static int genericpopupmenu (HWND hwnd, TCHAR **items, int *flags, int num)
 
 	menu = CreatePopupMenu ();
 	for (i = 0; i < num; i++) {
-		MENUITEMINFO mii = { 0 };
+		MENUITEMINFO mii = {}; 
 		mii.cbSize = sizeof mii;
 		mii.fMask = MIIM_STRING | MIIM_ID | MIIM_STATE;
 		mii.fType = MFT_STRING;
@@ -19867,7 +19867,7 @@ static void qualifierlistview(HWND list)
 		TCHAR tmp[MAX_DPATH];
 		getqualifiername(tmp, IDEV_MAPPED_QUALIFIER1 << (i * 2));
 
-		LV_ITEM lvi = { 0 };
+		LV_ITEM lvi = {}; 
 		lvi.mask     = LVIF_TEXT | LVIF_PARAM;
 		lvi.pszText  = tmp;
 		lvi.lParam   = 0;
@@ -19907,7 +19907,7 @@ static INT_PTR CALLBACK QualifierProc (HWND hDlg, UINT msg, WPARAM wParam, LPARA
 			int lvflags = LVS_EX_DOUBLEBUFFER | LVS_EX_ONECLICKACTIVATE | LVS_EX_UNDERLINEHOT | LVS_EX_FULLROWSELECT;
 			ListView_SetExtendedListViewStyleEx (list, lvflags , lvflags);
 
-			LV_COLUMN lvc = { 0 };
+			LV_COLUMN lvc = {}; 
 
 			lvc.mask     = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
 			lvc.iSubItem = 0;

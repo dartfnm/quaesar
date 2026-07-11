@@ -50,7 +50,8 @@ addrbank rtarea_bank = {
 	rtarea_lput, rtarea_wput, rtarea_bput,
 	rtarea_xlate, rtarea_check, NULL, _T("rtarea"), _T("UAE Boot ROM"),
 	rtarea_lget, rtarea_wget,
-	ABFLAG_ROMIN | ABFLAG_PPCIOSPACE, S_READ, S_WRITE
+	ABFLAG_ROMIN | ABFLAG_PPCIOSPACE, S_READ, S_WRITE,
+	NULL // sub_banks initialization
 };
 
 #define MAX_ABSOLUTE_ROM_ADDRESS 1024
@@ -162,7 +163,7 @@ static uae_u32 REGPARAM2 rtarea_wget (uaecptr addr)
 
 	if (rtarea_trap_status(addr)) {
 		int trap_offset = addr2 & (RTAREA_TRAP_STATUS_SIZE - 1);
-		int trap_slot = addr2 / RTAREA_TRAP_STATUS_SIZE;
+		// int trap_slot = addr2 / RTAREA_TRAP_STATUS_SIZE; // Currently unused
 		// lock attempt
 		if (trap_offset == 2) {
 			if (rtarea_bank.baseaddr[addr + 1] & 0x80) {
@@ -183,7 +184,7 @@ static uae_u32 REGPARAM2 rtarea_bget (uaecptr addr)
 	if (rtarea_trap_status(addr)) {
 		uaecptr addr2 = addr - RTAREA_TRAP_STATUS;
 		int trap_offset = addr2 & (RTAREA_TRAP_STATUS_SIZE - 1);
-		int trap_slot = addr2 / RTAREA_TRAP_STATUS_SIZE;
+		// int trap_slot = addr2 / RTAREA_TRAP_STATUS_SIZE; // Currently unused
 		if (trap_offset == 0) {
 			// 0 = busy wait, 1 = Wait()
 			rtarea_bank.baseaddr[addr] = trap_mode == 1 ? 1 : 0;
@@ -319,8 +320,8 @@ static void REGPARAM2 rtarea_lput (uaecptr addr, uae_u32 value)
 
 	if (rtarea_trap_status(addr)) {
 		addr -= RTAREA_TRAP_STATUS;
-		int trap_offset = addr & (RTAREA_TRAP_STATUS_SIZE - 1);
-		int trap_slot = addr / RTAREA_TRAP_STATUS_SIZE;
+		// int trap_offset = addr & (RTAREA_TRAP_STATUS_SIZE - 1); // Currently unused
+		// int trap_slot = addr / RTAREA_TRAP_STATUS_SIZE; // Currently unused
 #if NEW_TRAP_DEBUG
 		write_log(_T("PUT TRAP SLOT %d OFFSET %d: V=%08x\n"), trap_slot, trap_offset, value);
 #endif
@@ -460,6 +461,7 @@ void add_rom_absolute(uaecptr addr)
 
 uae_u32 boot_rom_copy(TrapContext *ctx, uaecptr rombase, int mode)
 {
+	(void)ctx; // Parameter unused in current implementation
 	uaecptr reloc = 0;
 	if (currprefs.uaeboard < 3)
 		return 0;
@@ -501,7 +503,7 @@ uae_u32 boot_rom_copy(TrapContext *ctx, uaecptr rombase, int mode)
 	} else {
 		rtarea_write_enabled = false;
 		protect_roms(true);
-		write_log(_T("ROMBASE changed.\n"), absolute_rom_address);
+		write_log(_T("ROMBASE changed."));
 		reloc = 1;
 	}
 	return reloc;
@@ -544,6 +546,7 @@ void align (int b)
 
 static uae_u32 REGPARAM2 nullfunc (TrapContext *ctx)
 {
+	(void)ctx; // Parameter unused in current implementation
 	write_log (_T("Null function called\n"));
 	return 0;
 }

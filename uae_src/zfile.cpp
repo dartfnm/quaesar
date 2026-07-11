@@ -551,7 +551,7 @@ static struct zfile *vhd (struct zfile *z)
 	write_log (_T("%s is VHD %s image, virtual size=%lldK\n"),
 		zfile_getname (z),
 		zvhd->vhd_type == 2 ? _T("fixed") : _T("dynamic"),
-		zvhd->virtsize / 1024);
+		(long long)(zvhd->virtsize / 1024));
 	return z;
 nonvhd:
 end:
@@ -1246,7 +1246,7 @@ static struct zfile *dms (struct zfile *z, int index, int *retcode)
 	TCHAR newname[MAX_DPATH];
 	static int recursive;
 	int i;
-	struct zfile *zextra[DMS_EXTRA_SIZE] = { 0 };
+	struct zfile *zextra[DMS_EXTRA_SIZE] = {}; 
 
 	if (checkwrite (z, retcode))
 		return NULL;
@@ -2882,6 +2882,7 @@ static struct znode *get_znode (struct zvolume *zv, const TCHAR *ppath, int);
 
 static void zfile_fopen_archive_recurse2 (struct zvolume *zv, struct znode *zn, int flags)
 {
+	(void)flags;
 	struct zvolume *zvnew;
 	struct znode *zndir;
 	TCHAR tmp[MAX_DPATH];
@@ -2889,7 +2890,7 @@ static void zfile_fopen_archive_recurse2 (struct zvolume *zv, struct znode *zn, 
 	_stprintf (tmp, _T("%s.DIR"), zn->fullname + _tcslen (zv->root.name) + 1);
 	zndir = get_znode (zv, tmp, TRUE);
 	if (!zndir) {
-		struct zarchive_info zai = { 0 };
+		struct zarchive_info zai = {}; 
 		zvnew = zvolume_alloc_empty (zv, tmp);
 		zvnew->parentz = zn;
 		zai.name = tmp;
@@ -3171,7 +3172,7 @@ static struct zvolume *zfile_fopen_directory (const TCHAR *dirname)
 	while (my_readdir (dir, fname)) {
 		TCHAR fullname[MAX_DPATH];
 		struct mystat statbuf;
-		struct zarchive_info zai = { 0 };
+		struct zarchive_info zai = {}; 
 		if (!_tcscmp (fname, _T(".")) || !_tcscmp (fname, _T("..")))
 			continue;
 		_tcscpy (fullname, dirname);

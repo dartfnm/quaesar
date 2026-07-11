@@ -719,6 +719,7 @@ static void do_extra_channels(int idx, int ch, int *data1, int *data2, int *data
 
 static void get_extra_channels_sample2(int *data1, int *data2, int mode)
 {
+	(void)mode; // Parameter reserved for future use
 	if (!audio_total_extra_streams)
 		return;
 	int idx = 0;
@@ -733,6 +734,7 @@ static void get_extra_channels_sample2(int *data1, int *data2, int mode)
 
 static void get_extra_channels_sample6(int *data1, int *data2, int *data3, int *data4, int *data5, int *data6, int mode)
 {
+	(void)mode; // Parameter reserved for future use
 	if (!audio_total_extra_streams)
 		return;
 	int idx = 0;
@@ -980,28 +982,28 @@ static void sample16i_crux_handler (void)
 		cdp = audio_channel + 0;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data0 = (data0 * ratio + data0p * (4096 - ratio)) >> 12;
 
 		cdp = audio_channel + 1;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data1 = (data1 * ratio + data1p * (4096 - ratio)) >> 12;
 
 		cdp = audio_channel + 2;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data2 = (data2 * ratio + data2p * (4096 - ratio)) >> 12;
 
 		cdp = audio_channel + 3;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data3 = (data3 * ratio + data3p * (4096 - ratio)) >> 12;
 	}
@@ -1267,28 +1269,28 @@ static void sample16si_crux_handler (void)
 		cdp = audio_channel + 0;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data0 = (data0 * ratio + data0p * (4096 - ratio)) >> 12;
 
 		cdp = audio_channel + 1;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data1 = (data1 * ratio + data1p * (4096 - ratio)) >> 12;
 
 		cdp = audio_channel + 2;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data2 = (data2 * ratio + data2p * (4096 - ratio)) >> 12;
 
 		cdp = audio_channel + 3;
 		ratio1 = cdp->per - cdp->evtime;
 		ratio = (ratio1 << 12) / INTERVAL;
-		if (cdp->evtime < scaled_sample_evtime || ratio1 >= INTERVAL)
+		if (cdp->evtime < scaled_sample_evtime || ratio1 >= (unsigned long)INTERVAL)
 			ratio = 4096;
 		data3 = (data3 * ratio + data3p * (4096 - ratio)) >> 12;
 	}
@@ -1446,7 +1448,7 @@ static void audio_event_reset (void)
 	for (i = 0; i < AUDIO_CHANNELS_PAULA; i++)
 		zerostate (i);
 	for (i = 0; i < audio_total_extra_streams; i++)
-		audio_stream[i].evtime = MAX_EV;
+		audio_stream[i].evtime = (int)MAX_EV;
 	schedule_audio ();
 	events_schedule ();
 	samplecnt = 0;
@@ -1516,6 +1518,7 @@ static int isirq(int nr)
 
 static void setirq(int nr, int which)
 {
+	(void)which; // Used only in debug logging
 #if DEBUG_AUDIO > 0
 	struct audio_channel_data *cdp = audio_channel + nr;
 	if (debugchannel (nr))
@@ -1702,7 +1705,8 @@ static bool audio_state_channel2 (int nr, bool perfin)
 	int audav = adkcon & (0x01 << nr);
 	int audap = adkcon & (0x10 << nr);
 	int napnav = (!audav && !audap) || audav;
-	int hpos = current_hpos ();
+	// int hpos = current_hpos(); // Currently unused
+	(void)napnav; // Used for future audio channel state tracking
 
 	cdp->dmaenstore = chan_ena;
 
@@ -1758,7 +1762,7 @@ static bool audio_state_channel2 (int nr, bool perfin)
 	{
 	case 0:
 		if (chan_ena) {
-			cdp->evtime = MAX_EV;
+			cdp->evtime = (int)MAX_EV;
 			cdp->state = 1;
 			setdr(nr, true);
 			cdp->wlen = cdp->len;
@@ -2012,12 +2016,12 @@ void audio_reset (void)
 		for (i = 0; i < AUDIO_CHANNELS_PAULA; i++) {
 			cdp = &audio_channel[i];
 			memset (cdp, 0, sizeof *audio_channel);
-			cdp->per = PERIOD_MAX - 1;
+			cdp->per = (int)(PERIOD_MAX - 1);
 			cdp->data.mixvol = 0;
-			cdp->evtime = MAX_EV;
+			cdp->evtime = (int)MAX_EV;
 		}
 		for (i = 0; i < AUDIO_CHANNEL_STREAMS; i++) {
-			audio_stream[i].evtime = MAX_EV;
+			audio_stream[i].evtime = (int)MAX_EV;
 		}
 	}
 	audio_total_extra_streams = 0;
@@ -2352,7 +2356,7 @@ void update_audio (void)
 		if (currprefs.produce_sound > 1 && best_evtime > rounded)
 			best_evtime = rounded;
 
-		if (best_evtime > n_cycles)
+		if (best_evtime > (evt_t)n_cycles)
 			best_evtime = n_cycles;
 
 		/* Decrease time-to-wait counters */
@@ -2508,6 +2512,7 @@ void event_audxdat_func(uae_u32 v)
 
 void AUDxDAT(int nr, uae_u16 v, uaecptr addr)
 {
+	(void)addr; // Address information not used in this implementation
 	struct audio_channel_data *cdp = audio_channel + nr;
 	int chan_ena = (dmacon & DMA_MASTER) && (dmacon & (1 << nr));
 
@@ -2631,18 +2636,18 @@ void AUDxPER (int nr, uae_u16 v)
 	update_audio ();
 
 	int per = (v ? v : 65536) * CYCLE_UNIT;
-	if (per < PERIOD_MIN * CYCLE_UNIT) {
+	if (per < (int)(PERIOD_MIN * CYCLE_UNIT)) {
 		/* smaller values would cause extremely high cpu usage */
 		per = PERIOD_MIN * CYCLE_UNIT;
 	}
-	if (per < PERIOD_MIN_NONCE * CYCLE_UNIT && !currprefs.cpu_memory_cycle_exact && cdp->dmaenstore) {
+	if (per < (int)(PERIOD_MIN_NONCE * CYCLE_UNIT) && !currprefs.cpu_memory_cycle_exact && cdp->dmaenstore) {
 		/* DMAL emulation and low period can cause very very high cpu usage on slow performance PCs
 		 * Only do this hack if audio DMA is active.
 		 */
 		per = PERIOD_MIN_NONCE * CYCLE_UNIT;
 	}
 
-	if (cdp->per == PERIOD_MAX - 1 && per != PERIOD_MAX - 1) {
+	if (cdp->per == (int)PERIOD_MAX - 1 && per != (int)PERIOD_MAX - 1) {
 		cdp->evtime = CYCLE_UNIT;
 		if (isaudio ()) {
 			schedule_audio ();
@@ -2674,6 +2679,7 @@ void AUDxLEN (int nr, uae_u16 v)
 void AUDxVOL (int nr, uae_u16 v)
 {
 	struct audio_channel_data *cdp = audio_channel + nr;
+	(void)cdp; // Variable currently unused, reserved for future volume tracking
 
 	audio_activate ();
 	update_audio ();
@@ -2780,7 +2786,7 @@ uae_u8 *restore_audio (int nr, uae_u8 *src)
 	acd->len = restore_u16 ();
 	acd->wlen = restore_u16 ();
 	uae_u16 p = restore_u16 ();
-	acd->per = p ? p * CYCLE_UNIT : PERIOD_MAX;
+	acd->per = p ? p * CYCLE_UNIT : (int)PERIOD_MAX;
 	acd->dat = acd->dat2 = restore_u16 ();
 	acd->lc = restore_u32 ();
 	acd->pt = restore_u32 ();
@@ -2812,7 +2818,7 @@ uae_u8 *save_audio (int nr, size_t *len, uae_u8 *dstptr)
 	save_u8 ((acd->dr ? 1 : 0) | (acd->dsr ? 2 : 0) | 0x80);
 	save_u16 (acd->len);
 	save_u16 (acd->wlen);
-	save_u16 (acd->per == PERIOD_MAX ? 0 : acd->per / CYCLE_UNIT);
+	save_u16 (acd->per == (int)PERIOD_MAX ? 0 : (uae_u16)(acd->per / CYCLE_UNIT));
 	save_u16 (acd->dat);
 	save_u32 (acd->lc);
 	save_u32 (acd->pt);
@@ -2891,7 +2897,7 @@ void audio_state_stream_state(int streamid, int *samplep, int highestch, unsigne
 }
 
 static uae_u32 cda_evt;
-static uae_s16 dummy_buffer[4] = { 0 };
+static uae_s16 dummy_buffer[4] = {}; 
 
 void update_cda_sound(float clk)
 {

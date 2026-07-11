@@ -134,7 +134,7 @@ static const TCHAR *fp_printx80(floatx80 *fx, int mode)
 		fs.float_exception_flags = save_exception_flags;
 	}
 
-	if (mode == 0 || mode > _tcslen(fsout))
+	if ((size_t)mode == 0 || mode > (int)_tcslen(fsout))
 		return fsout;
 	fsout[mode] = 0;
 	return fsout;
@@ -148,6 +148,7 @@ static const TCHAR *fp_print(fpdata *fpd, int mode)
 /* Functions for detecting float type */
 static bool fp_is_init(fpdata *fpd)
 {
+	(void)fpd;
 	return false;
 }
 static bool fp_is_snan(fpdata *fpd)
@@ -615,6 +616,7 @@ static void fp_normalize(fpdata *a)
 
 static void fp_to_pack(fpdata *fp, uae_u32 *wrd, int dummy)
 {
+	(void)dummy;
 	floatx80 f;
 	int i;
 	uae_s32 exp;

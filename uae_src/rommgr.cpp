@@ -2251,7 +2251,7 @@ struct zfile *read_rom_name(const TCHAR *filename, bool rw)
 	}
 	f = rom_fopen2(filename, rw ? _T("rb+") : _T("rb"), ZFD_NORMAL);
 	if (f) {
-		uae_u8 tmp[11] = { 0 };
+		uae_u8 tmp[11] = {}; 
 		zfile_fread(tmp, sizeof tmp, 1, f);
 		if (!memcmp(tmp, "AMIROMTYPE1", sizeof tmp)) {
 			struct zfile *df;
@@ -2400,12 +2400,12 @@ int configure_rom (struct uae_prefs *p, const int *rom, int msg)
 
 	if (rd->type & (ROMTYPE_ARCADIAGAME | ROMTYPE_ALG)) {
 		fetch_nvrampath(p->flashfile, sizeof(p->flashfile) / sizeof(TCHAR));
-		_stprintf(p->flashfile + _tcslen(p->flashfile), _T("%s.nvr"), rd->name);
+		_sntprintf(p->flashfile + _tcslen(p->flashfile), sizeof(p->flashfile) / sizeof(TCHAR) - _tcslen(p->flashfile), _T("%s.nvr"), rd->name);
 		clean_path(p->flashfile);
 	}
 	if (rd->type & ROMTYPE_ALG) {
 		fetch_videopath(p->genlock_video_file, sizeof(p->genlock_video_file) / sizeof(TCHAR));
-		_stprintf(p->genlock_video_file + _tcslen(p->genlock_video_file), _T("%s.avi"), rd->name);
+		_sntprintf(p->genlock_video_file + _tcslen(p->genlock_video_file), sizeof(p->genlock_video_file) / sizeof(TCHAR) - _tcslen(p->genlock_video_file), _T("%s.avi"), rd->name);
 		clean_path(p->genlock_video_file);
 	}
 	return 1;

@@ -157,7 +157,7 @@ void filesys_addexternals (void)
 	dwDriveMask >>= 2; // Skip A and B drives...
 
 	for(drive = 'C'; drive <= 'Z'; ++drive) {
-		struct uaedev_config_info ci = { 0 };
+		struct uaedev_config_info ci = {}; 
 		_stprintf (ci.rootdir, _T("%c:\\"), drive);
 		/* Is this drive-letter valid (it used to check for media in drive) */
 		if(dwDriveMask & 1) {

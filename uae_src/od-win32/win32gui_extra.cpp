@@ -1031,13 +1031,13 @@ void rescaleresource(struct newresource *nr, bool full)
 		SetWindowRedraw(nr->hwnd, FALSE);
 	}
 
-	TITLEBARINFO tbi = { 0 };
+	TITLEBARINFO tbi = {}; 
 	tbi.cbSize = sizeof(TITLEBARINFO);
 	GetTitleBarInfo(nr->hwnd, &tbi);
 
 	int height = tbi.rcTitleBar.bottom - tbi.rcTitleBar.top;
 
-	WINDOWINFO pwi = { 0 };
+	WINDOWINFO pwi = {}; 
 	pwi.cbSize = sizeof(WINDOWINFO);
 	GetWindowInfo(nr->hwnd, &pwi);
 
@@ -1351,8 +1351,8 @@ void scaleresource_init(const TCHAR *prefix, int fullscreen)
 
 int scaleresource_choosefont(HWND hDlg, int fonttype)
 {
-	CHOOSEFONT cf = { 0 };
-	LOGFONT lf = { 0 };
+	CHOOSEFONT cf = {}; 
+	LOGFONT lf = {}; 
 	TCHAR *fontname[3];
 	int *fontsize[3], *fontstyle[3], *fontweight[3];
 	int lm = 72;
@@ -2640,7 +2640,7 @@ void process_gui_control(HWND h, struct newresource *nres)
 
 			if (mousemove && clicked[i] == 1 && clickchanged) {
 
-				INPUT inputs[2] = { 0 };
+				INPUT inputs[2] = {}; 
 				inputs[0].type = INPUT_MOUSE;
 				inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 				inputs[1].type = INPUT_MOUSE;
@@ -2651,7 +2651,7 @@ void process_gui_control(HWND h, struct newresource *nres)
 
 			} else if (mousemove && clicked[i] == 2 && clickchanged) {
 
-				INPUT inputs[2] = { 0 };
+				INPUT inputs[2] = {}; 
 				inputs[0].type = INPUT_MOUSE;
 				inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 				inputs[1].type = INPUT_MOUSE;
@@ -2662,7 +2662,7 @@ void process_gui_control(HWND h, struct newresource *nres)
 
 			} else if (mousemove && clicked[i] == 8 && clickchanged) {
 
-				INPUT inputs[2] = { 0 };
+				INPUT inputs[2] = {}; 
 				inputs[0].type = INPUT_KEYBOARD;
 				inputs[0].ki.wVk = VK_TAB;
 				inputs[1].type = INPUT_KEYBOARD;
@@ -2716,7 +2716,7 @@ void process_gui_control(HWND h, struct newresource *nres)
 						pt.y += -ydiff;
 						if (h) {
 							RECT r;
-							WINDOWINFO wi = { 0 };
+							WINDOWINFO wi = {}; 
 							wi.cbSize = sizeof(wi);
 							GetWindowInfo(h, &wi);
 							r = wi.rcClient;

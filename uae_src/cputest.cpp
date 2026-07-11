@@ -1862,7 +1862,7 @@ static bool fpu_precision_valid(floatx80 f)
 			return false;
 		}
 	}
-	float_status status = { 0 };
+	float_status status = {}; 
 	status.floatx80_rounding_precision = 80;
 	status.float_rounding_mode = float_round_nearest_even;
 	status.float_exception_flags = 0;
@@ -2847,7 +2847,7 @@ static int putfpuimm(uaecptr addr, int opcodesize, int *isconstant)
 	}
 	case 3: // P
 	{
-		fpdata fpd = { 0 };
+		fpdata fpd = {}; 
 		if (fpu_imm_cnt & 1) {
 			fpd.fpx = int32_to_floatx80(rand32());
 		} else {
@@ -5933,7 +5933,7 @@ static void test_mnemo(const TCHAR *path, const TCHAR *mnemo, const TCHAR *ovrfi
 					// pre-test data end
 					*dst++ = CT_END_INIT;
 
-					int exception_array[256] = { 0 };
+					int exception_array[256] = {}; 
 					int ok = 0;
 					int cnt_stopped = 0;
 

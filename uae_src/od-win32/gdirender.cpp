@@ -204,7 +204,7 @@ static bool allocsprite(struct gdistruct *gdi, struct gdibm *bm, int w, int h)
 {
 	bm->thdc = CreateCompatibleDC(gdi->hdc);
 	if (bm->thdc) {
-		BITMAPV4HEADER bmi = { 0 };
+		BITMAPV4HEADER bmi = {}; 
 		bmi.bV4Size = sizeof(BITMAPINFOHEADER);
 		bmi.bV4Width = w;
 		bmi.bV4Height = -h;

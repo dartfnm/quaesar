@@ -749,7 +749,7 @@ static bool audio_state_sndboard_uae(int streamid, void *params)
 					uaesndboard_stop(data, s);
 				}
 				if (!s->indirect_address) {
-					s->indirect_ptr = NULL;
+					s->indirect_ptr = 0;
 				}
 			}
 			if (end) {
@@ -2484,7 +2484,7 @@ static bool audio_state_sndboard_fm801(int streamid, void *params)
 	if (data->streamid != streamid)
 		return false;
 	if (data->play_on) {
-		uae_u8 sample[2 * 6] = { 0 };
+		uae_u8 sample[2 * 6] = {}; 
 		pci_read_dma(data->pcibs, data->play_dma2[data->dmach], sample, data->bytesperframe);
 		for (int i = 0; i < data->ch; i++) {
 			uae_s16 smp;
@@ -3011,15 +3011,18 @@ static void snd_init(void)
 
 #ifdef _WIN32
 
+#include <initguid.h>
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
 
 #define REFTIMES_PER_SEC  10000000
 
+#ifdef _MSC_VER
 static const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
 static const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 static const IID IID_IAudioClient = __uuidof(IAudioClient);
 static const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
+#endif
 
 #define EXIT_ON_ERROR(hres) if (FAILED(hres)) { goto Exit; }
 #define SAFE_RELEASE(punk)  if ((punk) != NULL) { (punk)->Release(); (punk) = NULL; }
@@ -3154,17 +3157,21 @@ Exit:;
 
 #else
 
-static bool sndboard_init_capture(int freq) { 
+static bool sndboard_init_capture(int freq) {
+	(void)freq; 
     return false; 
 }
 
 static void sndboard_free_capture(void) { }
 
-static uae_u8 *sndboard_get_buffer(int *frames) { 
+static uae_u8 *sndboard_get_buffer(int *frames) {
+	(void)frames; 
     return NULL; 
 }
 
-static void sndboard_release_buffer(uae_u8 *buffer, int frames) { 
+static void sndboard_release_buffer(uae_u8 *buffer, int frames) {
+	(void)buffer;
+	(void)frames; 
 }
 
 #endif

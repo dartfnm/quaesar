@@ -403,6 +403,7 @@ static uae_u32 trap_Call68k(TrapContext *ctx, uaecptr func_addr)
 */
 static uae_u32 REGPARAM2 m68k_call_handler(TrapContext *dummy_ctx)
 {
+	(void)dummy_ctx;
 	TrapContext *context = current_context;
 
 	uae_u32 sp;
@@ -441,6 +442,7 @@ static uae_u32 REGPARAM2 m68k_call_handler(TrapContext *dummy_ctx)
 */
 static uae_u32 REGPARAM2 m68k_return_handler(TrapContext *dummy_ctx)
 {
+	(void)dummy_ctx;
 	TrapContext *context;
 	uae_u32 sp;
 
@@ -480,6 +482,7 @@ static uae_u32 REGPARAM2 m68k_return_handler(TrapContext *dummy_ctx)
 */
 static uae_u32 REGPARAM2 exit_trap_handler(TrapContext *dummy_ctx)
 {
+	(void)dummy_ctx;
 	TrapContext *context = current_context;
 
 	if (trace_traps) {
@@ -567,7 +570,7 @@ static void hardware_trap_ack(TrapContext *ctx)
 		set_special_exter(SPCFLAG_UAEINT);
 	}
 	if (!trap_in_use[ctx->trap_slot])
-		write_log(_T("TRAP SLOT %d ACK WIIHOUT ALLOCATION!\n"));
+		write_log(_T("TRAP SLOT %d ACK WIIHOUT ALLOCATION!\n"), ctx->trap_slot);
 	trap_in_use[ctx->trap_slot] = false;
 	xfree(ctx);
 }
@@ -581,7 +584,7 @@ static void hardware_trap_thread(void *arg)
 			break;
 
 		if (trap_in_use[ctx->trap_slot]) {
-			write_log(_T("TRAP SLOT %d ALREADY IN USE!\n"));
+			write_log(_T("TRAP SLOT %d ALREADY IN USE!\n"), ctx->trap_slot);
 		}
 		trap_in_use[ctx->trap_slot] = true;
 
@@ -643,7 +646,7 @@ void trap_background_set_complete(TrapContext *ctx)
 	atomic_dec(&ctx->trap_background);
 	if (!ctx->trap_background) {
 		if (!ctx->trap_done) {
-			write_log(_T("trap_background_set_complete(%d) still waiting!?\n"), ctx->tindex);
+			write_log(_T("trap_background_set_complete(%d) still waiting!?\n"), (int)ctx->tindex);
 			while (!ctx->trap_done);
 		}
 		hardware_trap_ack(ctx);

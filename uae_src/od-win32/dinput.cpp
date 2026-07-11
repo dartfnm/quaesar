@@ -416,7 +416,7 @@ static int doregister_rawinput (bool add)
 {
 	struct AmigaMonitor *mon = &AMonitors[0];
 	int num;
-	RAWINPUTDEVICE rid[2 + 2 + MAX_INPUT_DEVICES] = { 0 };
+	RAWINPUTDEVICE rid[2 + 2 + MAX_INPUT_DEVICES] = {}; 
 
 	if (!rawinput_available)
 		return 0;
@@ -754,9 +754,9 @@ static int gettabletres (AXIS *a)
 void *open_tablet (HWND hwnd)
 {
 	static int initialized;
-	LOGCONTEXT lc = { 0 };
-	AXIS tx = { 0 }, ty = { 0 }, tz = { 0 };
-	AXIS pres = { 0 };
+	LOGCONTEXT lc = {}; 
+	AXIS tx = { 0 }, ty = { 0 }, tz = {}; 
+	AXIS pres = {}; 
 	int xm, ym, zm;
 
 	if (!tablet)
@@ -3100,7 +3100,7 @@ BOOL IsXInputDevice(const GUID* pGuidProductFromDirectInput)
 {
 	IWbemLocator*           pIWbemLocator = NULL;
 	IEnumWbemClassObject*   pEnumDevices = NULL;
-	IWbemClassObject*       pDevices[20] = { 0 };
+	IWbemClassObject*       pDevices[20] = {}; 
 	IWbemServices*          pIWbemServices = NULL;
 	BSTR                    bstrNamespace = NULL;
 	BSTR                    bstrDeviceID = NULL;

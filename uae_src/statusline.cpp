@@ -136,6 +136,8 @@ void statusline_set_font(const char *newnumbers, int width, int height)
 
 int statusline_set_multiplier(int monid, int width, int height)
 {
+	(void)width;
+	(void)height;
 	struct amigadisplay *ad = &adisplays[monid];
 	int idx = ad->picasso_on ? 1 : 0;
 	int mult = currprefs.leds_on_screen_multiplier[idx];
@@ -192,7 +194,7 @@ void draw_status_line_single(int monid, uae_u8 *buf, int bpp, int y, int totalwi
 		pen_rgb = c1;
 		if (led >= LED_DF0 && led <= LED_DF3) {
 			int pled = led - LED_DF0;
-			struct floppyslot *fs = &currprefs.floppyslots[pled];
+			// struct floppyslot *fs = &currprefs.floppyslots[pled]; // Unused variable
 			struct gui_info_drive *gid = &gui_data.drives[pled];
 			int track = gid->drive_track;
 			pos = 7 + pled;
@@ -557,5 +559,7 @@ void statusline_vsync(void)
 
 void statusline_single_erase(int monid, uae_u8 *buf, int bpp, int y, int totalwidth)
 {
+	(void)monid;
+	(void)y;
 	memset(buf, 0, bpp * totalwidth);
 }

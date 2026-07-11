@@ -298,8 +298,8 @@ private:
 	// Private stuff
 	BridgeDriverHandle m_handle;				// Handle to loaded driver
 	unsigned int m_driverIndex;					// Index of that driver
-	TCharString m_error = { 0 };				// Last error
-	TCharString m_warning = { 0 };				// Last warning
+	TCharString m_error = {}; 				// Last error
+	TCharString m_warning = {}; 				// Last warning
 	BridgeDriver* m_driverInfo;					// Pointer to the driver info if retreived
 #ifdef _UNICODE
 	std::string m_lastErrorAnsi;				// Non-unicode version of the last error

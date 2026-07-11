@@ -230,9 +230,9 @@ static void nvram_read (void)
 		cd32_flashfile = zfile_fopen (path, _T("wb"), 0);
 	if (cd32_flashfile) {
 		size_t size = zfile_fread(cd32_nvram, 1, currprefs.cs_cd32nvram_size, cd32_flashfile);
-		if (size == currprefs.cs_cd32nvram_size && maxlen > currprefs.cs_cd32nvram_size)
+		if (size == (size_t)currprefs.cs_cd32nvram_size && maxlen > currprefs.cs_cd32nvram_size)
 			size += zfile_fread(cubo_nvram, 1, maxlen - currprefs.cs_cd32nvram_size, cd32_flashfile);
-		if (size < maxlen)
+		if (size < (size_t)maxlen)
 			zfile_fwrite(cd32_nvram + size, 1, maxlen - size, cd32_flashfile);
 	}
 	cd32_eeprom = eeprom_new(cd32_nvram, currprefs.cs_cd32nvram_size, cd32_flashfile);
@@ -565,7 +565,8 @@ static void subfunc (uae_u8 *data, int cnt)
 #endif
 	if (subcodebufferinuse[subcodebufferoffsetw]) {
 		memset (subcodebufferinuse, 0,sizeof (subcodebufferinuse));
-		subcodebufferoffsetw = subcodebufferoffset = 0;
+		subcodebufferoffset = 0;
+		subcodebufferoffsetw = 0;
 		uae_sem_post (&sub_sem);
 		//write_log (_T("CD32: subcode buffer overflow 1\n"));
 		return;
@@ -590,6 +591,7 @@ static void subfunc (uae_u8 *data, int cnt)
 
 static int statusfunc(int status, int playpos)
 {
+	(void)playpos; // Parameter unused in current implementation
 	if (status == -1)
 		return 0;
 	if (status == -2)
@@ -642,7 +644,7 @@ static bool isaudiotrack (int startlsn)
 	for (i = 0; i < cdrom_toc_cd_buffer.points; i++) {
 		s = &cdrom_toc_cd_buffer.toc[i];
 		addr = s->paddress;
-		if (s->track > 0 && s->track < 100 && addr >= startlsn)
+		if (s->track > 0 && s->track < 100 && addr >= (uae_u32)startlsn)
 			break;
 		s++;
 	}
@@ -658,7 +660,7 @@ static struct cd_toc *get_track (int startlsn)
 	for (int i = cdrom_toc_cd_buffer.first_track_offset + 1; i <= cdrom_toc_cd_buffer.last_track_offset + 1; i++) {
 		struct cd_toc *s = &cdrom_toc_cd_buffer.toc[i];
 		uae_u32 addr = s->paddress;
-		if (startlsn < addr)
+		if (startlsn < (int)addr)
 			return s - 1;
 	}
 	return NULL;
@@ -753,6 +755,7 @@ static int get_cdrom_toc (void)
 {
 	int j;
 	int datatrack = 0, secondtrack = 0;
+	(void)datatrack; // Set but not used - kept for potential future use
 
 	cdrom_toc_counter = -1;
 	if (!sys_command_cd_toc (unitnum, &cdrom_toc_cd_buffer))
@@ -795,7 +798,14 @@ static bool is_valid_data_sector(int sector)
 /* open device */
 static int sys_cddev_open (void)
 {
-	struct device_info di = { 0 };
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#endif
+	struct device_info di = {};
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 	unitnum = get_standard_cd_unit (CD_STANDARD_UNIT_CD32);
 	sys_command_info (unitnum, &di, 0);
 	write_log (_T("CD32: using drive %s (unit %d, media %d)\n"), di.label, unitnum, di.media_inserted);
@@ -916,12 +926,15 @@ static int cdrom_command_led (void)
 	return 0;
 }
 
+// static int cdrom_command_idle_status (void); // Currently unused
+#if 0
 static int cdrom_command_idle_status (void)
 {
 	cdrom_result_buffer[0] = 0x0a;
 	cdrom_result_buffer[1] = 0x70;
 	return 2;
 }
+#endif
 
 static int cdrom_command_media_status (void)
 {
@@ -1334,7 +1347,7 @@ static void cdrom_run_read (void)
 				write_log(_T("CD32: Akiko warning: Flags = %08x!\n"), cdrom_flags);
 
 			if (cdrom_flags & CDFLAG_SUBCODE) {
-				uae_u8 subbuf[SUB_CHANNEL_SIZE] = { 0 };
+				uae_u8 subbuf[SUB_CHANNEL_SIZE] = {}; 
 				uae_u8 subbuf2[SUB_CHANNEL_SIZE];
 				if (sys_command_cd_qcode(unitnum, subbuf2, sector, true))
 					sub_to_interleaved(subbuf2, subbuf);
@@ -1348,7 +1361,7 @@ static void cdrom_run_read (void)
 				}
 				dma_put_word(subcode_address + cdrom_subcodeoffset + SUB_CHANNEL_SIZE + 0, 0xffff);
 				dma_put_word(subcode_address + cdrom_subcodeoffset + SUB_CHANNEL_SIZE + 2, 0x0000);
-				cdrom_subcodeoffset += 100;
+				cdrom_subcodeoffset = cdrom_subcodeoffset + 100;
 				set_status(CDINTERRUPT_SUBCODE);
 			}
 
@@ -1491,10 +1504,10 @@ static void AKIKO_hsync_handler (void)
 					put_byte (subcode_address + cdrom_subcodeoffset + i, subcodebuffer[subcodebufferoffset * SUB_CHANNEL_SIZE + i]);
 				put_long (subcode_address + cdrom_subcodeoffset + SUB_CHANNEL_SIZE, 0xffff0000);
 				subcodebufferinuse[subcodebufferoffset] = 0;
-				cdrom_subcodeoffset += 100;
-				subcodebufferoffset++;
+				cdrom_subcodeoffset = cdrom_subcodeoffset + 100;
+				subcodebufferoffset = subcodebufferoffset + 1;
 				if (subcodebufferoffset >= MAX_SUBCODEBUFFER)
-					subcodebufferoffset -= MAX_SUBCODEBUFFER;
+					subcodebufferoffset = subcodebufferoffset - MAX_SUBCODEBUFFER;
 				set_status (CDINTERRUPT_SUBCODE);
 				//write_log (_T("*"));
 			}
@@ -1504,9 +1517,9 @@ static void AKIKO_hsync_handler (void)
 	}
 
 	if (frame2counter > 0)
-		frame2counter--;
+		frame2counter = frame2counter - 1;
 	if (mediacheckcounter > 0)
-		mediacheckcounter--;
+		mediacheckcounter = mediacheckcounter - 1;
 
 	akiko_internal ();
 	akiko_handler (framesync);
@@ -1515,6 +1528,7 @@ static void AKIKO_hsync_handler (void)
 /* cdrom data buffering thread */
 static void akiko_thread (void *null)
 {
+	(void)null; // Parameter name indicates it's unused
 	int secnum;
 	uae_u8 *tmp1;
 	uae_u8 *tmp2;
@@ -1650,8 +1664,8 @@ STATIC_INLINE void akiko_put_long (uae_u32 *p, int offset, int v)
 static uae_u32 REGPARAM3 akiko_lget (uaecptr) REGPARAM;
 static uae_u32 REGPARAM3 akiko_wget (uaecptr) REGPARAM;
 static uae_u32 REGPARAM3 akiko_bget (uaecptr) REGPARAM;
-static uae_u32 REGPARAM3 akiko_lgeti (uaecptr) REGPARAM;
-static uae_u32 REGPARAM3 akiko_wgeti (uaecptr) REGPARAM;
+// static uae_u32 REGPARAM3 akiko_lgeti (uaecptr) REGPARAM; // Currently unused
+// static uae_u32 REGPARAM3 akiko_wgeti (uaecptr) REGPARAM; // Currently unused
 static void REGPARAM3 akiko_lput (uaecptr, uae_u32) REGPARAM;
 static void REGPARAM3 akiko_wput (uaecptr, uae_u32) REGPARAM;
 static void REGPARAM3 akiko_bput (uaecptr, uae_u32) REGPARAM;
@@ -1956,7 +1970,8 @@ static void akiko_bput2 (uaecptr addr, uae_u32 v, int msg)
 		if ((cdrom_flags & CDFLAG_SUBCODE) && !(tmp & CDFLAG_SUBCODE)) {
 			uae_sem_wait (&sub_sem);
 			memset (subcodebufferinuse, 0, sizeof subcodebufferinuse);
-			subcodebufferoffset = subcodebufferoffsetw = 0;
+			subcodebufferoffsetw = 0;
+			subcodebufferoffset = 0;
 			uae_sem_post (&sub_sem);
 		}
 		cdrom_flags &= 0xff800000;
@@ -2022,13 +2037,26 @@ static void REGPARAM2 akiko_lput (uaecptr addr, uae_u32 v)
 	akiko_bput2 (addr + 0, (v >> 24) & 0xff, 0);
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#endif
 addrbank akiko_bank = {
 	akiko_lget, akiko_wget, akiko_bget,
 	akiko_lput, akiko_wput, akiko_bput,
 	default_xlate, default_check, NULL, NULL, _T("Akiko"),
 	dummy_lgeti, dummy_wgeti,
-	ABFLAG_IO | ABFLAG_SAFE, S_READ, S_WRITE
+	ABFLAG_IO | ABFLAG_SAFE, S_READ, S_WRITE,
+	NULL, // sub_banks initialization
+	0, // mask initialization
+	0, // startmask initialization
+	0, // start initialization
+	0, // allocated_size initialization
+	0 // reserved_size initialization
 };
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 static const uae_u8 patchdata[] = { 0x0c, 0x82, 0x00, 0x00, 0x03, 0xe8, 0x64, 0x00, 0x00, 0x46 };
 static const uae_u8 patchdata2[] = { 0x0c, 0x82, 0x00, 0x00, 0x03, 0xe8, 0x4e, 0x71, 0x4e, 0x71 };
@@ -2094,6 +2122,7 @@ static int akiko_thread_do(int start)
 
 static void akiko_reset(int hardreset)
 {
+	(void)hardreset; // Parameter reserved for future use
 	patchrom();
 	cdaudiostop_do();
 	nvram_read();

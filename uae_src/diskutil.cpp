@@ -159,6 +159,7 @@ static uae_u8 mfmdecode (uae_u16 **mfmp, int shift)
 
 static int drive_write_adf_pc (uae_u16 *mbuf, uae_u16 *mend, uae_u8 *writebuffer, uae_u8 *writebuffer_ok, int track, int *outsecs)
 {
+	(void)writebuffer_ok; // Unused parameter
 	int sectors, shift, sector, i;
 	uae_u8 mark;
 	uae_u8 secbuf[3 + 1 + 512];

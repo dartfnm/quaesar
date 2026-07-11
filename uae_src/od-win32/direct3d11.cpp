@@ -688,7 +688,7 @@ static bool psEffect_ParseParameters(struct d3d11struct *d3d, ID3DX11Effect *eff
 
 static bool allocfxdata(struct d3d11struct *d3d, struct shaderdata11 *s)
 {
-	struct TLVERTEX *vertices[NUMVERTICES] = { 0 };
+	struct TLVERTEX *vertices[NUMVERTICES] = {}; 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData;
 	D3D11_BUFFER_DESC indexBufferDesc;
@@ -5123,7 +5123,7 @@ static void xD3D11_unlocktexture(int monid, int y_start, int y_end)
 	if (y_start < 0) {
 		d3d->m_deviceContext->CopyResource(d3d->texture2d, d3d->texture2dstaging);
 	} else {
-		D3D11_BOX box = { 0 };
+		D3D11_BOX box = {}; 
 		box.right = d3d->m_bitmapWidth;
 		box.top = y_start;
 		box.bottom = y_end;
@@ -5258,7 +5258,7 @@ static HDC xD3D_getDC(int monid, HDC hdc)
 	HRESULT hr;
 
 	if (hdc) {
-		RECT empty = { 0 };
+		RECT empty = {}; 
 		g_pSurface1->ReleaseDC(&empty);
 		g_pSurface1->Release();
 		return NULL;

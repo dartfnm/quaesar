@@ -319,7 +319,7 @@ int uaenet_open_driver (struct netdriverdata *tc, const char *name)
     char actual_buffer[256];
     char device_path[256];
     const char *device_guid = NULL;
-    ULONG info[3] = { 0 };
+    ULONG info[3] = {}; 
     DWORD len, status;
 
     tc->h = INVALID_HANDLE_VALUE;

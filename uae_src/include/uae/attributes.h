@@ -14,7 +14,7 @@
 
 #ifdef _WIN32
 #define uae_cdecl __cdecl
-#elif defined(__GNUC__) && defined(__i386__)
+#elif defined(__GNUC__) && defined(__i386__) && !defined(__x86_64__)
 #define uae_cdecl __attribute__((cdecl))
 #else
 #define uae_cdecl

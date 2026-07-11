@@ -642,7 +642,7 @@ struct zfile *archive_access_lzx (struct znode *zn)
     struct zfile *dstf, *newzf;
     uae_u8 *buf, *dbuf, *dbufend;
     unsigned int compsize, unpsize;
-	struct lzxdata d = { 0 };
+	struct lzxdata d = {}; 
 
     dstf = NULL;
     buf = dbuf = NULL;
@@ -754,7 +754,7 @@ struct zvolume *archive_directory_lzx (struct zfile *in_file)
  unsigned char archive_header[31];
  char header_filename[256];
  char header_comment[256];
- struct lzxdata d = { 0 };
+ struct lzxdata d = {}; 
 
  if (zfile_fread(archive_header, 1, 10, in_file) != 10)
      return 0;

@@ -37,7 +37,6 @@ if ( NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC" )
       -Werror-implicit-function-declaration
       -Werror=format-security
       -Wno-unused-parameter
-      -Wno-enum-int-mismatch
       -Wno-sign-conversion
     #  -pedantic-errors
     #  $<$<CONFIG:DEBUG>:-g3>
@@ -45,6 +44,10 @@ if ( NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC" )
       $<$<CONFIG:DEBUG>:-ggdb>
     #  $<$<CONFIG:DEBUG>:-pg>
     )
+    # Only add -Wno-enum-int-mismatch for GCC (not supported by Clang/AppleClang)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        add_compile_options(-Wno-enum-int-mismatch)
+    endif()
 endif()
 
 

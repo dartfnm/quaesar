@@ -848,8 +848,8 @@ static int dev_do_io_cd (TrapContext *ctx, struct devstruct *dev, uae_u8 *iobuf,
 	{
 		uae_u16 status = 0;
 		struct cd_toc_head toc;
-		uae_u8 cdinfo[34] = { 0 };
-		uae_u8 subq[SUBQ_SIZE] = { 0 };
+		uae_u8 cdinfo[34] = {}; 
+		uae_u8 subq[SUBQ_SIZE] = {}; 
 		sys_command_cd_qcode (dev->di.unitnum, subq, -1, false);
 		status |= 1 << 0; // door closed
 		if (dev->di.media_inserted) {

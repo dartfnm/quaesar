@@ -1534,7 +1534,7 @@ void gfxboard_vsync_handler(bool full_redraw_required, bool redraw_required)
 		if (gb->func) {
 
 			if (gb->userdata) {
-				struct gfxboard_mode mode = { 0 };
+				struct gfxboard_mode mode = {}; 
 				mode.redraw_required = full_redraw_required;
 				gb->func->vsync(gb->userdata, &mode);
 				if (mode.mode && mode.width && mode.height) {

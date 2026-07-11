@@ -47,7 +47,7 @@ static TCHAR *parsedvaluess[MAX_VALUES];
 // 2            * / %           left to right
 // 3            + -             left to right
 // 4            =               right to left
-static int op_preced(const TCHAR c)
+static int op_preced(int c)
 {
     switch(c)    {
         case 0xf0: case 0xf1: case 0xf2:
@@ -68,7 +68,7 @@ static int op_preced(const TCHAR c)
     return 0;
 }
  
-static bool op_left_assoc(const TCHAR c)
+static bool op_left_assoc(int c)
 {
     switch(c)    {
         // left to right
@@ -83,7 +83,7 @@ static bool op_left_assoc(const TCHAR c)
     return false;
 }
  
-static unsigned int op_arg_count(const TCHAR c)
+static unsigned int op_arg_count(int c)
 {
     switch(c)  {
         case '?':
@@ -101,9 +101,9 @@ static unsigned int op_arg_count(const TCHAR c)
     return 0;
 }
  
-#define is_operator(c)  (c == '+' || c == '-' || c == '/' || c == '*' || c == '!' || c == '%' || c == '=' || \
-                         c == '|' || c == '&' || c == '^' || c == '@' || c == ('@' | 0x80) || c == '>' || c == '<' || c == ('>' | 0x80) || c == ('<' | 0x80) || \
-                         c == '?' || c == ':' || c == 0xf0 || c == 0xf1 || c == 0xf2)
+#define is_operator(c)  ((c) == '+' || (c) == '-' || (c) == '/' || (c) == '*' || (c) == '!' || (c) == '%' || (c) == '=' || \
+                         (c) == '|' || (c) == '&' || (c) == '^' || (c) == '@' || (unsigned char)(c) == ('@' | 0x80) || (c) == '>' || (c) == '<' || (unsigned char)(c) == ('>' | 0x80) || (unsigned char)(c) == ('<' | 0x80) || \
+                         (c) == '?' || (c) == ':' || (unsigned char)(c) == 0xf0 || (unsigned char)(c) == 0xf1 || (unsigned char)(c) == 0xf2)
 #define is_function(c)  (c >= 'A' && c <= 'Z')
 #define is_ident(c)     ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z'))
  
@@ -308,7 +308,7 @@ static TCHAR *stacktostring(struct calcstack *st)
 }
 
 
-static TCHAR *docalcxs(TCHAR op, TCHAR *v1, TCHAR *v2, double *voutp)
+static TCHAR *docalcxs(int op, TCHAR *v1, TCHAR *v2, double *voutp)
 {
     TCHAR tmp[MAX_DPATH];
     tmp[0] = 0;
@@ -346,7 +346,7 @@ static TCHAR *docalcxs(TCHAR op, TCHAR *v1, TCHAR *v2, double *voutp)
     return my_strdup(tmp);
 }
 
-static bool docalcx(TCHAR op, double v1, double v2, double *valp)
+static bool docalcx(int op, double v1, double v2, double *valp)
 {
     double v = 0;
 	switch (op)
@@ -419,7 +419,7 @@ static bool docalcx(TCHAR op, double v1, double v2, double *valp)
 
 static bool docalc2(TCHAR op, struct calcstack *sv1, struct calcstack *sv2, double *valp, TCHAR *sp)
 {
-    *sp = NULL;
+    *sp = 0;
     *valp = 0;
     if (isstackstring(sv1) || isstackstring(sv2)) {
         TCHAR *v1 = stacktostring(sv1);
@@ -583,10 +583,10 @@ static bool execution_order(const TCHAR *input, double *outval, TCHAR *outstring
 				if (outval)
 					*outval = val;
                 if (outstring) {
-                    if (vals && _tcslen(vals) >= maxlen) {
+                    if (_tcslen(vals) >= (size_t)maxlen) {
                         vals[maxlen] = 0;
                     }
-                    _tcscpy(outstring, vals ? vals : _T(""));
+                    _tcscpy(outstring, vals);
                 }
 				ok = true;
 		}
@@ -638,19 +638,19 @@ static bool parse_values(const TCHAR *ins, TCHAR *out)
 			in[3] = ' ';
 			in[4] = ' ';
         } else if (!_tcsncmp(in, _T("rl("), 3)) {
-            in[0] = 0xf2;
+            in[0] = static_cast<TCHAR>(0xf2);
             in[1] = ' ';
         } else if (!_tcsncmp(in, _T("rw("), 3)) {
-            in[0] = 0xf1;
+            in[0] = static_cast<TCHAR>(0xf1);
             in[1] = ' ';
         } else if (!_tcsncmp(in, _T("rb("), 3)) {
-            in[0] = 0xf0;
+            in[0] = static_cast<TCHAR>(0xf0);
             in[1] = ' ';
         } else if (in[0] == '>' && in[1] == '>') {
-            in[0] = '>' | 0x80;
+            in[0] = (TCHAR)('>' | 0x80);
             in[1] = ' ';
         } else if (in[0] == '<' && in[1] == '<') {
-            in[0] = '<' | 0x80;
+            in[0] = (TCHAR)('<' | 0x80);
             in[1] = ' ';
         } else if (in[0] == '"' || in[0] == '\'') {
             TCHAR *quoted = in;
@@ -677,7 +677,7 @@ static bool parse_values(const TCHAR *ins, TCHAR *out)
             *(in + 1) = ' ';
         }
         if (*in == '!' && *(in + 1) == '=') {
-            *in = '@' | 0x80;
+            *in = (TCHAR)('@' | 0x80);
             *(in + 1) = ' ';
         }
         if (_totupper (*in) == 'R') {
@@ -794,7 +794,7 @@ int calc(const TCHAR *input, double *outval, TCHAR *outstring, int maxlen)
 
 bool iscalcformula (const TCHAR *formula)
 {
-	for (int i = 0; i < _tcslen (formula); i++) {
+	for (size_t i = 0; i < _tcslen (formula); i++) {
 		TCHAR c = formula[i];
 		if (is_operator (c))
 			return true;

@@ -603,7 +603,7 @@ static bool debugmem_func(uaecptr addr, int rwi, int size, uae_u32 val)
 {
 	bool ret = true;
 	uaecptr oaddr = addr;
-	struct debugmemdata *dmfirst = NULL;
+	// struct debugmemdata *dmfirst = NULL; // Set but never used
 
 	if (debug_waiting && (rwi & DEBUGMEM_FETCH)) {
 		// first instruction?
@@ -623,9 +623,6 @@ static bool debugmem_func(uaecptr addr, int rwi, int size, uae_u32 val)
 		int page = addr / PAGE_SIZE;
 		struct debugmemdata *dm = dmd[page];
 		uae_u8 state = dm->state[offset];
-
-		if (!i)
-			dmfirst = dm;
 
 		if (!(state & DEBUGMEM_INUSE)) {
 			debugreport(dm, oaddr, rwi, size, _T("Accessing invalid memory"));
@@ -744,14 +741,14 @@ static int debugmem_free(uaecptr addr, uae_u32 size)
 	addr -= debugmem_bank.start;
 	int page = addr / PAGE_SIZE;
 	struct debugmemdata *dm = dmd[page];
-	bool ok = true;
+	// bool ok = true; // Set but never used
 
 	if (!(dm->flags & DEBUGMEM_ALLOCATED)) {
 		console_out_f(_T("Invalid memory free (%08x %d) Start address points to unallocated memory\n"), oaddr, size);
-		ok = false;
+		// ok = false;
 	} else if (!(dm->flags & DEBUGMEM_STARTBLOCK)) {
 		console_out_f(_T("Invalid memory free (%08x %d) Start address points to allocated memory but not start of allocated memory\n"), oaddr, size);
-		ok = false;
+		// ok = false; // ok is not used
 	} else {
 		struct debugmemallocs *dma = allocs[dm->id];
 		if (dma->start == addr && dma->size == size) {
@@ -774,7 +771,7 @@ static int debugmem_free(uaecptr addr, uae_u32 size)
 	for (int i = 0; i < end; i++) {
 		if (page + i >= totalmemdata) {
 			console_out_f(_T("Free end address is out of range\n"));
-			ok = false;
+			// ok = false; // ok is not used
 			break;
 		}
 		struct debugmemdata *dm2 = dmd[page + i];
@@ -1136,14 +1133,14 @@ static bool loadcodefiledata(struct debugcodefile *cf)
 	struct zfile *zf = zfile_fopen(fpath, _T("rb"));
 	if (!zf) {
 		console_out_f(_T("Couldn't open source file '%s'\n"), fpath);
-		return NULL;
+		return false;
 	}
 	int length;
 	uae_u8 *data2 = zfile_getdata(zf, 0, -1, &length);
 	if (!data2) {
 		zfile_fclose(zf);
 		console_out_f(_T("Couldn't read source file '%s'\n"), fpath);
-		return NULL;
+		return false;
 	}
 	uae_u8 *data = xcalloc(uae_u8, length + 1);
 	memcpy(data, data2, length);
@@ -1335,7 +1332,7 @@ static void parse_stabs(void)
 				continue;
 			}
 			pmindex = pm;
-			int linecnt = 0;
+			// int linecnt = 0; // Set but never used
 			struct debugsymbol *last_func = NULL;
 			while (idx < stabscount) {
 				TCHAR stripname[256];
@@ -1366,7 +1363,7 @@ static void parse_stabs(void)
 							linemap[s->val].file = cf;
 							linemap[s->val].line = s->desc;
 							//write_log(_T("%08x %d %s\n"), s->val, s->desc, cf->name);
-							linecnt++;
+							// linecnt++; // linecnt is not used
 						}
 					break;
 					case N_FUN:
@@ -1951,19 +1948,19 @@ static void scan_library_list(uaecptr v, int *cntp)
 		for (int i = 0; i < libnamecnt; i++) {
 			struct libname *name = &libnames[i];
 			char n[256];
-			sprintf(n, "%s.library", name->aname);
+			snprintf(n, sizeof(n), "%s.library", name->aname);
 			if (!strcmp((char*)p, n)) {
 				name->base = v;
 				found = name;
 				break;
 			}
-			sprintf(n, "%s.device", name->aname);
+			snprintf(n, sizeof(n), "%s.device", name->aname);
 			if (!strcmp((char*)p, n)) {
 				name->base = v;
 				found = name;
 				break;
 			}
-			sprintf(n, "%s.resource", name->aname);
+			snprintf(n, sizeof(n), "%s.resource", name->aname);
 			if (!strcmp((char*)p, n)) {
 				name->base = v;
 				found = name;
@@ -2480,6 +2477,8 @@ struct loadelfsection
 
 static uae_u8 *loadelffile(uae_u8 *file, int filelen, uae_u8 *dbgfile, int debugfilelen, uae_u32 seglist, int segmentid, int *outsizep, uae_u32 *startp, uae_u32 *parentidp, int mode)
 {
+	(void)dbgfile; // Unused parameter
+	(void)debugfilelen; // Unused parameter
 	uae_u8 *outp = NULL;
 	uae_u8 *outptr = NULL;
 	int outsize;
@@ -2518,15 +2517,15 @@ static uae_u8 *loadelffile(uae_u8 *file, int filelen, uae_u8 *dbgfile, int debug
 	}
 
 	uae_u8 *strtab = NULL, *strtabsym = NULL;
-	struct sheader *symtab_shndx = NULL, *linesheader = NULL;
+	struct sheader *symtab_shndx = NULL;//, *linesheader = NULL; // linesheader set but not used
 	struct debuglineheader lineheader;
 	struct symbol *symtab = NULL;
-	uae_u8 *debuginfo = NULL;
-	uae_u8 *debugstr = NULL;
-	uae_u8 *debugabbrev = NULL;
-	int debuginfo_size;
-	int debugstr_size;
-	int debugabbrev_size;
+	// uae_u8 *debuginfo = NULL; // Set but not used
+	// uae_u8 *debugstr = NULL; // Set but not used
+	// uae_u8 *debugabbrev = NULL; // Set but not used
+	// int debuginfo_size; // Set but not used
+	// int debugstr_size; // Set but not used
+	// int debugabbrev_size; // Set but not used
 	int symtab_num = 0;
 	bool debuglink = false;
 
@@ -2575,16 +2574,16 @@ static uae_u8 *loadelffile(uae_u8 *file, int filelen, uae_u8 *dbgfile, int debug
 		uae_char *name = (uae_char*)(strtabsym + sh.name);
 		if (sh.type == SHT_PROGBITS && !strcmp(name, ".debug_line")) {
 			swap_lineheader(&lineheader, (struct debuglineheader*)(file + sh.offset));
-			linesheader = shp;
+			// linesheader = shp; // linesheader not used
 		} else if (sh.type == SHT_PROGBITS && !strcmp(name, ".debug_info")) {
-			debuginfo = file + sh.offset;
-			debuginfo_size = sh.size;
+			// debuginfo = file + sh.offset; // debuginfo not used
+			// debuginfo_size = sh.size;
 		} else if (sh.type == SHT_PROGBITS && !strcmp(name, ".debug_str")) {
-			debugstr = file + sh.offset;
-			debugstr_size = sh.size;
+			// debugstr = file + sh.offset; // debugstr not used
+			// debugstr_size = sh.size;
 		} else if (sh.type == SHT_PROGBITS && !strcmp(name, ".debug_abbrev")) {
-			debugabbrev = file + sh.offset;
-			debugabbrev_size = sh.size;
+			// debugabbrev = file + sh.offset; // debugabbrev not used
+			// debugabbrev_size = sh.size;
 		}
 	}
 
@@ -4020,7 +4019,7 @@ struct zfile *read_executable_rom(struct zfile *z, int size, int maxblocks)
 		debugmem_init(false);
 	if (!debugmem_initialized)
 		return NULL;
-	uae_u8 header[8] = { 0 };
+	uae_u8 header[8] = {}; 
 	zfile_fseek(z, 0, SEEK_SET);
 	zfile_fread(header, 1, sizeof(header), z);
 	zfile_fseek(z, 0, SEEK_SET);

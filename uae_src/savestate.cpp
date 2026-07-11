@@ -216,6 +216,7 @@ void save_string_func (uae_u8 **dstp, const TCHAR *from)
 }
 void save_path_func (uae_u8 **dstp, const TCHAR *from, int type)
 {
+	(void)type;
 	save_string_func (dstp, from);
 }
 void save_path_full_func(uae_u8 **dstp, const TCHAR *spath, int type)
@@ -447,7 +448,7 @@ static void save_chunk (struct zfile *f, uae_u8 *chunk, size_t len, const TCHAR 
 		zfile_fwrite(zero, 1, len2, f);
 	}
 
-	write_log (_T("Chunk '%s' chunk size %u (%u)\n"), name, chunklen, len);
+	write_log (_T("Chunk '%s' chunk size %u (%u)\n"), name, (unsigned int)chunklen, (unsigned int)len);
 }
 
 static uae_u8 *restore_chunk (struct zfile *f, TCHAR *name, unsigned int *len, unsigned int *totallen, size_t *filepos)
@@ -1311,7 +1312,7 @@ void savestate_quick (int slot, int save)
 	}
 	_tcscpy (savestate_fname + i, _T(".uss"));
 	if (slot > 0)
-		_stprintf (savestate_fname + i, _T("_%d.uss"), slot);
+		_sntprintf (savestate_fname + i, MAX_DPATH - i, _T("_%d.uss"), slot);
 	if (save) {
 		write_log (_T("saving '%s'\n"), savestate_fname);
 		savestate_docompress = 1;
@@ -1373,7 +1374,7 @@ int savestate_dorewind (int pos)
 		pos = replaycounter - 1;
 	if (canrewind (pos)) {
 		savestate_state = STATE_DOREWIND;
-		write_log (_T("dorewind %d (%010ld/%03ld) -> %d\n"), replaycounter - 1, hsync_counter, vsync_counter, pos);
+		write_log (_T("dorewind %d (%010u/%03u) -> %d\n"), replaycounter - 1, hsync_counter, vsync_counter, pos);
 		return 1;
 	}
 	return 0;
@@ -1518,7 +1519,7 @@ void savestate_rewind (void)
 		return;
 	}
 	inprec_setposition (st->inprecoffset, pos);
-	write_log (_T("state %d restored.  (%010ld/%03ld)\n"), pos, hsync_counter, vsync_counter);
+	write_log (_T("state %d restored.  (%010u/%03u)\n"), pos, hsync_counter, vsync_counter);
 	if (rewind) {
 		replaycounter--;
 		if (replaycounter < 0)
@@ -1906,9 +1907,9 @@ retry2:
 			staterecords_first -= staterecords_max;
 	}
 
-	write_log (_T("state capture %d (%010ld/%03ld,%ld/%d) (%ld bytes, alloc %d)\n"),
+	write_log (_T("state capture %d (%010u/%03u,%u/%d) (%ld bytes, alloc %d)\n"),
 		replaycounter, hsync_counter, vsync_counter,
-		hsync_counter % current_maxvpos (), current_maxvpos (),
+		(unsigned int)(hsync_counter % current_maxvpos ()), (int)current_maxvpos (),
 		st->end - st->data, statefile_alloc);
 
 	if (firstcapture) {

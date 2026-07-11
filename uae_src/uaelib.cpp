@@ -190,7 +190,7 @@ static uae_u32 emulib_InsertDisk(TrapContext *ctx, uaecptr name, uae_u32 drive)
 	if (drive > 3)
 		return 0;
 
-	if (trap_get_string(ctx, real_name, name, sizeof real_name) >= sizeof real_name)
+	if ((int)trap_get_string(ctx, real_name, name, sizeof real_name) >= (int)sizeof real_name)
 		return 0; /* ENAMETOOLONG */
 
 	s = au (real_name);
@@ -254,6 +254,7 @@ static uae_u32 emulib_GetUaeConfig(TrapContext *ctx, uaecptr place)
 */
 static uae_u32 emulib_SetUaeConfig(uaecptr place)
 {
+	(void)place;
 	return 1;
 }
 

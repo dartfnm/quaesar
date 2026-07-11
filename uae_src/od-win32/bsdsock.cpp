@@ -658,7 +658,7 @@ int host_socket(TrapContext *ctx, SB, int af, int type, int protocol)
 		if (protocol==IPPROTO_UDP) {
 			sb->ftable[sd-1] |= SF_RAW_UDP;
 		} else if (protocol==IPPROTO_ICMP) {
-			struct sockaddr_in sin = { 0 };
+			struct sockaddr_in sin = {}; 
 
 			sin.sin_family = AF_INET;
 			sin.sin_addr.s_addr = INADDR_ANY;

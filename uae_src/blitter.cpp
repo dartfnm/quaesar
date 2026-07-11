@@ -105,7 +105,7 @@ static int blit_maxcyclecounter, blit_slowdown, blit_totalcyclecounter;
 static int blit_misscyclecounter;
 
 #ifdef CPUEMU_13
-static int blitter_cyclecounter;
+// static int blitter_cyclecounter; // Currently unused, reserved for future timing analysis
 static int blitter_hcounter;
 static int blitter_vcounter;
 #endif
@@ -365,8 +365,8 @@ static void blitter_dump (void)
 		blt_info.bltamod & 0xffff, blt_info.bltbmod & 0xffff, blt_info.bltcmod & 0xffff, blt_info.bltdmod & 0xffff);
 	console_out_f(_T("PC=%08X DMA=%d\n"), m68k_getpc(), dmaen (DMA_BLITTER));
 
-	if (((bltcon0 & BLTCHA) && bltapt >= chipsize) || ((bltcon0 & BLTCHB) && bltbpt >= chipsize) ||
-		((bltcon0 & BLTCHC) && bltcpt >= chipsize) || ((bltcon0 & BLTCHD) && bltdpt >= chipsize))
+	if (((bltcon0 & BLTCHA) && bltapt >= (uae_u32)chipsize) || ((bltcon0 & BLTCHB) && bltbpt >= (uae_u32)chipsize) ||
+		((bltcon0 & BLTCHC) && bltcpt >= (uae_u32)chipsize) || ((bltcon0 & BLTCHD) && bltdpt >= (uae_u32)chipsize))
 		console_out_f(_T("PT outside of chipram\n"));
 }
 
@@ -508,6 +508,8 @@ static void blitter_dofast (void)
 	uae_u8 mt = bltcon0 & 0xFF;
 	uae_u16 ashift = bltcon0 >> 12;
 	uae_u16 bshift = bltcon1 >> 12;
+	(void)ashift; // Unused in this function
+	(void)bshift; // Unused in this function
 
 	blit_masktable[0] = blt_info.bltafwm;
 	blit_masktable[blt_info.hblitsize - 1] &= blt_info.bltalwm;
@@ -966,6 +968,7 @@ static int makebliteventtime(int delay)
 
 void blitter_handler(uae_u32 data)
 {
+	(void)data; // Parameter unused but required for event handler signature
 	static int blitter_stuck;
 
 	if (!dmaen (DMA_BLITTER)) {
@@ -1014,6 +1017,7 @@ static void blit_bltset(int con)
 	static int blit_warned = 100;
 	bool blit_changed = false;
 	uae_u16 con0_old = bltcon0_old;
+	(void)con0_old; // Used for debugging/reference only
 
 	if (con & 2) {
 		blitdesc = bltcon1 & BLTDESC;
@@ -1076,7 +1080,7 @@ static void blit_bltset(int con)
 		blitfill = 0;
 		shifter_out = shifter_skip_y ? shifter[2] : shifter[3];
 	} else {
-		int oldfill = blitfill;
+		// int oldfill = blitfill; // Currently unused, reserved for debugging
 		blitfill = (bltcon1 & BLTFILL) != 0;
 		blitfc = !!(bltcon1 & BLTFC);
 		blitife = !!(bltcon1 & BLTIFE);
@@ -1356,6 +1360,7 @@ static int blitter_next_cycle(void)
 static void blitter_doddma_new(int hpos, bool addmod)
 {
 	uaecptr *hpt = NULL;
+	(void)hpt; // Initialized but not used in all code paths
 	bool skip = false;
 
 	check_channel_mods(hpos, 4, &bltdpt);
@@ -1866,33 +1871,34 @@ void decide_blitter(int until_hpos)
 void decide_blitter (int hpos) { }
 #endif
 
-static void blitter_force_finish(bool state)
-{
-	uae_u16 odmacon;
-	if (!blt_info.blit_main && !blt_info.blit_finald)
-		return;
-	/* blitter is currently running
-	* force finish (no blitter state support yet)
-	*/
-	odmacon = dmacon;
-	dmacon |= DMA_MASTER | DMA_BLITTER;
-	if (state)
-		write_log(_T("forcing blitter finish\n"));
-	if (blitter_cycle_exact && !immediate_blits) {
-		int rounds = 10000;
-		while ((blt_info.blit_main || blt_info.blit_finald) && rounds > 0) {
-			memset(cycle_line_slot, 0, sizeof(cycle_line_slot));
-			decide_blitter(-1);
-			rounds--;
-		}
-		if (rounds == 0)
-			write_log(_T("blitter froze!?\n"));
-	} else {
-		actually_do_blit();
-	}
-	blitter_done_all(-1);
-	dmacon = odmacon;
-}
+// static void blitter_force_finish(bool state) // Unused function - kept for future use
+// {
+// 	(void)state; // Parameter currently unused
+// 	uae_u16 odmacon;
+// 	if (!blt_info.blit_main && !blt_info.blit_finald)
+// 		return;
+// 	/* blitter is currently running
+// 	* force finish (no blitter state support yet)
+// 	*/
+// 	odmacon = dmacon;
+// 	dmacon |= DMA_MASTER | DMA_BLITTER;
+// 	if (state)
+// 		write_log(_T("forcing blitter finish\n"));
+// 	if (blitter_cycle_exact && !immediate_blits) {
+// 		int rounds = 10000;
+// 		while ((blt_info.blit_main || blt_info.blit_finald) && rounds > 0) {
+// 			memset(cycle_line_slot, 0, sizeof(cycle_line_slot));
+// 			decide_blitter(-1);
+// 			rounds--;
+// 		}
+// 		if (rounds == 0)
+// 			write_log(_T("blitter froze!?\n"));
+// 	} else {
+// 		actually_do_blit();
+// 	}
+// 	blitter_done_all(-1);
+// 	dmacon = odmacon;
+// }
 
 static void blit_modset (void)
 {
@@ -2319,6 +2325,7 @@ uae_u8 *restore_blitter (uae_u8 *src)
 
 uae_u8 *save_blitter (size_t *len, uae_u8 *dstptr, bool newstate)
 {
+	(void)newstate; // Parameter reserved for future use
 	uae_u8 *dstbak,*dst;
 
 	if (dstptr)

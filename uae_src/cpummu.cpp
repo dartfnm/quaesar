@@ -85,7 +85,8 @@ int mmu_data_write_hit, mmu_data_write_miss;
 
 static void mmu_dump_ttr(const TCHAR * label, uae_u32 ttr)
 {
-	DUNUSED(label);
+	(void)label;
+	(void)ttr;
 #if MMUDEBUG > 0
 	uae_u32 from_addr, to_addr;
 
@@ -400,7 +401,7 @@ void mmu_bus_error(uaecptr addr, uae_u32 val, int fc, bool write, int size,uae_u
 
 		if (ismoves) {
 			// MOVES special behavior
-			int old_fc = fc = write ? regs.dfc : regs.sfc;
+			// int old_fc = fc = write ? regs.dfc : regs.sfc; // Unused
 			if ((fc & 3) == 0 || (fc & 3) == 3) {
 				ssw |= MMU_SSW_TT1;
 			} else if (fc & 2) {
@@ -1317,7 +1318,7 @@ void mmu_put_move16(uaecptr addr, uae_u32 *val, bool data, int size)
 void REGPARAM2 mmu_op_real(uae_u32 opcode, uae_u16 extra)
 {
 	bool super = (regs.dfc & 4) != 0;
-	DUNUSED(extra);
+	(void)extra;
 	if ((opcode & 0xFE0) == 0x0500) { // PFLUSH
 		bool glob;
 		int regno;
@@ -1571,6 +1572,7 @@ void m68k_do_rte_mmu040 (uaecptr a7)
 
 void m68k_do_rte_mmu060 (uaecptr a7)
 {
+	(void)a7;
 #if 0
 	mmu060_state = 2;
 #endif
@@ -1579,6 +1581,8 @@ void m68k_do_rte_mmu060 (uaecptr a7)
 
 void flush_mmu040 (uaecptr addr, int n)
 {
+	(void)addr;
+	(void)n;
 	mmu_flush_cache();
 }
 
@@ -1599,6 +1603,8 @@ void m68k_do_bsr_mmu040 (uaecptr oldpc, uae_s32 offset)
 
 void flush_mmu060 (uaecptr addr, int n)
 {
+	(void)addr;
+	(void)n;
 	mmu_flush_cache();
 }
 
@@ -1619,6 +1625,7 @@ void m68k_do_bsr_mmu060 (uaecptr oldpc, uae_s32 offset)
 
 void uae_mmu_put_lrmw (uaecptr addr, uae_u32 v, int size, int type)
 {
+	(void)type;
 	locked_rmw_cycle = true;
 	if (size == sz_byte) {
 		mmu_put_user_byte(addr, v, regs.s, sz_byte, true);
@@ -1638,6 +1645,7 @@ void uae_mmu_put_lrmw (uaecptr addr, uae_u32 v, int size, int type)
 }
 uae_u32 uae_mmu_get_lrmw (uaecptr addr, int size, int type)
 {
+	(void)type;
 	uae_u32 v;
 	locked_rmw_cycle = true;
 	if (size == sz_byte) {

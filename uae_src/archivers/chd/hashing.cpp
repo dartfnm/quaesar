@@ -17,8 +17,8 @@
 //  CONSTANTS
 //**************************************************************************
 
-const crc16_t crc16_t::null = { 0 };
-const crc32_t crc32_t::null = { 0 };
+const crc16_t crc16_t::null = {}; 
+const crc32_t crc32_t::null = {}; 
 const md5_t md5_t::null = { { 0 } };
 const sha1_t sha1_t::null = { { 0 } };
 

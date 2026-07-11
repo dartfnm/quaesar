@@ -183,7 +183,7 @@ const TCHAR *OGL_init (HWND ahwnd, int w_w, int w_h, int t_w, int t_h, int depth
 {
     int PixelFormat;
     const char *ext1;
-    static TCHAR errmsg[100] = { 0 };
+    static TCHAR errmsg[100] = {}; 
     static int init;
 
     ogl_enabled = 0;

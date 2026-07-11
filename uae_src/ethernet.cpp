@@ -37,7 +37,7 @@ struct ethernet_data
 static const int slirp_ports[] = { 21, 22, 23, 80, 0 };
 
 static struct ethernet_data *slirp_data;
-static bool slirp_inited;
+// static bool slirp_inited; // Unused variable
 uae_sem_t slirp_sem1, slirp_sem2;
 static int netmode;
 
@@ -106,6 +106,10 @@ void ethernet_trigger (struct netdriverdata *ndd, void *vsd)
 
 int ethernet_open (struct netdriverdata *ndd, void *vsd, void *user, ethernet_gotfunc *gotfunc, ethernet_getfunc *getfunc, int promiscuous, const uae_u8 *mac)
 {
+#ifndef WITH_UAENET_PCAP
+	(void)promiscuous;
+	(void)mac;
+#endif
 	switch (ndd->type)
 	{
 		case UAENET_SLIRP:
@@ -169,6 +173,7 @@ int ethernet_open (struct netdriverdata *ndd, void *vsd, void *user, ethernet_go
 
 void ethernet_close (struct netdriverdata *ndd, void *vsd)
 {
+	(void)vsd; // Only used when WITH_UAENET_PCAP is defined
 	if (!ndd)
 		return;
 	switch (ndd->type)
@@ -200,7 +205,7 @@ void ethernet_enumerate_free (void)
 bool ethernet_enumerate (struct netdriverdata **nddp, int romtype)
 {
 	int j;
-	struct netdriverdata *nd;
+	// struct netdriverdata *nd; // Unused variable
 	const TCHAR *name = NULL;
 	
 	if (romtype) {

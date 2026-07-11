@@ -254,7 +254,7 @@ static void to_iff_ilbm(TrapContext *ctx, HBITMAP hbmp)
 	BITMAP bmp;
 	int bmpw, w, h, bpp, iffbpp, tsize, size, x, y, i;
 	int iffsize, bodysize;
-	uae_u32 colors[256] = { 0 };
+	uae_u32 colors[256] = {}; 
 	int cnt;
 	uae_u8 *iff, *p;
 	uae_u8 iffilbm[] = {

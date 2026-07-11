@@ -94,7 +94,7 @@ static int unitnum = -1;
 static struct cd_toc_head toc;
 static int datatrack;
 static int cdtvcr_media;
-static int subqcnt;
+// static int subqcnt; // Unused
 static int cd_audio_status;
 static int cdtvcr_wait_sectors;
 static int cd_led;
@@ -244,7 +244,8 @@ static void cdtvcr_4510_reset(uae_u8 v)
 	cdtvcr_4510_ram[CDTVCR_PLAYLIST_TIME_MODE] = 2;
 	uae_sem_wait (&sub_sem);
 	memset (subcodebufferinuse, 0, sizeof subcodebufferinuse);
-	subcodebufferoffsetw = subcodebufferoffset = 0;
+	subcodebufferoffset = 0;
+	subcodebufferoffsetw = 0;
 	uae_sem_post (&sub_sem);
 
 	if (ismedia())
@@ -404,7 +405,8 @@ static void subfunc(uae_u8 *data, int cnt)
 	uae_sem_wait(&sub_sem);
 	if (subcodebufferinuse[subcodebufferoffsetw]) {
 		memset (subcodebufferinuse, 0,sizeof (subcodebufferinuse));
-		subcodebufferoffsetw = subcodebufferoffset = 0;
+		subcodebufferoffset = 0;
+	subcodebufferoffsetw = 0;
 	} else {
 		int offset = subcodebufferoffsetw;
 		while (cnt > 0) {
@@ -427,6 +429,7 @@ static void subfunc(uae_u8 *data, int cnt)
 
 static int statusfunc(int status, int playpos)
 {
+	(void)playpos;
 	if (status == -1)
 		return 75;
 	if (status == -2)
@@ -552,7 +555,10 @@ static void cdtvcr_player_play(void)
 
 static void cdtvcr_do_cmd(void)
 {
-	uae_u32 addr, len, start, end, datalen;
+	uaecptr addr;
+	uae_u32 len, start, end, datalen;
+	// len is set but never used in this function
+	(void)len;
 	uae_u32 startlsn, endlsn;
 	uae_u8 starttrack, endtrack;
 	uae_u8 *p = &cdtvcr_4510_ram[CDTVCR_CD_CMD];
@@ -786,11 +792,13 @@ static uae_u32 REGPARAM2 cdtvcr_lget (uaecptr addr)
 
 static uae_u32 REGPARAM2 cdtvcr_wgeti (uaecptr addr)
 {
+	(void)addr;
 	uae_u32 v = 0xffff;
 	return v;
 }
 static uae_u32 REGPARAM2 cdtvcr_lgeti (uaecptr addr)
 {
+	(void)addr;
 	uae_u32 v = 0xffff;
 	return v;
 }
@@ -854,11 +862,13 @@ static addrbank cdtvcr_bank = {
 	cdtvcr_lput, cdtvcr_wput, cdtvcr_bput,
 	default_xlate, default_check, NULL, NULL, _T("CDTV-CR"),
 	cdtvcr_lgeti, cdtvcr_wgeti,
-	ABFLAG_IO | ABFLAG_SAFE, S_READ, S_WRITE
+	ABFLAG_IO | ABFLAG_SAFE, S_READ, S_WRITE,
+	0, 0
 };
 
 static void dev_thread (void *p)
 {
+	(void)p;
 	write_log (_T("CDTV-CR: CD thread started\n"));
 	thread_alive = 1;
 	for (;;) {
@@ -943,9 +953,9 @@ static void CDTVCR_hsync_handler (void)
 				d[cdtvcr_4510_ram[CDTVCR_SUBBANK] + i] = subcodebuffer[subcodebufferoffset * SUB_CHANNEL_SIZE + i] & 0x3f;
 			}
 			subcodebufferinuse[subcodebufferoffset] = 0;
-			subcodebufferoffset++;
+			subcodebufferoffset = subcodebufferoffset + 1;
 			if (subcodebufferoffset >= MAX_SUBCODEBUFFER)
-				subcodebufferoffset -= MAX_SUBCODEBUFFER;
+				subcodebufferoffset = subcodebufferoffset - MAX_SUBCODEBUFFER;
 			uae_sem_post (&sub_sem);
 			if (cdtvcr_4510_ram[CDTVCR_CD_SUBCODES])
 				cdtvcr_4510_ram[CDTVCR_INTREQ] |= 2;
@@ -997,6 +1007,7 @@ static void close_unit (void)
 
 static void cdtvcr_reset(int hardreset)
 {
+	(void)hardreset;
 	if (!currprefs.cs_cdtvcr)
 		return;
 	close_unit ();

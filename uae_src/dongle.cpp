@@ -123,6 +123,7 @@ void dongle_reset (void)
 
 uae_u8 dongle_cia_read (int cia, int reg, uae_u8 extra, uae_u8 val)
 {
+	(void)extra; // Unused parameter
 	if (!currprefs.dongle)
 		return val;
 	switch (currprefs.dongle)
@@ -181,6 +182,7 @@ void dongle_cia_write (int cia, int reg, uae_u8 extra, uae_u8 val)
 
 void dongle_joytest (uae_u16 val)
 {
+	(void)val; // Unused parameter
 }
 
 uae_u16 dongle_joydat (int port, uae_u16 val)

@@ -10,7 +10,7 @@
 // clang-format on
 
 static struct uae_input_device_kbr_default keytrans_amiga[] = {
-    {INPUTEVENT_KEY_CAPS_LOCK, {{INPUTEVENT_KEY_CAPS_LOCK, ID_FLAG_TOGGLE}}}, {-1, {{0}}}};
+    {INPUTEVENT_KEY_CAPS_LOCK, {{INPUTEVENT_KEY_CAPS_LOCK, ID_FLAG_TOGGLE}}}, {-1, {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}}};
 
 static struct uae_input_device_kbr_default* keytrans[] = {
     keytrans_amiga,

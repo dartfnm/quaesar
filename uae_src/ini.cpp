@@ -157,7 +157,7 @@ void ini_addnewdata(struct ini_data *ini, const TCHAR *section, const TCHAR *key
 	xfree(s);
 }
 
-static const uae_u8 bom[3] = { 0xef, 0xbb, 0xbf };
+// static const uae_u8 bom[3] = { 0xef, 0xbb, 0xbf }; // Unused - BOM marker for UTF-8
 
 struct ini_data *ini_new(void)
 {
@@ -170,7 +170,7 @@ struct ini_data *ini_load(const TCHAR *path, bool sort)
 	bool utf8 = false;
 	TCHAR section[MAX_DPATH];
 	uae_u8 tmp[3];
-	struct ini_data ini = { 0 };
+	struct ini_data ini = {}; 
 	int section_id = 1;
 
 	if (path == NULL || path[0] == 0)
@@ -203,7 +203,7 @@ struct ini_data *ini_load(const TCHAR *path, bool sort)
 				struct ini_line *il = ini.inidata[c];
 				if (il && !_tcscmp(il->section, section)) {
 					section_id++;
-					_stprintf(section + _tcslen(section), _T("|%d"), section_id);
+					_sntprintf(section + _tcslen(section), MAX_DPATH - _tcslen(section), _T("|%d"), section_id);
 					break;
 				}
 			}
@@ -234,7 +234,7 @@ struct ini_data *ini_load(const TCHAR *path, bool sort)
 						s3[_tcslen(s3) - 1] = 0;
 						initrim(s3);
 					}
-					if (_tcslen(otxt) + _tcslen(s3) + 1 >= len) {
+					if (_tcslen(otxt) + _tcslen(s3) + 1 >= (size_t)len) {
 						len += MAX_DPATH;
 						otxt = xrealloc(TCHAR, otxt, len);
 					}
@@ -515,11 +515,13 @@ bool ini_getsectionstring(struct ini_data *ini, const TCHAR *section, int idx, T
 
 void ini_setcurrentasstart(struct ini_data *ini, struct ini_context *ctx)
 {
+	(void)ini;
 	ctx->start = ctx->lastpos;
 }
 
 void ini_setnextasstart(struct ini_data *ini, struct ini_context *ctx)
 {
+	(void)ini;
 	ctx->start = ctx->lastpos + 1;
 }
 
@@ -542,6 +544,7 @@ void ini_setlastasstart(struct ini_data *ini, struct ini_context *ctx)
 
 void ini_initcontext(struct ini_data *ini, struct ini_context *ctx)
 {
+	(void)ini;
 	memset(ctx, 0, sizeof(struct ini_context));
 	ctx->end = 0x7fffffff;
 }

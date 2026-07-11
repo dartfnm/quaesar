@@ -1401,7 +1401,7 @@ static void initsramattr (int size, int readonly)
 		strcpy ((char*)p, "68000");
 	}
 	p += strlen ((char*)p) + 1;
-	sprintf ((char*)p, "Generic Emulated %dKB PCMCIA SRAM Card", size >> 10);
+	snprintf ((char*)p, 256, "Generic Emulated %dKB PCMCIA SRAM Card", size >> 10);
 	p += strlen ((char*)p) + 1;
 	*p++= 0xff;
 	*rp = addrdiff(p, rp) - 1;
@@ -1533,7 +1533,7 @@ static int initpcmcia (const TCHAR *path, int readonly, int type, int reset, str
 			uae_u32 error = 0;
 			pcmcia_common_size = (int)pcmcia_disk->hfd.virtsize;
 			if (pcmcia_disk->hfd.virtsize > 4 * 1024 * 1024) {
-				write_log (_T("PCMCIA SRAM: too large device, %llu bytes\n"), pcmcia_disk->hfd.virtsize);
+				write_log (_T("PCMCIA SRAM: too large device, %llu bytes\n"), (unsigned long long)pcmcia_disk->hfd.virtsize);
 				extrasize = (int)pcmcia_disk->hfd.virtsize - 4 * 1024 * 1024;
 				if (extrasize > 262144)
 					extrasize = 262144;
@@ -1545,7 +1545,7 @@ static int initpcmcia (const TCHAR *path, int readonly, int type, int reset, str
 			pcmcia_card = 1;
 			if (extrasize >= 512 && extrasize < 1 * 1024 * 1024) {
 				hdf_read(&pcmcia_disk->hfd, pcmcia_attrs, pcmcia_common_size, extrasize, &error);
-				write_log(_T("PCMCIA SRAM: Attribute data read %ld bytes\n"), extrasize);
+				write_log(_T("PCMCIA SRAM: Attribute data read %d bytes\n"), extrasize);
 				pcmcia_attrs_full = 1;
 			} else {
 				initsramattr(pcmcia_common_size, readonly);

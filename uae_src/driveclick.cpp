@@ -326,7 +326,7 @@ static uae_s16 getsample (void)
 static void mix (void)
 {
 	size_t total = ((uae_u8*)paula_sndbufpt - (uae_u8*)paula_sndbuffer) / (get_audio_nativechannels (currprefs.sound_stereo) * 2);
-	while (clickcnt < total) {
+	while ((size_t)clickcnt < total) {
 		clickbuffer[clickcnt++] = getsample ();
 	}
 }

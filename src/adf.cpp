@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#pragma warning(disable : 4996) // fopen deprecation warning
+#endif
+
 #include "adf.h"
 #include <adflib.h>
 #include <stdint.h>
@@ -106,7 +110,7 @@ void Adf::create_for_exefile(const char* name) {
         exit(1);
     }
 
-    adfFileWrite(file, size, buffer);
+    adfFileWrite(file, static_cast<uint32_t>(size), buffer);
     adfFileClose(file);
 
     // Create the S directory
@@ -126,7 +130,7 @@ void Adf::create_for_exefile(const char* name) {
     // Create the Startup-Sequence file and write commands to it
     file = adfFileOpen(volume, "Startup-Sequence", ADF_FILE_MODE_WRITE);
     if (file) {
-        adfFileWrite(file, strlen(name), (unsigned char*)name);
+        adfFileWrite(file, static_cast<uint32_t>(strlen(name)), (unsigned char*)name);
         adfFileClose(file);
     } else {
         printf("Error creating Startup-Sequence file\n");

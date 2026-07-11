@@ -23,11 +23,16 @@ static uaecptr tablettags;
 
 static int tablet_x, tablet_y, tablet_resx, tablet_resy;
 static int tablet_pressure, tablet_buttonbits, tablet_inproximity;
-static int tablet_maxx, tablet_maxy, tablet_maxz;
+static int tablet_maxx, tablet_maxy; // tablet_maxz unused
 static int ksversion;
 
 void tabletlib_tablet (int x, int y, int z, int pressure, int maxpres, uae_u32 buttonbits, int inproximity, int ax, int ay, int az)
 {
+	(void)z;
+	(void)maxpres;
+	(void)ax;
+	(void)ay;
+	(void)az;
 	tablet_x = x;
 	tablet_y = y;
 	tablet_pressure = pressure << 15;
@@ -37,6 +42,10 @@ void tabletlib_tablet (int x, int y, int z, int pressure, int maxpres, uae_u32 b
 
 void tabletlib_tablet_info (int maxx, int maxy, int maxz, int maxax, int maxay, int maxaz, int xres, int yres)
 {
+	(void)maxz;
+	(void)maxax;
+	(void)maxay;
+	(void)maxaz;
 	tablet_maxx = maxx;
 	tablet_maxy = maxy;
 	tablet_resx = xres;
@@ -109,6 +118,7 @@ static uae_u32 REGPARAM2 lib_closefunc (TrapContext *ctx)
 }
 static uae_u32 REGPARAM2 lib_expungefunc (TrapContext *context)
 {
+	(void)context;
 	return 0;
 }
 
@@ -170,6 +180,7 @@ static uae_u32 REGPARAM2 lib_dofunc (TrapContext *ctx)
 }
 static uae_u32 REGPARAM2 lib_unkfunc (TrapContext *context)
 {
+	(void)context;
 	write_log (_T("tablet.library unknown function called\n"));
 	return 0;
 }
@@ -221,7 +232,8 @@ void tabletlib_install (void)
 	calltrap (deftrap2 (lib_freefunc, TRAPFLAG_EXTRA_STACK, _T("tablet_free"))); dw (RTS);
 	dofunc = here ();
 	calltrap (deftrap (lib_dofunc)); dw (RTS);
-	unkfunc = here ();
+	unkfunc = here (); // Assigned but never used
+	(void)unkfunc;
 	calltrap (deftrap (lib_unkfunc)); dw (RTS);
 
 	/* FuncTable */

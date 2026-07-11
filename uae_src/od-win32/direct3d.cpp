@@ -2655,8 +2655,8 @@ static const TCHAR *D3D_init2 (struct d3dstruct *d3d, HWND ahwnd, int w_w, int w
 	int monid = d3d->num;
 	struct amigadisplay *ad = &adisplays[monid];
 	HRESULT ret, hr;
-	static TCHAR errmsg[300] = { 0 };
-	D3DDISPLAYMODE mode = { 0 };
+	static TCHAR errmsg[300] = {}; 
+	D3DDISPLAYMODE mode = {}; 
 	D3DCAPS9 d3dCaps;
 	int adapter;
 	DWORD flags;

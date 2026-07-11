@@ -67,10 +67,10 @@
 
 #	define FASTCALL
 #	define FUNCTION_CONST
-#	define PACKED		__attribute__((packed))
-#	define UNUSED		__attribute__((unused))
+#	define PACKED
+#	define UNUSED
 #	define DEPRECATED
-#	define ALIGN_STRUCT(n)	__attribute__((aligned(n)))
+#	define ALIGN_STRUCT(n)	__declspec(align(n))
 #	define NORETURN __declspec(noreturn)
 
 typedef unsigned long long uint64;

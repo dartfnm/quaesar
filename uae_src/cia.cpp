@@ -358,7 +358,7 @@ static void compute_passed_time_cia(int num, uae_u32 ciaclocks)
 	if ((c->t[0].cr & (CR_INMODE | CR_START)) == CR_START) {
 		uae_u32 cc = ciaclocks;
 		int pipe = bitstodelay(c->t[0].inputpipe);
-		if (cc > pipe) {
+		if (cc > (uae_u32)pipe) {
 			cc -= pipe;
 		} else {
 			cc = 0;
@@ -369,7 +369,7 @@ static void compute_passed_time_cia(int num, uae_u32 ciaclocks)
 	if ((c->t[1].cr & (CR_INMODE | CR_INMODE1 | CR_START)) == CR_START) {
 		uae_u32 cc = ciaclocks;
 		int pipe = bitstodelay(c->t[1].inputpipe);
-		if (cc > pipe) {
+		if (cc > (uae_u32)pipe) {
 			cc -= pipe;
 		} else {
 			cc = 0;
@@ -767,6 +767,7 @@ static int get_cia_sync_cycles(int *syncdelay)
 
 void event_CIA_synced_interrupt(uae_u32 v)
 {
+	(void)v;
 	CIA_update();
 	CIA_calctimers();
 }
@@ -918,7 +919,7 @@ static void do_tod_hack(bool dotod)
 	if (rate <= 0)
 		return;
 	if (rate != oldrate || (cia[0].tod & 0xfff) != (tod_hack_tod_last & 0xfff)) {
-		write_log(_T("TOD HACK reset %d,%d %ld,%lld\n"), rate, oldrate, cia[0].tod, tod_hack_tod_last);
+		write_log(_T("TOD HACK reset %d,%d %d,%lld\n"), rate, oldrate, (int)cia[0].tod, (long long)tod_hack_tod_last);
 		tod_hack_reset();
 		oldrate = rate;
 		docount = 1;
@@ -936,7 +937,7 @@ static void do_tod_hack(bool dotod)
 
 	gettimeofday(&tv, NULL);
 	t = (uae_u64)tv.tv_sec * 1000000 + tv.tv_usec;
-	if (t - tod_hack_tv >= 1000000 / rate) {
+	if ((int64_t)(t - tod_hack_tv) >= 1000000 / rate) {
 		tod_hack_tv += 1000000 / rate;
 		tod_diff_cnt += 1000000 - (1000000 / rate) * rate;
 		tod_hack_tv += tod_diff_cnt / rate;
@@ -1824,6 +1825,7 @@ static uae_u8 ReadCIAA(uae_u32 addr, uae_u32 *flags)
 
 static uae_u8 ReadCIAB(uae_u32 addr, uae_u32 *flags)
 {
+	(void)flags;
 	struct CIA *c = &cia[1];
 	uae_u32 tmp;
 	int reg = addr & 15;
@@ -1914,6 +1916,7 @@ static uae_u8 ReadCIAB(uae_u32 addr, uae_u32 *flags)
 
 static void WriteCIAA(uae_u16 addr, uae_u8 val, uae_u32 *flags)
 {
+	(void)flags;
 	struct CIA *c = &cia[0];
 	int reg = addr & 15;
 
@@ -2032,7 +2035,7 @@ static void WriteCIAA(uae_u16 addr, uae_u8 val, uae_u32 *flags)
 			if (kblostsynccnt > 0 && currprefs.cs_kbhandshake) {
 				evt_t len = get_cycles() - kbhandshakestart;
 				if (len < currprefs.cs_kbhandshake * CYCLE_UNIT) {
-					write_log(_T("Keyboard handshake pulse length %d < %d (CCKs)\n"), len / CYCLE_UNIT, currprefs.cs_kbhandshake);
+					write_log(_T("Keyboard handshake pulse length %lld < %d (CCKs)\n"), (long long)(len / CYCLE_UNIT), currprefs.cs_kbhandshake);
 				}
 			}
 			kblostsynccnt = 0;
@@ -2246,7 +2249,8 @@ addrbank cia_bank = {
 	cia_lput, cia_wput, cia_bput,
 	default_xlate, default_check, NULL, NULL, _T("CIA"),
 	cia_lgeti, cia_wgeti,
-	ABFLAG_IO | ABFLAG_CIA, S_READ, S_WRITE, NULL, 0x3f01, 0xbfc000
+	ABFLAG_IO | ABFLAG_CIA, S_READ, S_WRITE, NULL, 0x3f01, 0xbfc000,
+	0
 };
 
 static int cia_cycles(int delay, int phase, int val, int post)
@@ -2281,6 +2285,7 @@ static int cia_cycles(int delay, int phase, int val, int post)
 
 static void cia_wait_pre(int cianummask)
 {
+	(void)cianummask;
 	if (currprefs.cachesize || currprefs.cpu_thread)
 		return;
 #ifdef WITH_PPC
@@ -2708,7 +2713,8 @@ addrbank clock_bank = {
 	clock_lput, clock_wput, clock_bput,
 	default_xlate, default_check, NULL, NULL, _T("Battery backed up clock (none)"),
 	dummy_lgeti, dummy_wgeti,
-	ABFLAG_IO, S_READ, S_WRITE, NULL, 0x3f, 0xdc0000
+	ABFLAG_IO, S_READ, S_WRITE, NULL, 0x3f, 0xdc0000,
+	0
 };
 
 static uae_u8 getclockreg(int addr, struct tm *ct)
@@ -2852,6 +2858,7 @@ static uae_u32 REGPARAM2 clock_bget(uaecptr addr)
 
 static void cputester_event(uae_u32 v)
 {
+	(void)v;
 	IRQ_forced(4, 28 / 2);
 }
 

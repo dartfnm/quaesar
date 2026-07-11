@@ -97,8 +97,8 @@ static struct mmufastcache030 atc_data_cache_read[MMUFASTCACHE_ENTRIES030];
 static struct mmufastcache030 atc_data_cache_write[MMUFASTCACHE_ENTRIES030];
 #endif
 
-/* for debugging messages */
-static char table_letter[4] = {'A','B','C','D'};
+/* for debugging */
+// static char table_letter[4] = {'A','B','C','D'}; // Unused
 
 static const uae_u32 mmu030_size[3] = { MMU030_SSW_SIZE_B, MMU030_SSW_SIZE_W, MMU030_SSW_SIZE_L };
 
@@ -335,6 +335,7 @@ static bool mmu_op30_invea(uae_u32 opcode)
 
 int mmu_op30_pmove(uaecptr pc, uae_u32 opcode, uae_u16 next, uaecptr extra)
 {
+	(void)pc;
 	int preg = (next >> 10) & 31;
 	int rw = (next >> 9) & 1;
 	int fd = (next >> 8) & 1;
@@ -458,6 +459,7 @@ int mmu_op30_pmove(uaecptr pc, uae_u32 opcode, uae_u16 next, uaecptr extra)
 
 bool mmu_op30_ptest (uaecptr pc, uae_u32 opcode, uae_u16 next, uaecptr extra)
 {
+    (void)pc;
     mmu030.status = mmusr_030 = 0;
     
     int level = (next&0x1C00)>>10;
@@ -509,6 +511,7 @@ bool mmu_op30_ptest (uaecptr pc, uae_u32 opcode, uae_u16 next, uaecptr extra)
 
 static bool mmu_op30_pload (uaecptr pc, uae_u32 opcode, uae_u16 next, uaecptr extra)
 {
+    (void)pc;
     int rw = (next >> 9) & 1;
   	int unused = (next & (0x100 | 0x80 | 0x40 | 0x20));
 	uae_u32 fc;
@@ -2502,6 +2505,7 @@ void uae_mmu030_put_lrmw(uaecptr addr, uae_u32 val, int size)
 
 uae_u32 REGPARAM2 mmu030_get_ilong_unaligned(uaecptr addr, uae_u32 fc, int flags)
 {
+	(void)flags;
 	uae_u32 res;
 
 	res = (uae_u32)mmu030_get_iword(addr, fc) << 16;
@@ -2519,6 +2523,7 @@ uae_u32 REGPARAM2 mmu030_get_ilong_unaligned(uaecptr addr, uae_u32 fc, int flags
 
 static void unalign_init(uaecptr addr, bool l, bool l2)
 {
+	(void)addr;
 	if (l2)
 		mmu030_state[1] |= MMU030_STATEFLAG1_SUBACCESSX;
 	if (l)
@@ -3093,6 +3098,8 @@ void m68k_do_rte_mmu030 (uaecptr a7)
 
 void flush_mmu030 (uaecptr addr, int n)
 {
+	(void)addr;
+	(void)n;
 }
 
 void m68k_do_rts_mmu030 (void)

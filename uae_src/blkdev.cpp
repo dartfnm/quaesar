@@ -1907,7 +1907,7 @@ int scsi_cd_emulate (int unitnum, uae_u8 *cmdbuf, int scsi_cmd_len,
 			int format = cmdbuf[3];
 			int track = cmdbuf[6];
 			int maxlen = rw(cmdbuf + 7);
-			uae_u8 buf[SUBQ_SIZE] = { 0 };
+			uae_u8 buf[SUBQ_SIZE] = {}; 
 
 			if (nodisk (&di))
 				goto nodisk;
@@ -2027,7 +2027,7 @@ int scsi_cd_emulate (int unitnum, uae_u8 *cmdbuf, int scsi_cmd_len,
 			goto nodisk;
 		int start = rl (cmdbuf + 2) & 0x00ffffff;
 		if (start == 0x00ffffff) {
-			uae_u8 buf[SUBQ_SIZE] = { 0 };
+			uae_u8 buf[SUBQ_SIZE] = {}; 
 			sys_command_cd_qcode (unitnum, buf, -1, false);
 			start = fromlongbcd (buf + 4 + 7);
 		}
@@ -2057,7 +2057,7 @@ int scsi_cd_emulate (int unitnum, uae_u8 *cmdbuf, int scsi_cmd_len,
 			len = rw (cmdbuf + 7);
 		if (len > 0) {
 			if (start == -1) {
-				uae_u8 buf[SUBQ_SIZE] = { 0 };
+				uae_u8 buf[SUBQ_SIZE] = {}; 
 				sys_command_cd_qcode (unitnum, buf, -1, false);
 				start = msf2lsn (fromlongbcd (buf + 4 + 7));
 			}
@@ -2099,7 +2099,7 @@ int scsi_cd_emulate (int unitnum, uae_u8 *cmdbuf, int scsi_cmd_len,
 	{
 		if (nodisk (&di))
 			goto nodisk;
-		uae_u8 buf[SUBQ_SIZE] = { 0 };
+		uae_u8 buf[SUBQ_SIZE] = {}; 
 		int resume = cmdbuf[8] & 1;
 		sys_command_cd_qcode (unitnum, buf, -1, false);
 		if (buf[1] != AUDIO_STATUS_IN_PROGRESS && buf[1] != AUDIO_STATUS_PAUSED)
@@ -2249,8 +2249,8 @@ static int execscsicmd_direct (int unitnum, int type, struct amigascsi *as)
 	int io_error = 0;
 	uae_u8 *scsi_datap, *scsi_datap_org;
 	uae_u32 scsi_cmd_len_orig = as->cmd_len;
-	uae_u8 cmd[16] = { 0 };
-	uae_u8 replydata[256] = { 0 };
+	uae_u8 cmd[16] = {}; 
+	uae_u8 replydata[256] = {}; 
 	int datalen = as->len;
 	int senselen = as->sense_len;
 	int replylen = 0;
@@ -2322,7 +2322,7 @@ int sys_command_scsi_direct_native(int unitnum, int type, struct amigascsi *as)
 int sys_command_scsi_direct(TrapContext *ctx, int unitnum, int type, uaecptr acmd)
 {
 	int ret;
-	struct amigascsi as = { 0 };
+	struct amigascsi as = {}; 
 	uaecptr ap;
 	addrbank *bank;
 	uae_u8 scsicmd[30];

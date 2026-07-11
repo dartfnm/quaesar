@@ -582,7 +582,7 @@ int hdf_hd_open (struct hd_hardfiledata *hfd)
 	hfd->secspertrack_def = hfd->secspertrack;
 	hfd->heads_def = hfd->heads;
 	if (ci->surfaces && ci->sectors) {
-		uae_u8 buf[512] = { 0 };
+		uae_u8 buf[512] = {}; 
 		hdf_read (&hfd->hfd, buf, 0, 512, &error);
 		if (!error && buf[0] != 0 && memcmp (buf, _T("RDSK"), 4)) {
 			ci->highcyl = (int)((hfd->hfd.virtsize / ci->blocksize) / (ci->sectors * ci->surfaces));
@@ -616,6 +616,7 @@ static int hdf_read2(struct hardfiledata *hfd, void *buffer, uae_u64 offset, int
 
 static void hdf_init_cache(struct hardfiledata *hfd)
 {
+	(void)hfd;
 }
 static void hdf_flush_cache(struct hardfiledata *hdf)
 {
@@ -747,7 +748,7 @@ int hdf_open (struct hardfiledata *hfd, const TCHAR *pname)
 	}
 	write_log (_T("HDF is VHD %s image, virtual size=%lldK (%llx %lld)\n"),
 		hfd->hfd_type == HFD_VHD_FIXED ? _T("fixed") : _T("dynamic"),
-		hfd->virtsize / 1024, hfd->virtsize, hfd->virtsize);
+		(long long)(hfd->virtsize / 1024), (unsigned long long)hfd->virtsize, (long long)hfd->virtsize);
 	hdf_init_cache (hfd);
 	return 1;
 nonvhd:
@@ -1070,7 +1071,7 @@ int vhd_create (const TCHAR *name, uae_u64 size, uae_u32 dostype)
 	zf = NULL;
 
 	if (dostype) {
-		uae_u8 bootblock[512] = { 0 };
+		uae_u8 bootblock[512] = {}; 
 		bootblock[0] = dostype >> 24;
 		bootblock[1] = dostype >> 16;
 		bootblock[2] = dostype >>  8;

@@ -2824,7 +2824,7 @@ static uae_u32 REGPARAM2 picasso_InitCard (TrapContext *ctx)
 	i = 0;
 	unkcnt = cnt = 0;
 	while (newmodes[i].depth >= 0) {
-		struct LibResolution res = { 0 };
+		struct LibResolution res = {}; 
 		int j = i;
 		if (addmode(ctx, AmigaBoardInfo, &amem, &res, newmodes[i].res.width, newmodes[i].res.height, NULL, 0, &unkcnt)) {
 			TCHAR *s;
@@ -2850,7 +2850,7 @@ static uae_u32 REGPARAM2 picasso_InitCard (TrapContext *ctx)
 	}
 #if MULTIDISPLAY
 	for (i = 0; Displays[i].name; i++) {
-		struct LibResolution res = { 0 };
+		struct LibResolution res = {}; 
 		struct MultiDisplay *md = &Displays[i];
 		int w = md->rect.right - md->rect.left;
 		int h = md->rect.bottom - md->rect.top;

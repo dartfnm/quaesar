@@ -731,7 +731,7 @@ void thread_kill(thread_t *handle)
 }
 event_t *thread_create_event(void)
 {
-	uae_sem_t sem = { 0 };
+	uae_sem_t sem = {}; 
 	uae_sem_init(&sem, 1, 0);
 	return sem;
 }

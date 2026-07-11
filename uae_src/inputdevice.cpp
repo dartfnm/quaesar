@@ -100,8 +100,8 @@ extern int tablet_log;
 
 #define JOYMOUSE_CDTV 8
 
-#define DEFEVENT(A, B, C, D, E, F) {_T(#A), B, NULL, C, D, E, F, 0 },
-#define DEFEVENT2(A, B, B2, C, D, E, F, G) {_T(#A), B, B2, C, D, E, F, G },
+#define DEFEVENT(A, B, C, D, E, F) {_T(#A), B, NULL, C, D, E, F, 0, 0 },
+#define DEFEVENT2(A, B, B2, C, D, E, F, G) {_T(#A), B, B2, C, D, E, F, G, 0 },
 #define DEFEVENTKB(A, B, C, F, PC) {_T(#A), B, NULL, C, 0, 0, F, 0, PC },
 static const struct inputevent events[] = {
 	{0, 0, 0, AM_K, 0, 0, 0, 0, 0},
@@ -590,7 +590,7 @@ void inputdevice_forget_unplugged_device(int portnum, int sub)
 static struct jport *inputdevice_get_used_device(int portnum, int ageindex)
 {
 	int idx = -1;
-	int used[MAX_STORED_JPORTS] = { 0 };
+	int used[MAX_STORED_JPORTS] = {}; 
 	if (ageindex < 0)
 		return NULL;
 	while (ageindex >= 0) {
@@ -702,7 +702,7 @@ static void inputdevice_store_used_device(struct jport *jps, int portnum, int su
 
 static void inputdevice_store_unplugged_port(struct uae_prefs *p, struct inputdevconfig *idc)
 {
-	struct jport jpt = { 0 };
+	struct jport jpt = {}; 
 	for (int j = 0; j < MAX_JPORT_DEVS; j++) {
 		struct jport_dev *jdt = &jpt.jd[j];
 		_tcscpy(jdt->idc.configname, idc->configname);
@@ -7386,7 +7386,7 @@ static void setautofires (struct uae_prefs *prefs, int port, int sub, int af, bo
 // merge gameport settings with current input configuration
 static void compatibility_copy (struct uae_prefs *prefs, bool gameports)
 {
-	int used[MAX_INPUT_DEVICES] = { 0 };
+	int used[MAX_INPUT_DEVICES] = {}; 
 	int joy;
 
 	for (int i = 0; i < MAX_JPORTS; i++) {
@@ -8134,7 +8134,7 @@ bool inputdevice_devicechange (struct uae_prefs *prefs)
 	}
 
 	// store old devices
-	struct inputdevconfig devcfg[MAX_INPUT_DEVICES][IDTYPE_MAX] = { 0 };
+	struct inputdevconfig devcfg[MAX_INPUT_DEVICES][IDTYPE_MAX] = {}; 
 	int dev_nums[IDTYPE_MAX];
 	for (int j = 0; j <= IDTYPE_KEYBOARD; j++) {
 		struct inputdevice_functions *inf = &idev[j];
@@ -8172,7 +8172,7 @@ bool inputdevice_devicechange (struct uae_prefs *prefs)
 	for (int j = 0; j <= IDTYPE_KEYBOARD; j++) {
 		struct inputdevice_functions *inf = &idev[j];
 		int num = inf->get_num();
-		bool df[MAX_INPUT_DEVICES] = { 0 };
+		bool df[MAX_INPUT_DEVICES] = {}; 
 		for (int i = 0; i < MAX_INPUT_DEVICES; i++) {
 			TCHAR *fn2 = devcfg[i][j].name;
 			TCHAR *un2 = devcfg[i][j].configname;
@@ -8586,10 +8586,12 @@ static TCHAR *get_int_friendlyname (int num)
 }
 static TCHAR *get_int_uniquename (int num)
 {
+	(void)num;
 	return my_strdup(_T("INTERNALEVENTS1"));
 }
 static int get_int_widget_num (int num)
 {
+	(void)num;
 	int i;
 	for (i = 0; internaleventlabels[i]; i++);
 	return i;
@@ -9248,7 +9250,7 @@ static void copydev (struct uae_input_device *dst, struct uae_input_device *src,
 		for (int j = 0; j < MAX_INPUT_DEVICE_EVENTS; j++) {
 			if (j == selectedwidget || selectedwidget < 0) {
 				for (int k = 0; k < MAX_INPUT_SUB_EVENT_ALL; k++) {
-					if (dst[i].custom)
+					if (dst[i].custom[j][k])
 						dst[i].custom[j][k] = my_strdup (dst[i].custom[j][k]);
 				}
 			}
@@ -10366,7 +10368,7 @@ void inputdevice_fix_prefs(struct uae_prefs *p, bool userconfig)
 				}
 				if (!matched[i][j]) {
 					if (jd->idc.configname[0] && jd->idc.name[0]) {
-						struct jport jpt = { 0 };
+						struct jport jpt = {}; 
 						memcpy(&jpt.jd[j].idc, &jp->jd[j].idc, sizeof(struct inputdevconfig));
 						jpt.jd[j].id = JPORT_UNPLUGGED;
 						jpt.jd[j].mode = jd->mode;

@@ -496,6 +496,7 @@ uaecptr ShowEA_disp(uaecptr *pcp, uaecptr base, TCHAR *buffer, const TCHAR *name
 
 uaecptr ShowEA(void *f, uaecptr pc, uae_u16 opcode, int reg, amodes mode, wordsizes size, TCHAR *buf, uae_u32 *eaddr, int *actualea, int safemode)
 {
+	(void)safemode;
 	uaecptr addr = pc;
 	uae_s16 disp16;
 	uae_s32 offset = 0;
@@ -524,7 +525,7 @@ uaecptr ShowEA(void *f, uaecptr pc, uae_u16 opcode, int reg, amodes mode, wordsi
 		_stprintf(buffer, _T("(%c%d)"), disasm_areg, reg);
 		addr = regs.regs[reg + 8];
 		if (disasm_flags & DISASM_FLAG_VAL_FORCE) {
-			_stprintf(buffer + _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
+			_sntprintf(buffer + _tcslen(buffer), sizeof(buffer) - _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
 		}
 		showea_val(buffer, opcode, addr, size);
 		break;
@@ -532,7 +533,7 @@ uaecptr ShowEA(void *f, uaecptr pc, uae_u16 opcode, int reg, amodes mode, wordsi
 		_stprintf(buffer, _T("(%c%d)+"), disasm_areg, reg);
 		addr = regs.regs[reg + 8];
 		if (disasm_flags & DISASM_FLAG_VAL_FORCE) {
-			_stprintf(buffer + _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
+			_sntprintf(buffer + _tcslen(buffer), sizeof(buffer) - _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
 		}
 		showea_val(buffer, opcode, addr, size);
 		break;
@@ -540,7 +541,7 @@ uaecptr ShowEA(void *f, uaecptr pc, uae_u16 opcode, int reg, amodes mode, wordsi
 		_stprintf(buffer, _T("-(%c%d)"), disasm_areg, reg);
 		addr = regs.regs[reg + 8] - datasizes[size];
 		if (disasm_flags & DISASM_FLAG_VAL_FORCE) {
-			_stprintf(buffer + _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
+			_sntprintf(buffer + _tcslen(buffer), sizeof(buffer) - _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
 		}
 		showea_val(buffer, opcode, addr, size);
 		break;
@@ -555,7 +556,7 @@ uaecptr ShowEA(void *f, uaecptr pc, uae_u16 opcode, int reg, amodes mode, wordsi
 			addr = m68k_areg (regs, reg) + disp16;
 			_stprintf(buffer, _T("(%c%d,%s)"), disasm_areg, reg, offtxt);
 			if (disasm_flags & (DISASM_FLAG_VAL_FORCE | DISASM_FLAG_VAL)) {
-				_stprintf(buffer + _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
+				_sntprintf(buffer + _tcslen(buffer), sizeof(buffer) - _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
 			}
 			showea_val(buffer, opcode, addr, size);
 		}
@@ -572,9 +573,9 @@ uaecptr ShowEA(void *f, uaecptr pc, uae_u16 opcode, int reg, amodes mode, wordsi
 		disp16 = get_iword_debug (pc); pc += 2;
 		addr += (uae_s16)disp16;
 		_stprintf(buffer, _T("(%s"), disasm_pcreg);
-		_stprintf(buffer + _tcslen(buffer), disasm_lc_hex(_T(",$%04X)")), disp16 & 0xffff);
+		_sntprintf(buffer + _tcslen(buffer), sizeof(buffer) - _tcslen(buffer), disasm_lc_hex(_T(",$%04X)")), disp16 & 0xffff);
 		if (disasm_flags & (DISASM_FLAG_VAL_FORCE | DISASM_FLAG_VAL)) {
-			_stprintf(buffer + _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
+			_sntprintf(buffer + _tcslen(buffer), sizeof(buffer) - _tcslen(buffer), disasm_lc_hex(_T(" == $%08X")), addr);
 		}
 		showea_val(buffer, opcode, addr, size);
 		break;
@@ -1095,6 +1096,7 @@ static uae_u32 asmgetval(const TCHAR *s)
 
 static int asm_parse_mode020(TCHAR *s, uae_u8 *reg, uae_u32 *v, int *extcnt, uae_u16 *ext)
 {
+	(void)s; (void)reg; (void)v; (void)extcnt; (void)ext;
 	return -1;
 }
 
@@ -1148,7 +1150,7 @@ static int asm_parse_mode(TCHAR *s, uae_u8 *reg, uae_u32 *v, int *extcnt, uae_u1
 	}
 	int dots = 0;
 	int fullext = 0;
-	for (int i = 0; i < _tcslen(s); i++) {
+	for (size_t i = 0; i < _tcslen(s); i++) {
 		if (s[i] == ',') {
 			dots++;
 		} else if (s[i] == '[') {
@@ -1463,8 +1465,9 @@ int m68k_asm(TCHAR *sline, uae_u16 *out, uaecptr pc)
 	uae_u8 dreg = -1;
 	uae_u32 sval = 0;
 	uae_u32 dval = 0;
-	int ssize = -1;
-	int dsize = -1;
+	// uaecptr seaddr2, deaddr2; // Unused in this function
+	// int ssize = -1; // Unused
+	// int dsize = -1; // Unused
 	struct mnemolookup *lookup;
 
 	dmode = asm_parse_mode(dstea, &dreg, &dval, &dextcnt, dexts);
@@ -1942,7 +1945,7 @@ uae_u32 m68k_disasm_2(TCHAR *buf, int bufsize, uaecptr pc, uae_u16 *bufpc, int b
 		int illegal = 0;
 		int segid, lastsegid;
 		TCHAR *symbolpos;
-		bool skip = false;
+		// bool skip = false; // Unused
 
 		seaddr2 = deaddr2 = 0xffffffff;
 		oldpc = pc;
@@ -2194,19 +2197,19 @@ uae_u32 m68k_disasm_2(TCHAR *buf, int bufsize, uaecptr pc, uae_u16 *bufpc, int b
 			_tcscat(instrname, _T(","));
 			pc = ShowEA(NULL, pc, opcode, dp->dreg, dp->dmode, dp->size, instrname, &deaddr2, &actualea_dst, safemode);
 			extra = get_word_debug(pc);
-			_stprintf(instrname + _tcslen(instrname), disasm_lc_hex(_T(",#$%04X")), extra);
+			_sntprintf(instrname + _tcslen(instrname), sizeof(instrname) - _tcslen(instrname), disasm_lc_hex(_T(",#$%04X")), extra);
 			add_disasm_word(&pc, &bufpc, &bufpcsize, 2);
 		} else if (lookup->mnemo == i_LPSTOP) {
 			if (extra == 0x01c0) {
 				uae_u16 extra2 = get_word_debug(pc + 2);
 				_tcscpy(instrname, _T("LPSTOP"));
 				disasm_lc_mnemo(instrname);
-				_stprintf(instrname + _tcslen(instrname), disasm_lc_hex(_T(" #$%04X")), extra2);
+				_sntprintf(instrname + _tcslen(instrname), sizeof(instrname) - _tcslen(instrname), disasm_lc_hex(_T(" #$%04X")), extra2);
 				add_disasm_word(&pc, &bufpc, &bufpcsize, 4);
 			} else {
 				_tcscpy(instrname, _T("ILLG"));
 				disasm_lc_mnemo(instrname);
-				_stprintf(instrname + _tcslen(instrname), disasm_lc_hex(_T(" #$%04X")), extra);
+				_sntprintf(instrname + _tcslen(instrname), sizeof(instrname) - _tcslen(instrname), disasm_lc_hex(_T(" #$%04X")), extra);
 				add_disasm_word(&pc, &bufpc, &bufpcsize, 2);
 			}
 		} else if (lookup->mnemo == i_CALLM) {
@@ -2239,7 +2242,7 @@ uae_u32 m68k_disasm_2(TCHAR *buf, int bufsize, uaecptr pc, uae_u16 *bufpc, int b
 				fpu_get_constant(&fp, extra & 0x7f);
 				_tcscpy(instrname, _T("FMOVECR.X"));
 				disasm_lc_mnemo(instrname);
-				_stprintf(instrname + _tcslen(instrname), _T(" #0x%02x [%s],%s%d"), extra & 0x7f, fpp_print(&fp, 0), disasm_fpreg, (extra >> 7) & 7);
+				_sntprintf(instrname + _tcslen(instrname), sizeof(instrname) - _tcslen(instrname), _T(" #0x%02x [%s],%s%d"), extra & 0x7f, fpp_print(&fp, 0), disasm_fpreg, (extra >> 7) & 7);
 			} else if ((extra & 0x8000) == 0x8000) { // FMOVEM or FMOVE control register
 				int dr = (extra >> 13) & 1;
 				int mode;
@@ -2403,7 +2406,7 @@ uae_u32 m68k_disasm_2(TCHAR *buf, int bufsize, uaecptr pc, uae_u16 *bufpc, int b
 		}
 
 		if (disasm_flags & DISASM_FLAG_WORDS) {
-			for (i = 0; i < (pc - oldpc) / 2 && i < disasm_max_words; i++) {
+			for (i = 0; i < (int)(pc - oldpc) / 2 && i < disasm_max_words; i++) {
 				buf = buf_out(buf, &bufsize, disasm_lc_nhex(_T("%04X ")), get_word_debug(oldpc + i * 2));
 			}
 			while (i++ < disasm_min_words) {
@@ -2515,6 +2518,7 @@ and instrcode
 *************************************************************/
 void sm68k_disasm (TCHAR *instrname, TCHAR *instrcode, uaecptr addr, uaecptr *nextpc, uaecptr lastpc)
 {
+	(void)lastpc;
 	TCHAR *ccpt;
 	uae_u32 opcode;
 	struct mnemolookup *lookup;
@@ -2554,7 +2558,7 @@ void sm68k_disasm (TCHAR *instrname, TCHAR *instrcode, uaecptr addr, uaecptr *ne
 	if (instrcode)
 	{
 		int i;
-		for (i = 0; i < (pc - oldpc) / 2; i++)
+		for (i = 0; i < (int)(pc - oldpc) / 2; i++)
 		{
 			_stprintf (instrcode, _T("%04x "), get_iword_debug (oldpc + i * 2));
 			instrcode += _tcslen (instrcode);

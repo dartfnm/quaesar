@@ -105,7 +105,7 @@ static void cdda_closewav(struct cda_play *ciw)
 
 static int cdda_openwav(struct cda_play *ciw)
 {
-	WAVEFORMATEX wav = { 0 };
+	WAVEFORMATEX wav = {}; 
 	MMRESULT mmr;
 
 	wav.cbSize = 0;

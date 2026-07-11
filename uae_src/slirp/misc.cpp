@@ -76,7 +76,7 @@ void getouraddr(void)
 
 	if (gethostname(buff, sizeof(buff)) == 0)
 	{
-		struct addrinfo hints = { 0 };
+		struct addrinfo hints = {}; 
 		hints.ai_flags = AI_NUMERICHOST;
 		hints.ai_family = AF_INET;
 		struct addrinfo* ai;

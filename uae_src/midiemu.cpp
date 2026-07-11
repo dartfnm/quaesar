@@ -169,7 +169,7 @@ void midi_update_sound(float v)
 
 static bool audio_state_midi_emu(int streamid, void *params)
 {
-	int sample[2] = { 0 };
+	int sample[2] = {}; 
 
 	if (mt32context) {
 		int vol = (100 - currprefs.sound_volume_midi) * 32768 / 100;

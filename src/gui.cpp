@@ -22,6 +22,7 @@ void gui_filename(int, const TCHAR*) {
 }
 
 void gui_fps(int fps, int idle, int color) {
+    (void)fps; (void)idle; (void)color;
 }
 
 void gui_changesettings(void) {
@@ -37,15 +38,19 @@ void gui_flicker_led(int, int, int) {
 }
 
 void gui_disk_image_change(int, const TCHAR*, bool writeprotected) {
+    (void)writeprotected;
 }
 
 void gui_display(int shortcut) {
+    (void)shortcut;
 }
 
 void gui_gameport_button_change(int port, int button, int onoff) {
+    (void)port; (void)button; (void)onoff;
 }
 
 void gui_gameport_axis_change(int port, int axis, int state, int max) {
+    (void)port; (void)axis; (void)state; (void)max;
 }
 
 void notify_user(int msg) {

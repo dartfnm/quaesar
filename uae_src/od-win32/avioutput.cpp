@@ -663,7 +663,7 @@ static int AVIOutput_GetCOMPVARSFromRegistry(COMPVARS *pcv)
 
 static int AVIOutput_GetVideoCodecName (COMPVARS *pcv, TCHAR *name, int len)
 {
-	ICINFO icinfo = { 0 };
+	ICINFO icinfo = {}; 
 
 	name[0] = 0;
 	if (pcv->fccHandler == mmioFOURCC ('D','I','B',' ')) {

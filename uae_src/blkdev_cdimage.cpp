@@ -1810,7 +1810,7 @@ static int parsecue (struct cdunit *cdu, struct zfile *zcue, const TCHAR *img, c
 					t->address += postgap;
 					if (fnametypeid == AUDENC_PCM && t->handle) {
 						struct zfile *zf = t->handle;
-						uae_u8 buf[16] = { 0 };
+						uae_u8 buf[16] = {}; 
 						zfile_fread (buf, 12, 1, zf);
 						if (!memcmp (buf, "RIFF", 4) && !memcmp (buf + 8, "WAVE", 4)) {
 							int size;
@@ -1872,7 +1872,7 @@ static int parsenrg(struct cdunit *cdu, struct zfile *znrg, const TCHAR *img, co
 	uae_s64 size;
 	uae_s64 offset;
 	bool ner5 = false;
-	uae_u8 buf[256] = { 0 };
+	uae_u8 buf[256] = {}; 
 	int tracknum = 0;
 	uae_u32 lastlba = 0;
 	bool gotsession = false;

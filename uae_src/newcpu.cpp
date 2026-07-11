@@ -58,7 +58,7 @@
 #include <signal.h>
 #else
 /* Need to have these somewhere */
-bool check_prefs_changed_comp (bool checkonly) { return false; }
+bool check_prefs_changed_comp (bool checkonly) { (void)checkonly;  (void)checkonly; return false; }
 #endif
 /* For faster JIT cycles handling */
 int pissoff = 0;
@@ -403,8 +403,8 @@ static bool check_trace (void)
 		return true;
 	if (!cputrace.readcounter && !cputrace.writecounter && !cputrace.cyclecounter) {
 		if (cpu_tracer != -2) {
-			write_log (_T("CPU trace: dma_cycle() enabled. %08x %08x NOW=%08x\n"),
-				cputrace.cyclecounter_pre, cputrace.cyclecounter_post, get_cycles ());
+			write_log (_T("CPU trace: dma_cycle() enabled. %08x %08x NOW=%08llx\n"),
+				cputrace.cyclecounter_pre, cputrace.cyclecounter_post, (unsigned long long)get_cycles ());
 			cpu_tracer = -2; // dma_cycle() allowed to work now
 		}
 	}
@@ -427,7 +427,7 @@ static bool check_trace (void)
 	x_do_cycles_pre = x2_do_cycles_pre;
 	x_do_cycles_post = x2_do_cycles_post;
 	set_x_cp_funcs();
-	write_log(_T("CPU tracer playback complete. STARTCYCLES=%016llx NOWCYCLES=%016llx\n"), cputrace.startcycles, get_cycles());
+	write_log(_T("CPU tracer playback complete. STARTCYCLES=%016llx NOWCYCLES=%016llx\n"), (unsigned long long)cputrace.startcycles, (unsigned long long)get_cycles());
 	cputrace.needendcycles = 1;
 	cpu_tracer = 0;
 	return true;
@@ -442,8 +442,8 @@ static bool get_trace(uaecptr addr, int accessmode, int size, uae_u32 *data)
 			ctm->mode = 0;
 			write_log(_T("CPU trace: GET %d: PC=%08x %08x=%08x %d %d %08x/%08x/%08x %d/%d (%08x)\n"),
 				i, cputrace.pc, addr, ctm->data, accessmode, size,
-				cputrace.cyclecounter, cputrace.cyclecounter_pre, cputrace.cyclecounter_post,
-				cputrace.readcounter, cputrace.writecounter, get_cycles ());
+				(unsigned int)(cputrace.cyclecounter & 0xFFFFFFFF), (unsigned int)(cputrace.cyclecounter_pre & 0xFFFFFFFF), (unsigned int)(cputrace.cyclecounter_post & 0xFFFFFFFF),
+				cputrace.readcounter, cputrace.writecounter, (unsigned int)(get_cycles() & 0xFFFFFFFF));
 			if (accessmode == 1)
 				cputrace.writecounter--;
 			else
@@ -812,10 +812,12 @@ static void do_cycles_post (int cycles, uae_u32 v)
 }
 static void do_cycles_ce_post (int cycles, uae_u32 v)
 {
+	(void)v;
 	do_cycles_ce (cycles);
 }
 static void do_cycles_ce020_post (int cycles, uae_u32 v)
 {
+	(void)v;
 	do_cycles_ce020 (cycles);
 }
 
@@ -2391,7 +2393,7 @@ void checkint(void)
 
 void REGPARAM2 MakeSR(void)
 {
-	regs.sr = ((regs.t1 << 15) | (regs.t0 << 14)
+	regs.sr = static_cast<uae_u16>((regs.t1 << 15) | (regs.t0 << 14)
 		| (regs.s << 13) | (regs.m << 12) | (regs.intmask << 8)
 		| (GET_XFLG() << 4) | (GET_NFLG() << 3)
 		| (GET_ZFLG() << 2) | (GET_VFLG() << 1)
@@ -5083,7 +5085,7 @@ static void m68k_run_1_ce (void)
 cont:
 				if (cputrace.needendcycles) {
 					cputrace.needendcycles = 0;
-					write_log(_T("STARTCYCLES=%016llx ENDCYCLES=%016llx\n"), cputrace.startcycles, get_cycles());
+					write_log(_T("STARTCYCLES=%016llx ENDCYCLES=%016llx\n"), (unsigned long long)cputrace.startcycles, (unsigned long long)get_cycles());
 #ifdef DEBUGGER
 					log_dma_record ();
 #endif
@@ -7227,7 +7229,7 @@ uae_u8 *save_cpu_trace(size_t *len, uae_u8 *dstptr)
 	save_u32 (cputrace.writecounter);
 	save_u32 (cputrace.memoryoffset);
 	write_log (_T("CPUT SAVE: PC=%08x C=%016llX %08x %08x %08x %d %d %d\n"),
-		cputrace.pc, cputrace.startcycles,
+		cputrace.pc, (unsigned long long)cputrace.startcycles,
 		cputrace.cyclecounter, cputrace.cyclecounter_pre, cputrace.cyclecounter_post,
 		cputrace.readcounter, cputrace.writecounter, cputrace.memoryoffset);
 	for (int i = 0; i < cputrace.memoryoffset; i++) {

@@ -178,8 +178,8 @@ end:
 
 static int runxfd(int argc,wchar_t *argv[])
 {
-	STARTUPINFO si = { 0 };
-	PROCESS_INFORMATION pi = { 0 };
+	STARTUPINFO si = {}; 
+	PROCESS_INFORMATION pi = {}; 
 	TCHAR *src, *dst;
 	TCHAR *parms[5];
 	FILE *f;

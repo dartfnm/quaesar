@@ -188,6 +188,7 @@ void devices_reset_ext(int hardreset)
 
 void devices_reset(int hardreset)
 {
+	(void)hardreset;
 	memset(device_reset_done, 0, sizeof(device_reset_done));
 	// must be first
 	init_eventtab();

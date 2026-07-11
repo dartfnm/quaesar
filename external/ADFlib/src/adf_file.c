@@ -57,7 +57,9 @@ static void show_bFileExtBlock (
     const struct bFileExtBlock * const block );
 
 #else
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #endif
 
 #include <assert.h>
@@ -116,6 +118,7 @@ RETCODE adfFileTruncateGetBlocksToRemove ( const struct AdfFile * const file,
 
     unsigned blocksCount = 0;
     unsigned dataBlocksCount = 0;
+    (void)dataBlocksCount; // Currently unused, reserved for debugging
     if ( nExtBlocksOld < 1 ) {
         // no ext. blocks (neither in orig. or truncated)
         int32_t * const dataBlocks = file->fileHdr->dataBlocks;

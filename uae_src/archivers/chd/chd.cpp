@@ -1967,7 +1967,7 @@ chd_error chd_file::create_common()
 		if (!compressed())
 		{
 			UINT32 mapsize = m_mapentrybytes * m_hunkcount;
-			UINT8 buffer[4096] = { 0 };
+			UINT8 buffer[4096] = {}; 
 			UINT64 offset = m_mapoffset;
 			while (mapsize != 0)
 			{

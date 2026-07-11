@@ -23,6 +23,16 @@
 #define UAE
 #endif
 
+/* On MinGW with C++17, include Windows headers BEFORE C++ standard library
+ * to avoid std::byte vs Windows byte typedef conflicts. The `using namespace std;`
+ * below pulls std::byte into global scope, conflicting with Windows' byte in rpcndr.h. */
+#if defined(__MINGW32__) && defined(__cplusplus)
+#ifndef _AMD64_
+#define _AMD64_
+#endif
+#include <windows.h>
+#endif
+
 #ifdef __cplusplus
 #include <string>
 using namespace std;

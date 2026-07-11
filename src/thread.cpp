@@ -37,6 +37,7 @@ void uae_sem_wait(uae_sem_t* sem) {
 }
 
 void uae_sem_init(uae_sem_t* sem, int manual_reset, int initial_state) {
+    (void)manual_reset;
     if (*sem) {
         SDL_SemPost((SDL_sem*)sem);
     } else {
@@ -87,6 +88,7 @@ int uae_start_thread_fast(void (*fn)(void*), void* arg, uae_thread_id* tid) {
 }
 
 void uae_end_thread(uae_thread_id* thread) {
+    (void)thread;
     /*
    #ifdef _WIN32
        TerminateThread(SDL_GetThreadID(t), 0);
@@ -104,7 +106,7 @@ void uae_set_thread_priority(uae_thread_id*, int) {
 }
 
 uae_thread_id uae_thread_get_id(void) {
-    return (uae_thread_id)SDL_GetThreadID(nullptr);
+    return reinterpret_cast<uae_thread_id>(static_cast<uintptr_t>(SDL_GetThreadID(nullptr)));
 }
 
 #ifdef _WIN32

@@ -635,11 +635,11 @@ int __cdecl wmain (int argc, wchar_t *argv[], wchar_t *envp[])
 	int ok = 0, i;
 	int list = 0, xtract = 0, extract = 0;
 	int out = 0, all = 0, crclist = 0;
-	TCHAR path[MAX_DPATH] = { 0 }, pathx[MAX_DPATH] = { 0 };
+	TCHAR path[MAX_DPATH] = { 0 }, pathx[MAX_DPATH] = {}; 
 #if 0
 	TCHAR tmppath[MAX_DPATH];
 #endif
-	int used[32] = { 0 };
+	int used[32] = {}; 
 	TCHAR *parm2 = NULL;
 	TCHAR *parm3 = NULL;
 	TCHAR *match = NULL;

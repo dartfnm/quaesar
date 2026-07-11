@@ -2505,7 +2505,7 @@ static LRESULT CALLBACK AmigaWindowProc(HWND hWnd, UINT message, WPARAM wParam, 
 			monitor_off = 0;
 			if (!mouseinside) {
 				//write_log(_T("mouseinside\n"));
-				TRACKMOUSEEVENT tme = { 0 };
+				TRACKMOUSEEVENT tme = {}; 
 				mouseinside = true;
 				tme.cbSize = sizeof tme;
 				tme.dwFlags = TME_LEAVE;
@@ -4290,8 +4290,8 @@ static TCHAR **parseargstring (const TCHAR *s)
 
 static void shellexecute (const TCHAR *command)
 {
-	STARTUPINFO si = { 0 };
-	PROCESS_INFORMATION pi = { 0 };
+	STARTUPINFO si = {}; 
+	PROCESS_INFORMATION pi = {}; 
 	TCHAR **arg;
 	int i, j, k, stop;
 
@@ -6278,7 +6278,7 @@ bool get_plugin_path (TCHAR *out, int len, const TCHAR *path)
 
 void setpathmode (pathtype pt)
 {
-	TCHAR pathmode[32] = { 0 };
+	TCHAR pathmode[32] = {}; 
 	if (pt == PATH_TYPE_WINUAE)
 		_tcscpy (pathmode, _T("WinUAE"));
 	if (pt == PATH_TYPE_NEWWINUAE)
@@ -7819,8 +7819,8 @@ void addnotifications (HWND hwnd, int remove, int isgui)
 			WTSUnRegisterSessionNotification (hwnd);
 		wtson = 0;
 	} else {
-		DEV_BROADCAST_DEVICEINTERFACE NotificationFilter = { 0 };
-		SHChangeNotifyEntry shCNE = { 0 };
+		DEV_BROADCAST_DEVICEINTERFACE NotificationFilter = {}; 
+		SHChangeNotifyEntry shCNE = {}; 
 		shCNE.pidl = NULL;
 		shCNE.fRecursive = TRUE;
 		ret = SHChangeNotifyRegister (hwnd, SHCNRF_ShellLevel | SHCNRF_InterruptLevel | SHCNRF_NewDelivery,
@@ -8315,7 +8315,7 @@ int PASCAL wWinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 		return 0;
 
 #ifndef NDEBUG
-	PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY p = { 0 };
+	PROCESS_MITIGATION_STRICT_HANDLE_CHECK_POLICY p = {}; 
 	p.HandleExceptionsPermanentlyEnabled = 1;
 	p.RaiseExceptionOnInvalidHandleReference = 1;
 	//ProcessStrictHandleCheckPolicy = 3

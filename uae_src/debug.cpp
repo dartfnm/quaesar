@@ -1772,7 +1772,7 @@ static void heatmap_stats(TCHAR **c)
 
 	} else {
 #define MAX_HEATMAP_LINES 1000
-		struct heatmapstore linestore[MAX_HEATMAP_LINES] = { 0 };
+		struct heatmapstore linestore[MAX_HEATMAP_LINES] = {}; 
 		int storecnt = 0;
 		uae_u32 maxlimit = 0xffffffff;
 
@@ -7948,7 +7948,7 @@ int mmu_init(int mode, uaecptr parm, uaecptr parm2)
 
 void debug_parser (const TCHAR *cmd, TCHAR *out, uae_u32 outsize)
 {
-	TCHAR empty[2] = { 0 };
+	TCHAR empty[2] = {}; 
 	TCHAR *input = my_strdup (cmd);
 	if (out == NULL && outsize == 0) {
 		setconsolemode (empty, 1);

@@ -972,7 +972,7 @@ void FUNCTION_NAME(tms340x0_device::pixblt)(int src_is_linear, int dst_is_linear
 		word_read_func word_read;
 		UINT32 readwrites = 0;
 		UINT32 saddr, daddr;
-		XY dstxy = { 0 };
+		XY dstxy = {}; 
 
 		/* determine read/write functions */
 		if (IOREG(REG_DPYCTL) & 0x0800)
@@ -1324,7 +1324,7 @@ void FUNCTION_NAME(tms340x0_device::pixblt_r)(int src_is_linear, int dst_is_line
 		word_write_func word_write;
 		word_read_func word_read;
 		UINT32 saddr, daddr;
-		XY dstxy = { 0 };
+		XY dstxy = {}; 
 
 		/* determine read/write functions */
 		if (IOREG(REG_DPYCTL) & 0x0800)
@@ -1611,7 +1611,7 @@ void FUNCTION_NAME(tms340x0_device::pixblt_b)(int dst_is_linear)
 		word_write_func word_write;
 		word_read_func word_read;
 		UINT32 saddr, daddr;
-		XY dstxy = { 0 };
+		XY dstxy = {}; 
 
 		/* determine read/write functions */
 		if (IOREG(REG_DPYCTL) & 0x0800)
@@ -1832,7 +1832,7 @@ void FUNCTION_NAME(tms340x0_device::fill)(int dst_is_linear)
 		word_write_func word_write;
 		word_read_func word_read;
 		UINT32 daddr;
-		XY dstxy = { 0 };
+		XY dstxy = {}; 
 
 		/* determine read/write functions */
 		if (IOREG(REG_DPYCTL) & 0x0800)

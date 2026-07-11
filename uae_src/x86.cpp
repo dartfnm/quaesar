@@ -644,7 +644,7 @@ static void do_floppy_seek(int num, int error)
 
 	disk_reserved_reset_disk_change(num);
 	if (!error) {
-		struct floppy_reserved fr = { 0 };
+		struct floppy_reserved fr = {}; 
 		bool valid_floppy = disk_reserved_getinfo(num, &fr);
 		if (floppy_seekcyl[num] != pcf->phys_cyl) {
 
@@ -763,7 +763,7 @@ static void floppy_format(struct x86_bridge *xb, bool real)
 {
 	uae_u8 cmd = floppy_cmd[0];
 	struct pc_floppy *pcf = &floppy_pc[floppy_num];
-	struct floppy_reserved fr = { 0 };
+	struct floppy_reserved fr = {}; 
 	bool valid_floppy = disk_reserved_getinfo(floppy_num, &fr);
 
 #if FLOPPY_DEBUG
@@ -845,7 +845,7 @@ static void floppy_write(struct x86_bridge *xb, bool real)
 {
 	uae_u8 cmd = floppy_cmd[0];
 	struct pc_floppy *pcf = &floppy_pc[floppy_num];
-	struct floppy_reserved fr = { 0 };
+	struct floppy_reserved fr = {}; 
 	bool valid_floppy = disk_reserved_getinfo(floppy_num, &fr);
 
 #if FLOPPY_DEBUG
@@ -872,7 +872,7 @@ static void floppy_write(struct x86_bridge *xb, bool real)
 			uae_u8 *pioptr = floppy_pio_buffer;
 			while (!end && !fr.wrprot) {
 				int len = 128 << floppy_cmd[5];
-				uae_u8 buf[512] = { 0 };
+				uae_u8 buf[512] = {}; 
 				if (floppy_specify_pio) {
 					for (int i = 0; i < 512 && i < len; i++) {
 						if (real) {
@@ -960,7 +960,7 @@ static void floppy_do_cmd(struct x86_bridge *xb)
 {
 	uae_u8 cmd = floppy_cmd[0];
 	struct pc_floppy *pcf = &floppy_pc[floppy_num];
-	struct floppy_reserved fr = { 0 };
+	struct floppy_reserved fr = {}; 
 	bool valid_floppy;
 
 	valid_floppy = disk_reserved_getinfo(floppy_num, &fr);
@@ -1236,7 +1236,7 @@ static void outfloppy(struct x86_bridge *xb, int portnum, uae_u8 v)
 		for (int i = 0; i < 2; i++) {
 			int mask = 0x10 << i;
 			if ((floppy_dpc & mask) != (v & mask)) {
-				struct floppy_reserved fr = { 0 };
+				struct floppy_reserved fr = {}; 
 				bool valid_floppy = disk_reserved_getinfo(i, &fr);
 				if (valid_floppy)
 					driveclick_motor(fr.num, (v & mask) ? 1 : 0);
@@ -1368,7 +1368,7 @@ static uae_u8 infloppy(struct x86_bridge *xb, int portnum)
 	{
 		case 0x3f0: // PS/2 status A (draco)
 		if (xb->type < 0) {
-			struct floppy_reserved fr = { 0 };
+			struct floppy_reserved fr = {}; 
 			bool valid_floppy = disk_reserved_getinfo(floppy_num, &fr);
 			v |= floppy_irq ? 0x80 : 0x00; // INT PENDING
 			v |= 0x40; // nDRV2
@@ -1433,7 +1433,7 @@ static uae_u8 infloppy(struct x86_bridge *xb, int portnum)
 		case 0x3f7: // digital input register
 		if (xb->type >= TYPE_2286 || xb->type < 0) {
 			struct pc_floppy *pcf = &floppy_pc[floppy_num];
-			struct floppy_reserved fr = { 0 };
+			struct floppy_reserved fr = {}; 
 			bool valid_floppy = disk_reserved_getinfo(floppy_num, &fr);
 			v = 0x00;
 			if (valid_floppy && fr.disk_changed && (floppy_dpc >> 4) & (1 << floppy_num)) {
@@ -1456,7 +1456,7 @@ static uae_u8 infloppy(struct x86_bridge *xb, int portnum)
 
 uae_u16 floppy_get_raw_data(int *rate)
 {
-	struct floppy_reserved fr = { 0 };
+	struct floppy_reserved fr = {}; 
 	bool valid_floppy = disk_reserved_getinfo(floppy_num, &fr);
 	*rate = fr.rate;
 	if (valid_floppy) {
@@ -3721,7 +3721,7 @@ static void x86_ne2000(struct x86_bridge *xb)
 			break;
 		}
 		struct romconfig *rc = get_device_romconfig(&currprefs, ROMTYPE_NE2KISA, 0);
-		struct autoconfig_info aci = { 0 };
+		struct autoconfig_info aci = {}; 
 		aci.rc = rc;
 		if (xb->ne2000_isa->init(xb->ne2000_isa_board_state, &aci)) {
 			write_log(_T("NE2000 ISA configured, IO=%3X, IRQ=%d\n"), xb->ne2000_io, xb->ne2000_irq);

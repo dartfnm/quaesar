@@ -85,10 +85,17 @@ uae_u16 serper=0,serdat;
 
 void SERPER (uae_u16 w)
 {
-	int baud=0, pspeed;
+	int baud=0;
+#if defined POSIX_SERIAL
+	int pspeed;
+#endif
 
 	if (!currprefs.use_serial)
 		return;
+
+#if !defined POSIX_SERIAL
+	(void)w; // Only used when POSIX_SERIAL is defined
+#endif
 
 #if defined POSIX_SERIAL
 	if (serper == w)  /* don't set baudrate if it's already ok */
@@ -297,6 +304,7 @@ void serial_flush_buffer(void)
 
 uae_u8 serial_readstatus(uae_u8 ignored)
 {
+	(void)ignored;
 	int status = 0;
 
 #ifdef POSIX_SERIAL

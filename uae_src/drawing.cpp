@@ -1491,7 +1491,7 @@ static bool get_genlock_very_rare_and_complex_case(uae_u8 v)
 			if (v >= 128 && v < 192 && (currprefs.ecs_genlock_features_colorkey_mask[2] & (1LL << (v - 128)))) {
 				return false;
 			}
-			if (v >= 192 && v < 256 && (currprefs.ecs_genlock_features_colorkey_mask[3] & (1LL << (v - 192)))) {
+			if (v >= 192 && (currprefs.ecs_genlock_features_colorkey_mask[3] & (1LL << (v - 192)))) {
 				return false;
 			}
 		} else {
@@ -1876,6 +1876,7 @@ static uae_u8 render_sprites(int pos, int dualpf, uae_u8 apixel, int aga)
 
 static uae_u8 sh_render_sprites(int pos, int dualpf, uae_u8 apixel, int aga)
 {
+	(void)aga;
 	struct spritepixelsbuf *spb = &spritepixels[pos];
 	unsigned int v = spb->data;
 	int *shift_lookup = dualpf ? (bpldualpfpri ? dblpf_ms2 : dblpf_ms1) : dblpf_ms;
@@ -2869,6 +2870,7 @@ function only pass in constant arguments (except for E).  This means
 that many of the if statements will go away completely after inlining.  */
 STATIC_INLINE void draw_sprites_1(struct sprite_entry *e, int dualpf, int has_attach)
 {
+	(void)dualpf;
 	uae_u16 *buf = spixels + e->first_pixel;
 	uae_u8 *stbuf = spixstate.stb + e->first_pixel;
 	uae_u16 *stfmbuf = spixstate.stbfm + e->first_pixel;
@@ -5186,6 +5188,9 @@ void hsync_record_line_state_last(int lineno, enum nln_how how, int changed)
 		case nln_lower_black:
 		case nln_lower_black_always:
 		hsync_record_line_state(lineno, how, 0);
+		break;
+		default:
+		// Other line types don't need special handling here
 		break;
 	}
 }

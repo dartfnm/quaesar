@@ -122,8 +122,8 @@ static void clear_shm (void)
 
 bool preinit_shm (void)
 {
-	uae_u64 total64;
-	uae_u64 totalphys64;
+	uae_u64 total64 = 0;
+	uae_u64 totalphys64 = 0;
 #ifdef _WIN32
 	MEMORYSTATUS memstats;
 	GLOBALMEMORYSTATUSEX pGlobalMemoryStatusEx;
@@ -153,7 +153,7 @@ bool preinit_shm (void)
 		// Higher than 2G to support G-REX PCI VRAM
 		max_allowed_mman = 2560;
 	}
-	if (maxmem > max_allowed_mman)
+	if ((uae_u32)maxmem > max_allowed_mman)
 		max_allowed_mman = maxmem;
 
 #ifdef _WIN32
@@ -208,7 +208,7 @@ bool preinit_shm (void)
 	}
 
 	write_log (_T("MMAN: Total physical RAM %llu MB, all RAM %llu MB\n"),
-				  totalphys64 >> 20, total64 >> 20);
+				  (unsigned long long)(totalphys64 >> 20), (unsigned long long)(total64 >> 20));
 	write_log(_T("MMAN: Attempting to reserve: %u MB\n"), natmem_size >> 20);
 
 #if 1
@@ -305,7 +305,7 @@ static void resetmem (bool decommit)
 	}
 }
 
-static uae_u8 *va (uae_u32 offset, uae_u32 len, DWORD alloc, DWORD protect)
+static uae_u8 * va (uae_u32 offset, uae_u32 len, DWORD alloc, DWORD protect)
 {
 	uae_u8 *addr;
 
@@ -324,9 +324,10 @@ static int doinit_shm (void)
 {
 	uae_u32 totalsize, totalsize_z3;
 	uae_u32 align;
-	uae_u32 z3rtgmem_size;
+	uae_u32 z3rtgmem_size; // Used conditionally
 	struct rtgboardconfig *rbc = &changed_prefs.rtgboards[0];
-	struct rtgboardconfig *crbc = &currprefs.rtgboards[0];
+	struct rtgboardconfig *crbc = &currprefs.rtgboards[0]; // May be unused on some platforms
+	(void)crbc;
 	uae_u32 extra = 65536;
 	struct uae_prefs *p = &changed_prefs;
 
@@ -622,7 +623,8 @@ void free_shm (void)
 void mapped_free (addrbank *ab)
 {
 	shmpiece *x = shm_start;
-	bool rtgmem = (ab->flags & ABFLAG_RTG) != 0;
+	bool rtgmem = (ab->flags & ABFLAG_RTG) != 0; // May be unused on some platforms
+	(void)rtgmem;
 
 	ab->flags &= ~ABFLAG_MAPPED;
 	if (ab->baseaddr == NULL)
@@ -884,8 +886,10 @@ bool uae_mman_info(addrbank *ab, struct uae_mman_data *md)
 
 void *uae_shmat (addrbank *ab, int shmid, void *shmaddr, int shmflg, struct uae_mman_data *md)
 {
+	(void)shmflg;
 	void *result = (void *)-1;
 	bool got = false, readonly = false, maprom = false;
+	(void)got; // May be unused on some platforms
 	int p96special = FALSE;
 	struct uae_mman_data md2;
 
@@ -962,6 +966,7 @@ void *uae_shmat (addrbank *ab, int shmid, void *shmaddr, int shmflg, struct uae_
 // remove possible barrier at the start of this memory region
 void uae_mman_unmap(addrbank *ab, struct uae_mman_data *md)
 {
+	(void)md;
 	if (canbang && (ab->flags & ABFLAG_ALLOCINDIRECT)) {
 		virtualfreewithlock(ab->start + natmem_offset, ab->reserved_size, MEM_DECOMMIT);
 	}
@@ -1068,6 +1073,7 @@ void mman_set_barriers(bool disable)
 
 int uae_shmdt (const void *shmaddr)
 {
+	(void)shmaddr;
 	return 0;
 }
 
@@ -1076,7 +1082,7 @@ int uae_shmget (uae_key_t key, addrbank *ab, int shmflg)
 	int result = -1;
 
 	if ((key == UAE_IPC_PRIVATE) || ((shmflg & UAE_IPC_CREAT) && (find_shmkey (key) == -1))) {
-		write_log (_T("shmget of size %zd (%zdk) for %s (%s)\n"), ab->reserved_size, ab->reserved_size >> 10, ab->label, ab->name);
+		write_log (_T("shmget of size %u (%uk) for %s (%s)\n"), ab->reserved_size, ab->reserved_size >> 10, ab->label, ab->name);
 		if ((result = get_next_shmkey ()) != -1) {
 			shmids[result].size = ab->reserved_size;
 			_tcscpy (shmids[result].name, ab->label);

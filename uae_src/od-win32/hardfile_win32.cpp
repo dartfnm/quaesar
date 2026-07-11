@@ -1539,7 +1539,7 @@ void hd_get_meta(HWND hDlg, int idx, TCHAR *geometryfile)
 	struct uae_driveinfo *udi = &uae_drives[idx];
 	bool satl = false;
 	uae_u8 *data = NULL;
-	uae_u8 inq[INQUIRY_LEN + 4] = { 0 };
+	uae_u8 inq[INQUIRY_LEN + 4] = {}; 
 	TCHAR *text, *tptr;
 	struct ini_data *ini = NULL;
 	bool atapi = false;
@@ -2843,8 +2843,8 @@ static bool getstorageinfo(uae_driveinfo *udi, STORAGE_DEVICE_NUMBER sdnp)
 	idx = -1;
 	for (;;) {
 		PSP_DEVICE_INTERFACE_DETAIL_DATA pInterfaceDetailData = NULL;
-		SP_DEVICE_INTERFACE_DATA interfaceData = { 0 };
-		SP_DEVINFO_DATA deviceInfoData = { 0 };
+		SP_DEVICE_INTERFACE_DATA interfaceData = {}; 
+		SP_DEVINFO_DATA deviceInfoData = {}; 
 		DWORD dwRequiredSize, returnedLength;
 
 		idx++;
@@ -2949,7 +2949,7 @@ static BOOL GetDevicePropertyFromName(const TCHAR *DevicePath, DWORD Index, DWOR
 	BOOL                                status;
 	ULONG                               length = 0, returned = 0, returnedLength;
 	BOOL showonly = FALSE;
-	struct uae_driveinfo tmpudi = { 0 };
+	struct uae_driveinfo tmpudi = {}; 
 	struct uae_driveinfo* udi2;
 	udi = &tmpudi;
 	int udiindex = *index2;

@@ -264,8 +264,8 @@ uaecptr expamem_z3_highram_real, expamem_z3_highram_uae;
 uaecptr expamem_highmem_pointer;
 uae_u32 expamem_board_size;
 uaecptr expamem_board_pointer;
-static uae_u8 slots_e8[8] = { 0 };
-static uae_u8 slots_20[(8 * 1024 * 1024) / 65536] = { 0 };
+static uae_u8 slots_e8[8] = {}; 
+static uae_u8 slots_20[(8 * 1024 * 1024) / 65536] = {}; 
 
 static int z3hack_override;
 
@@ -513,13 +513,13 @@ static void call_card_init(int index)
 					expamem_write(i * 4, aci->autoconfig_bytes[i]);
 				}
 				expamem_autoconfig_mode = 1;
-			} else if (aci->autoconfig_bytes) {
+			} else if (aci->autoconfig_bytes[0] != 0) {
 				memset(expamem, 0xff, AUTOMATIC_AUTOCONFIG_MAX_ADDRESS);
 				for (int i = 0; i < 16; i++) {
 					expamem_write(i * 4, aci->autoconfig_bytes[i]);
 				}
 				expamem_autoconfig_mode = 1;
-			} else if (aci->autoconfig_raw) {
+			} else if (aci->autoconfig_raw[0] != 0) {
 				memcpy(expamem, aci->autoconfig_raw, sizeof aci->autoconfig_raw);
 			}
 		} else {
@@ -610,7 +610,7 @@ void expamem_next(addrbank *mapped, addrbank *next)
 			break;
 		}
 		if (ec->initrc && isnonautoconfig(ec->zorro)) {
-			struct autoconfig_info aci = { 0 };
+			struct autoconfig_info aci = {}; 
 			aci.doinit = true;
 			aci.prefs = &currprefs;
 			aci.rc = cards[ecard]->rc;
@@ -1003,6 +1003,8 @@ MEMORY_ARRAY_FUNCTIONS(romboardmem, 3);
 
 static void REGPARAM2 empty_put(uaecptr addr, uae_u32 v)
 {
+	(void)v;
+	(void)addr;
 }
 
 addrbank romboardmem_bank[MAX_ROM_BOARDS] =
@@ -1614,7 +1616,7 @@ static bool fastmem_autoconfig(struct uae_prefs *p, struct autoconfig_info *aci,
 	uae_u8 flags = 0;
 	DEVICE_MEMORY_CALLBACK dmc = NULL;
 	struct romconfig *dmc_rc = NULL;
-	uae_u8 ac[16] = { 0 };
+	uae_u8 ac[16] = {}; 
 	int boardnum = aci->devnum;
 	bool canforceac = false;
 
@@ -2763,7 +2765,7 @@ bool alloc_expansion_bank(addrbank *bank, struct autoconfig_info *aci)
 void free_expansion_bank(addrbank *bank)
 {
 	mapped_free(bank);
-	bank->start = NULL;
+	bank->start = 0;
 	bank->reserved_size = 0;
 }
 
@@ -2967,7 +2969,7 @@ static void set_order(struct uae_prefs *p, struct card_data *cd, int order)
 	if (!cd)
 		return;
 	if (cd->aci.set_params) {
-		struct expansion_params parms = { 0 };
+		struct expansion_params parms = {}; 
 		parms.device_order = order;
 		if (cd->aci.set_params(p, &parms))
 			return;
@@ -3199,7 +3201,7 @@ static void expansion_parse_cards(struct uae_prefs *p, bool log)
 				aci->parent_of_previous = true;
 		} else {
 			if (log)
-				write_log(_T("init failed.\n"), i);
+				write_log(_T("init failed.\n"));
 		}
 	}
 	if (log)
@@ -4268,12 +4270,12 @@ static const struct expansionsubromtype a2090_sub[] = {
 	{
 		_T("A2090a"), _T("a2090a"),
 		0, 0, 0,
-		{ 0 },
+		{},
 	},
 	{
 		_T("A2090a + 1M RAM"), _T("a2090a_2"),
 		0, 0, 0,
-		{ 0 },
+		{},
 	},
 	{
 		NULL
@@ -4294,12 +4296,12 @@ static const struct expansionsubromtype a2091_sub[] = {
 	{
 		_T("DMAC-01"), _T("dmac01"), 0,
 		commodore, commodore_a2091_ram, 0, true,
-		{ 0 }
+		{}
 	},
 	{
 		_T("DMAC-02"), _T("dmac02"), 0,
 		commodore, commodore_a2091_ram, 0, true,
-		{ 0 }
+		{}
 	},
 	{
 		NULL
@@ -4309,17 +4311,17 @@ static const struct expansionsubromtype gvp1_sub[] = {
 	{
 		_T("Impact A2000-1/X"), _T("a2000-1"), 0,
 		1761, 8, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		_T("Impact A2000-HC"), _T("a2000-hc"), 0,
 		1761, 8, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		_T("Impact A2000-HC+2"), _T("a2000-hc+"), 0,
 		1761, 8, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		NULL
@@ -4329,12 +4331,12 @@ static const struct expansionsubromtype masoboshi_sub[] = {
 	{
 		_T("MC-302"), _T("mc-302"), 0,
 		2157, 3, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		_T("MC-702"), _T("mc-702"), 0,
 		2157, 3, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		NULL
@@ -4344,12 +4346,12 @@ static const struct expansionsubromtype rochard_sub[] = {
 	{
 		_T("IDE"), _T("ide"), 0,
 		2144, 2, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		_T("IDE+SCSI"), _T("scsi"), 0,
 		2144, 2, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		NULL
@@ -4360,12 +4362,12 @@ static const struct expansionsubromtype trifecta_sub[] = {
 	{
 		_T("EC (IDE)"), _T("ec"), 0, // IDE-only
 		2071, 32, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		_T("LX (IDE + SCSI)"), _T("lx"), 0, // IDE+SCSI
 		2071, 32, 0, false,
-		{ 0 }
+		{}
 	},
 	{
 		NULL
@@ -5012,10 +5014,10 @@ void ethernet_updateselection(void)
 
 static void fastlane_memory_callback(struct romconfig *rc, uae_u8 *ac, int size)
 {
-	struct zfile *z = read_device_from_romconfig(rc, NULL);
+	struct zfile *z = read_device_from_romconfig(rc, 0);
 	if (z) {
 		// load autoconfig data from rom file
-		uae_u8 act[16] = { 0 };
+		uae_u8 act[16] = {}; 
 		zfile_fseek(z, 0x80, SEEK_SET);
 		zfile_fread(act, 1, 16, z);
 		zfile_fclose(z);
@@ -5672,7 +5674,7 @@ const struct expansionromtype expansionroms[] = {
 		{ 0xd1, 0x31, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00 },
 	},
 	{
-		_T("kommos"), _T("Kommos A500/A2000 SCSI"), _T("Jürgen Kommos"),
+		_T("kommos"), _T("Kommos A500/A2000 SCSI"), _T("Jï¿½rgen Kommos"),
 		NULL, kommos_init, NULL, kommos_add_scsi_unit, ROMTYPE_KOMMOS, 0, 0, BOARD_NONAUTOCONFIG_BEFORE, true,
 		NULL, 0,
 		false, EXPANSIONTYPE_SCSI
@@ -5906,7 +5908,7 @@ const struct expansionromtype expansionroms[] = {
 		true, 0, alf3_settings
 	},
 	{
-		_T("promigos"), _T("Promigos"), _T("Flesch und Hörnemann"),
+		_T("promigos"), _T("Promigos"), _T("Flesch und Hï¿½rnemann"),
 		NULL, promigos_init, NULL, promigos_add_scsi_unit, ROMTYPE_PROMIGOS | ROMTYPE_NOT, 0, 0, BOARD_NONAUTOCONFIG_BEFORE, true,
 		NULL, 0,
 		false, EXPANSIONTYPE_CUSTOM | EXPANSIONTYPE_SCSI
@@ -6626,7 +6628,7 @@ static const struct cpuboardsubtype macrosystem_sub[] = {
 		_T("Falcon 040"),
 		_T("Falcon040"),
 		ROMTYPE_CB_FALCON40, 0,
-		NULL, 0,
+		0, 0,
 		0,
 		128 * 1024 * 1024,
 	},
@@ -6787,7 +6789,7 @@ static const struct cpuboardsubtype hardital_sub[] = {
 		_T("TQM"),
 		_T("tqm"),
 		ROMTYPE_CB_TQM, 0,
-		NULL, 0,
+		0, 0,
 		BOARD_MEMORY_HIGHMEM,
 		128 * 1024 * 1024,
 	},
@@ -7067,7 +7069,7 @@ const struct cpuboardtype cpuboards[] = {
 		harms_sub, 0
 	},
 	{
-		NULL
+		0
 	}
 };
 

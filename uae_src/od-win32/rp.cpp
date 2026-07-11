@@ -1261,7 +1261,7 @@ void parse_guest_event(const TCHAR *ss)
 
 static int movescreenoverlay(WPARAM wParam, LPARAM lParam)
 {
-	struct extoverlay eo = { 0 };
+	struct extoverlay eo = {}; 
 	if (!D3D_extoverlay)
 		return 0;
 	eo.idx = (int)wParam;
@@ -1277,7 +1277,7 @@ static int movescreenoverlay(WPARAM wParam, LPARAM lParam)
 
 static int deletescreenoverlay(WPARAM wParam)
 {
-	struct extoverlay eo = { 0 };
+	struct extoverlay eo = {}; 
 	if (!D3D_extoverlay)
 		return 0;
 	delayed_refresh = gett();
@@ -1290,7 +1290,7 @@ static int deletescreenoverlay(WPARAM wParam)
 static int screenoverlay(LPCVOID pData)
 {
 	struct RPScreenOverlay *rpo = (struct RPScreenOverlay*)pData;
-	struct extoverlay eo = { 0 };
+	struct extoverlay eo = {}; 
 	if (!D3D_extoverlay)
 		return 0;
 	if (rpo->dwFormat != RPSOPF_32BIT_BGRA)
@@ -1955,7 +1955,7 @@ static void rp_device_writeprotect (int dev, int num, bool writeprotected)
 
 static void rp_device_change (int dev, int num, int mode, bool readonly, const TCHAR *content, bool preventrecursive)
 {
-	struct RPDeviceContent dc = { 0 };
+	struct RPDeviceContent dc = {}; 
 
 	if (!cando ())
 		return;
@@ -2260,7 +2260,7 @@ void rp_set_hwnd_delayed (void)
 
 void rp_set_hwnd (HWND hWnd)
 {
-	struct RPScreenMode sm = { 0 };
+	struct RPScreenMode sm = {}; 
 
 	if (!initialized)
 		return;
@@ -2339,7 +2339,7 @@ void rp_vsync(void)
 		screenmode_request--;
 		if (screenmode_request == 0) {
 			//write_log (_T("RP_IPC_TO_HOST_SCREENMODE screenmode_request timeout\n"));
-			struct RPScreenMode sm = { 0 };
+			struct RPScreenMode sm = {}; 
 			get_screenmode (&sm, &currprefs, true);
 			RPSendMessagex (RP_IPC_TO_HOST_SCREENMODE, 0, 0, &sm, sizeof sm, &guestinfo, NULL);
 		}
@@ -2423,7 +2423,7 @@ bool rp_mouseevent(int x, int y, int buttons, int buttonmask)
 			data[i * 4 + 3] = 0xff;
 		}
 
-		struct extoverlay eo = { 0 };
+		struct extoverlay eo = {}; 
 		eo.idx = ovl_idx;
 		eo.xpos = 100 + ovl_idx * 50;
 		eo.ypos = 100;
@@ -2434,7 +2434,7 @@ bool rp_mouseevent(int x, int y, int buttons, int buttonmask)
 		ovl_idx--;
 	}
 	if (buttons > 0 && (buttons & 2)) {
-		struct extoverlay eo = { 0 };
+		struct extoverlay eo = {}; 
 		ovl_idx++;
 		eo.idx = ovl_idx;
 		eo.width = -1;
@@ -2443,7 +2443,7 @@ bool rp_mouseevent(int x, int y, int buttons, int buttonmask)
 	}
 
 	for (int i = 0; i < ovl_idx; i++) {
-		struct extoverlay eo = { 0 };
+		struct extoverlay eo = {}; 
 		eo.idx = i;
 		eo.xpos = 100 + i * 50;
 		eo.ypos = 100 + ovl_add * (i + 1);
@@ -2564,7 +2564,7 @@ void rp_test(void)
 {
 #if 0
 	struct AmigaMonitor *mon = &AMonitors[0];
-	struct RPScreenCapture rpsc = { 0 };
+	struct RPScreenCapture rpsc = {}; 
 
 	_tcscpy(rpsc.szScreenRaw, _T("c:\\temp\\test_r.png"));
 	_tcscpy(rpsc.szScreenFiltered, _T("c:\\temp\\test_f.png"));

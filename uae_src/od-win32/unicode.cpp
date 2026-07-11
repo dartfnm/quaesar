@@ -15,7 +15,7 @@ static void err (const char *func, const WCHAR *w, const char *c, UINT cp)
 {
 #if 0
 	FILE *f;
-	uae_u8 zero[2] = { 0 };
+	uae_u8 zero[2] = {}; 
 	DWORD err = GetLastError ();
 
 	f = fopen ("output.dat", "a");

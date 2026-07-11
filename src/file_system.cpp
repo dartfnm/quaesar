@@ -108,6 +108,7 @@ TCHAR* au_fs(const char* src) {
 }
 
 char* ua_fs(const TCHAR* s, int defchar) {
+    (void)defchar;
 #ifdef NO_TRANSLATION
     if (s == NULL)
         return NULL;
@@ -156,6 +157,7 @@ TCHAR* au_fs_copy(TCHAR* dst, int maxlen, const char* src) {
 }
 
 char* ua_fs_copy(char* dst, int maxlen, const TCHAR* src, int defchar) {
+    (void)defchar;
 #ifdef NO_TRANSLATION
     dst[0] = 0;
     strncpy(dst, src, maxlen);
@@ -181,6 +183,7 @@ char* ua_fs_copy(char* dst, int maxlen, const TCHAR* src, int defchar) {
 }
 
 TCHAR* target_expand_environment(const TCHAR* path, TCHAR* out, int maxlen) {
+    (void)maxlen;
     if (!path)
         return NULL;
     if (out == NULL) {
@@ -192,21 +195,25 @@ TCHAR* target_expand_environment(const TCHAR* path, TCHAR* out, int maxlen) {
 }
 
 bool my_stat(const TCHAR* name, struct mystat* ms) {
+    (void)name; (void)ms;
     // UNIMPLEMENTED();
     return true;
 }
 
 int my_readdir(struct my_opendir_s* mod, TCHAR* name) {
+    (void)mod; (void)name;
     UNIMPLEMENTED();
     return 0;
 }
 
 struct my_opendir_s* my_opendir(const TCHAR* name, const TCHAR* mask) {
+    (void)name; (void)mask;
     UNIMPLEMENTED();
     return NULL;
 }
 
 void my_closedir(struct my_opendir_s* mod) {
+    (void)mod;
     UNIMPLEMENTED();
 }
 
@@ -218,11 +225,13 @@ int hdf_write_target(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int
 */
 
 int hdf_write_target(struct hardfiledata* hfd, void* buffer, uae_u64 offset, int len, uint32_t* error) {
+    (void)hfd; (void)buffer; (void)offset; (void)len; (void)error;
     UNIMPLEMENTED();
     return 0;
 }
 
 struct my_opendir_s* my_opendir(const TCHAR* name) {
+    (void)name;
     UNIMPLEMENTED();
     return nullptr;
 }
@@ -230,15 +239,18 @@ struct my_opendir_s* my_opendir(const TCHAR* name) {
 struct a_inode_struct;
 
 int fsdb_set_file_attrs(a_inode_struct* aino) {
+    (void)aino;
     UNIMPLEMENTED();
     return 0;
 }
 
 void fetch_nvrampath(TCHAR* out, int size) {
+    (void)out; (void)size;
     UNIMPLEMENTED();
 }
 
 void fetch_configurationpath(TCHAR* out, int size) {
+    (void)size;
     out[0] = _T('/');
     out[1] = _T('.');
     out[2] = 0;

@@ -696,8 +696,8 @@ static void ide_set_features (struct ide_hdf *ide)
 		return;
 	}
 
-	int type = ide->regs.ide_nsector >> 3;
-	int mode = ide->regs.ide_nsector & 7;
+	// int type = ide->regs.ide_nsector >> 3; // Unused
+	// int mode = ide->regs.ide_nsector & 7; // Unused
 
 	write_log (_T("IDE%d set features %02X (%02X)\n"), ide->num, ide->regs.ide_feat, ide->regs.ide_nsector);
 	switch (ide->regs.ide_feat)
@@ -784,10 +784,10 @@ static void put_lbachs (struct ide_hdf *ide, uae_u64 lba, unsigned int cyl, unsi
 			ide->regs.ide_sector = lba & 0xff;
 		} else {
 			sec += inc;
-			while (sec >= ide->hdhfd.secspertrack) {
+			while (sec >= (unsigned int)ide->hdhfd.secspertrack) {
 				sec -= ide->hdhfd.secspertrack;
 				head++;
-				if (head >= ide->hdhfd.heads) {
+				if (head >= (unsigned int)ide->hdhfd.heads) {
 					head -= ide->hdhfd.heads;
 					cyl++;
 				}
@@ -1003,7 +1003,7 @@ static void do_process_rw_command (struct ide_hdf *ide)
 	nsec_total = nsec;
 	ide_grow_buffer(ide, nsec_total * ide->blocksize);
 
-	if (nsec > ide->data_multi)
+	if ((int)nsec > ide->data_multi)
 		nsec = ide->data_multi;
 
 	if (ide->buffer_offset == 0) {
@@ -1662,6 +1662,7 @@ void remove_ide_unit(struct ide_hdf **idetable, int ch)
 
 struct ide_hdf *add_ide_unit (struct ide_hdf **idetable, int max, int ch, struct uaedev_config_info *ci, struct romconfig *rc)
 {
+	(void)rc;
 	struct ide_hdf *ide;
 	bool vb;
 
@@ -1729,7 +1730,7 @@ struct ide_hdf *add_ide_unit (struct ide_hdf **idetable, int max, int ch, struct
 
 		if (!ide->byteswap)
 			ata_byteswapidentity(ide->secbuf);
-		struct uaedev_config_info ci = { 0 };
+		struct uaedev_config_info ci = {}; 
 		ata_parse_identity(ide->secbuf, &ci, &ide->lba, &ide->lba48, &ide->max_multiple_mode);
 		ide->hdhfd.cyls = ide->hdhfd.cyls_def = ci.pcyls;
 		ide->hdhfd.heads = ide->hdhfd.heads_def = ci.pheads;

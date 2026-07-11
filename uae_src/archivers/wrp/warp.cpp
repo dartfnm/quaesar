@@ -389,7 +389,7 @@ static int iswrp (uae_u8 *data)
 struct zfile *unwarp(struct zfile *zf)
 {
 	int err = 0;
-	uae_u8 buf[26] = { 0 };
+	uae_u8 buf[26] = {}; 
 	int algo, side, track;
 	int pos, dstpos, olddstpos;
 	uae_u16 crc;

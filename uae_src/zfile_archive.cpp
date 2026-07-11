@@ -1077,7 +1077,7 @@ struct zvolume *archive_directory_plain (struct zfile *z)
 	if (!memcmp (id, exeheader, sizeof id)) {
 		char *an = ua (zai.name);
 		char *data = xmalloc (char, 1 + strlen (an) + 1 + 1 + 1);
-		sprintf (data, "\"%s\"\n", an);
+		snprintf (data, 1 + strlen (an) + 3, "\"%s\"\n", an);
 		zn = addfile (zv, z, _T("s/startup-sequence"), (uae_u8*)data, uaestrlen (data));
 		xfree (data);
 		xfree (an);
@@ -1641,7 +1641,7 @@ static struct zfile *archive_access_adf (struct znode *zn)
 		for (i = 0; i < sfsblockcnt; i++)
 			bsize += sfsblocks[i].length * adf->blocksize;
 		if (bsize < size)
-			write_log (_T("SFS extracting error, %s size mismatch %d<%d\n"), z->name, bsize, size);
+			write_log (_T("SFS extracting error, %s size mismatch %d<%d\n"), z->name, (int)bsize, (int)size);
 
 		dst = z->data;
 		block = zn->offset;
@@ -1696,7 +1696,7 @@ static TCHAR *tochar (uae_u8 *s, int len)
 
 struct zvolume *archive_directory_rdb (struct zfile *z)
 {
-	uae_u8 buf[512] = { 0 };
+	uae_u8 buf[512] = {}; 
 	int partnum, bs;
 	TCHAR *devname;
 	struct zvolume *zv;
@@ -1784,7 +1784,7 @@ static struct zfile *archive_access_rdb (struct znode *zn)
 {
 	struct zfile *z = zn->volume->archive;
 	struct zfile *zf;
-	uae_u8 buf[512] = { 0 };
+	uae_u8 buf[512] = {}; 
 	int surf, spb, spt, lowcyl, highcyl;
 	int block, blocksize;
 	uae_s64 size;
@@ -2022,7 +2022,7 @@ static void fatdirectory (struct zfile *z, struct zvolume *zv, const TCHAR *name
 
 struct zvolume *archive_directory_fat (struct zfile *z)
 {
-	uae_u8 buf[512] = { 0 };
+	uae_u8 buf[512] = {}; 
 	int fatbits = 12;
 	struct zvolume *zv;
 	int rootdir, reserved, sectorspercluster;
@@ -2050,7 +2050,7 @@ struct zvolume *archive_directory_fat (struct zfile *z)
 
 static struct zfile *archive_access_fat (struct znode *zn)
 {
-	uae_u8 buf[512] = { 0 };
+	uae_u8 buf[512] = {}; 
 	int fatbits = 12;
 	uae_s64 size = zn->size;
 	struct zfile *sz, *dz;
@@ -2138,14 +2138,13 @@ struct zfile *archive_unpackzfile (struct zfile *zf)
 		return NULL;
 	unpack_log (_T("delayed unpack '%s'\n"), zf->name);
 	zf->datasize = zf->size;
-	switch (zf->archiveid)
-	{
 #ifdef A_ZIP
-	case ArchiveFormatZIP:
+	if (zf->archiveid == ArchiveFormatZIP) {
 		zout = archive_unpack_zip (zf);
-		break;
-#endif
 	}
+#else
+	(void)zout;
+#endif
 	zfile_fclose (zf->archiveparent);
 	zf->archiveparent = NULL;
 	zf->archiveid = 0;

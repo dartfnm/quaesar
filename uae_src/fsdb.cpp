@@ -31,12 +31,9 @@
 * Offset 519, 81 bytes, comment
 */
 
-#define TRACING_ENABLED 0
-#if TRACING_ENABLED
-#define TRACE(x) do { write_log x; } while(0)
-#else
-#define TRACE(x)
-#endif
+// Local FSDB_TRACE macro - renamed from TRACE to avoid collision with sysconfig.h TRACE()
+// sysconfig.h defines TRACE() as a no-arg macro; fsdb needs args like FSDB_TRACE((fmt, args))
+#define FSDB_TRACE(x) do { } while(0)
 
 TCHAR *nname_begin (TCHAR *nname)
 {
@@ -99,6 +96,8 @@ static void kill_fsdb (a_inode *dir)
 
 static void fsdb_fixup (FILE *f, uae_u8 *buf, int size, a_inode *base)
 {
+	(void)f; // Unused parameter - TODO: implement fixup logic
+	(void)size; // Unused parameter
 	TCHAR *nname;
 	int ret;
 
@@ -112,7 +111,7 @@ static void fsdb_fixup (FILE *f, uae_u8 *buf, int size, a_inode *base)
 		xfree (nname);
 		return;
 	}
-	TRACE ((_T("uaefsdb '%s' deleted\n"), nname));
+	FSDB_TRACE ((_T("uaefsdb '%s' deleted\n"), nname));
 	/* someone deleted this file/dir outside of emulation.. */
 	buf[0] = 0;
 	xfree (nname);
@@ -281,7 +280,7 @@ static int needs_dbentry (a_inode *aino)
 
 static void write_aino (FILE *f, a_inode *aino)
 {
-	uae_u8 buf[1 + 4 + 257 + 257 + 81] = { 0 };
+	uae_u8 buf[1 + 4 + 257 + 257 + 81] = {}; 
 
 	buf[0] = aino->needs_dbentry ? 1 : 0;
 	do_put_mem_long ((uae_u32 *)(buf + 1), aino->amigaos_mode);
@@ -294,7 +293,7 @@ static void write_aino (FILE *f, a_inode *aino)
 	aino->db_offset = ftell (f);
 	fwrite (buf, 1, sizeof buf, f);
 	aino->has_dbentry = aino->needs_dbentry;
-	TRACE ((_T("%d '%s' '%s' written\n"), aino->db_offset, aino->aname, aino->nname));
+	FSDB_TRACE ((_T("%d '%s' '%s' written\n"), aino->db_offset, aino->aname, aino->nname));
 }
 
 /* Write back the db file for a directory.  */
@@ -308,7 +307,7 @@ void fsdb_dir_writeback (a_inode *dir)
 	uae_u8 *tmpbuf;
 	int size, i;
 
-	TRACE ((_T("fsdb writeback %s\n"), dir->aname));
+	FSDB_TRACE ((_T("fsdb writeback %s\n"), dir->aname));
 	/* First pass: clear dirty bits where unnecessary, and see if any work
 	* needs to be done.  */
 	for (aino = dir->child; aino; aino = aino->sibling) {
@@ -330,12 +329,12 @@ void fsdb_dir_writeback (a_inode *dir)
 	}
 	if (! entries_needed) {
 		kill_fsdb (dir);
-		TRACE ((_T("fsdb removed\n")));
+		FSDB_TRACE ((_T("fsdb removed\n")));
 		return;
 	}
 
 	if (! changes_needed) {
-		TRACE ((_T("not modified\n")));
+		FSDB_TRACE ((_T("not modified\n")));
 		return;
 	}
 
@@ -351,7 +350,7 @@ void fsdb_dir_writeback (a_inode *dir)
 		}
 		f = get_fsdb (dir, _T("w+b"));
 		if (f == 0) {
-			TRACE ((_T("failed\n")));
+			FSDB_TRACE ((_T("failed\n")));
 			/* This shouldn't happen... */
 			return;
 		}
@@ -364,7 +363,7 @@ void fsdb_dir_writeback (a_inode *dir)
 		tmpbuf = (uae_u8*)malloc (size);
 		fread (tmpbuf, 1, size, f);
 	}
-	TRACE ((_T("**** updating '%s' %d\n"), dir->aname, size));
+	FSDB_TRACE ((_T("**** updating '%s' %d\n"), dir->aname, size));
 
 	for (aino = dir->child; aino; aino = aino->sibling) {
 		if (! aino->dirty)
@@ -390,7 +389,7 @@ void fsdb_dir_writeback (a_inode *dir)
 		}
 		write_aino (f, aino);
 	}
-	TRACE ((_T("end\n")));
+	FSDB_TRACE ((_T("end\n")));
 	fclose (f);
 	xfree (tmpbuf);
 }

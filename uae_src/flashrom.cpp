@@ -43,7 +43,7 @@ struct eeprom93xx_eeprom_t {
 	struct zfile *zf;
 };
 
-static const char *opstring[] = { "extended", "write", "read", "erase" };
+// static const char *opstring[] = { "extended", "write", "read", "erase" }; // Unused
 
 void eeprom93xx_write(void *eepromp, int eecs, int eesk, int eedi)
 {
@@ -228,6 +228,7 @@ uae_u8 eeprom93xx_read_byte(void *eepromp, int offset)
 
 void *eeprom93xx_new(const uae_u8 *memory, int nwords, struct zfile *zf)
 {
+	(void)zf;
 	/* Add a new EEPROM (with 16, 64 or 256 words). */
 	eeprom93xx_eeprom_t *eeprom;
 	uint8_t addrbits;
@@ -463,7 +464,7 @@ int eeprom_i2c_set(void *fdv, int line, int level)
 				i2c->write_func(i2c->eeprom_addr, i2c->buffer);
 			} else {
 				i2c->memory[i2c->eeprom_addr] = i2c->buffer;
-				i2c->eeprom_addr = (i2c->eeprom_addr & ~(NVRAM_PAGE_SIZE - 1)) | (i2c->eeprom_addr + 1) & (NVRAM_PAGE_SIZE - 1);
+				i2c->eeprom_addr = (i2c->eeprom_addr & ~(NVRAM_PAGE_SIZE - 1)) | ((i2c->eeprom_addr + 1) & (NVRAM_PAGE_SIZE - 1));
 				gui_flicker_led(LED_MD, 0, 2);
 			}
         }
@@ -559,6 +560,7 @@ void *eeprom_new(uae_u8 *memory, int size, struct zfile *zf)
 
 void *i2c_new(uae_u8 device_address, int size, uae_u8 (*read_func)(uae_u8 addr), void (*write_func)(uae_u8 addr, uae_u8 v))
 {
+	(void)device_address;
 	bitbang_i2c_interface *s;
 
 	s = xcalloc(bitbang_i2c_interface, 1);
@@ -705,6 +707,7 @@ int flash_size(void *fdv)
 
 bool flash_active(void *fdv, uaecptr addr)
 {
+	(void)addr;
 	struct flashrom_data *fd = (struct flashrom_data*)fdv;
 	if (!fd)
 		return false;
@@ -756,7 +759,7 @@ bool flash_write(void *fdv, uaecptr addr, uae_u8 v)
 		other_byte_mult = 2;
 	}
 
-	if (addr * other_byte_mult >= fd->allocsize) {
+	if ((size_t)addr * other_byte_mult >= fd->allocsize) {
 		return false;
 	}
 
@@ -892,7 +895,7 @@ uae_u32 flash_read(void *fdv, uaecptr addr)
 		other_byte_mult = 2;
 	}
 
-	if (addr * other_byte_mult >= fd->allocsize) {
+	if ((size_t)addr * other_byte_mult >= fd->allocsize) {
 		return 0xff;
 	}
 

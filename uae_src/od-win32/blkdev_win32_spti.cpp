@@ -591,7 +591,7 @@ static int open_scsi_device2 (struct dev_info_spti *di, int unitnum)
 		write_log (_T("SPTI: failed to open unit %d err=%d ('%s')\n"), unitnum, GetLastError (), dev);
 	} else {
 		int err = 0;
-		uae_u8 inqdata[INQUIRY_SIZE + 1] = { 0 };
+		uae_u8 inqdata[INQUIRY_SIZE + 1] = {}; 
 		checkcapabilities (di);
 		execscsicmd(di, unitnum, inqdata, 6, NULL, 0, 0, &err, false);
 		if (err) {

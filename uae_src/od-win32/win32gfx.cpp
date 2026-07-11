@@ -345,7 +345,7 @@ static D3DKMTWAITFORVERTICALBLANKEVENT pD3DKMTWaitForVerticalBlankEvent;
 static int target_get_display_scanline2(int displayindex)
 {
 	if (pD3DKMTGetScanLine) {
-		D3DKMT_GETSCANLINE sl = { 0 };
+		D3DKMT_GETSCANLINE sl = {}; 
 		struct MultiDisplay *md = displayindex < 0 ? getdisplay(&currprefs, 0) : &Displays[displayindex];
 		if (!md->HasAdapterData)
 			return -11;
@@ -481,7 +481,7 @@ static unsigned int __stdcall waitvblankthread(void *dummy)
 	waitvblankthread_mode = 2;
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 	while (waitvblankthread_mode) {
-		D3DKMT_WAITFORVERTICALBLANKEVENT e = { 0 };
+		D3DKMT_WAITFORVERTICALBLANKEVENT e = {}; 
 		e.hAdapter = wait_vblank_display->AdapterHandle;
 		e.VidPnSourceId = wait_vblank_display->VidPnSourceId;
 		pD3DKMTWaitForVerticalBlankEvent(&e);
@@ -1008,7 +1008,7 @@ static bool enumeratedisplays2 (bool selectall)
 			if (pD3DKMTOpenAdapterFromHdc) {
 				HDC hdc = CreateDC(NULL, add.DeviceName, NULL, NULL);
 				if (hdc != NULL) {
-					D3DKMT_OPENADAPTERFROMHDC OpenAdapterData = { 0 };
+					D3DKMT_OPENADAPTERFROMHDC OpenAdapterData = {}; 
 					OpenAdapterData.hDc = hdc;
 					NTSTATUS status = pD3DKMTOpenAdapterFromHdc(&OpenAdapterData);
 					if (status == STATUS_SUCCESS) {
@@ -4450,7 +4450,7 @@ struct osd_kb
 
 static struct osd_kb *osd_kb_data;
 static int osd_kb_selected = 11, osd_kb_x, osd_kb_y;
-struct extoverlay osd_kb_eo = { 0 };
+struct extoverlay osd_kb_eo = {}; 
 
 #define OSD_KB_TRANSPARENCY 0xaa
 #define OSD_KB_ACTIVE_TRANSPARENCY 0xaa
